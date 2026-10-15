@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+
+    // Who lives on which campus (used for the 35/50 counts and real roommates)
+    match /members/{uid} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['cp', 'nm', 'room', 'rn', 'at'])
+        && request.resource.data.cp is string && request.resource.data.cp.size() <= 8
+        && request.resource.data.nm is string && request.resource.data.nm.size() <= 16;
+      allow delete: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Private messages: one document per sender -> recipient. Only those two can read it,
+    // and only the sender can write it.
+    match /dm/{id} {
+      allow read: if signedIn()
+        && (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid);
+      allow create, update: if signedIn()
+        && request.resource.data.from == request.auth.uid
+        && id == request.auth.uid + '_' + request.resource.data.to
+        && request.resource.data.ms is list && request.resource.data.ms.size() <= 40;
+      allow delete: if signedIn() && resource.data.from == request.auth.uid;
+    }
+
+    // Each player's saved student. Nobody else can read it.
+    match /data/users/{uid}/{doc=**} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+  }
+}
