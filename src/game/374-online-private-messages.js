@@ -1,12 +1,13 @@
 /* ---- private messages that wait for you (mail box in the shared database) ---- */
 function mpMailSnap(s){const fresh=[];s.docs.forEach(d=>{if(d.id===MP.uid||!okId(d.id))return;const v=d.data()||{},arr=v.to&&Array.isArray(v.to[MP.uid])?v.to[MP.uid]:[];
-    const ms=arr.slice(-60).filter(m=>m&&typeof m==='object').map(m=>({k:['m','fr','fa','vo'].includes(m.k)?m.k:'m',tx:mpClean(m.tx),t:+m.t||0,i:String(m.i||'')})).filter(m=>m.t);
+    const ms=arr.slice(-60).filter(m=>m&&typeof m==='object').map(m=>({k:['m','fr','fa','vo',...REL_KINDS].includes(m.k)?m.k:'m',tx:mpClean(m.tx),t:+m.t||0,i:String(m.i||'')})).filter(m=>m.t);
     const sn=v.seen&&typeof v.seen==='object'?+v.seen[MP.uid]||0:0;MP.mailIn[d.id]={nm:mpClean(v.nm,16)||'Student',ms,seen:sn};
     ms.forEach(m=>{const key=d.id+'|'+m.i+'|'+m.t;if(MP.seen.has(key))return;MP.seen.add(key);if(m.t>(MP.lastRead[d.id]||0)&&!MP.blocked[d.id])fresh.push([d.id,m])})});
   fresh.sort((a,b)=>a[1].t-b[1].t);
   if(!MP.mailFirst){MP.mailFirst=1;const n=fresh.filter(([u,m])=>m.k==='m').length;if(n)MP.pendingWelcome=n}
   else fresh.forEach(([u,m])=>{const nm=MP.mailIn[u].nm;if(m.k==='m')mpNotify(u,nm,m.tx);else if(m.k==='fr')toast(`🤝 ${nm} sent you a friend request. Open 🌐 → Chats.`);else if(m.k==='fa'){mpMakeFriend(u,nm);toast(`🎉 ${nm} accepted your friend request`)}else if(m.k==='vo'){visParse(u,nm,m.tx,m.t);mpPing();toast(`🏠 ${nm} invited you to their room. Tap them or open 🌐 → Chats.`)}});
   fresh.forEach(([u,m])=>{if(m.k==='fa')mpMakeFriend(u,MP.mailIn[u].nm)});
+  try{relMail()}catch(e){console.error(e)}
   mpBadge();if(MP.view)mpRedraw()}
 function mpPing(v=1){try{ACX=ACX||new (window.AudioContext||window.webkitAudioContext)();const t=ACX.currentTime,g=ACX.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.05*v,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+.28);g.connect(ACX.destination);[880,1320].forEach((fq,i)=>{const o=ACX.createOscillator();o.type='sine';o.frequency.value=fq;o.connect(g);o.start(t+i*.07);o.stop(t+.3)})}catch(e){}}
 MP.seenOut=mpStore.get('seenOut',{});

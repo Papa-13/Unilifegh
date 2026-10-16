@@ -38,6 +38,8 @@ src/
     385-intro-art.js        launch animation, skyline, step strip for the intro screens
     346-play-together.js    sports against real students (penalties, shooting contest, swim race)
     347-visit-friends.js    asking to visit a real friend's room, and room invites
+    348-player-requests.js  accept/decline pop-ups for hugs, daps, flirts, dates, kisses
+    349-relationships.js    partners, break-ups, cheating, witnesses and getting caught
     370-375 online-*.js     multiplayer: campuses, presence, chat, messages
     …
     990-boot.js             starts the game (runs last)

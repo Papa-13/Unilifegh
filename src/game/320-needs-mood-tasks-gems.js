@@ -46,7 +46,7 @@ const WHIMS=[
 const MILES=[
  ['Make 3 friends',4,()=>friendsN()>=3],['Attend 5 lectures',4,()=>P().att.reduce((a,b)=>a+b,0)>=5],['Complete 5 daily tasks',4,()=>S.tasksDone>=5],
  ['Decorate your room with 4 items',5,()=>P().items.length>=4],['Win a pickup game',4,()=>S.wins>=1],['Have GH₵2,000 on MoMo',5,()=>P().money>=2000],
- ['Make 10 friends',8,()=>friendsN()>=10],['Get into a relationship',6,()=>!!P().partner||(NOBOTS&&Object.values(MP.friends).some(f=>(f.lv||0)>=80))],['Score 70+ in an exam',8,()=>Object.values(P().exams||{}).some(r=>r.score>=70)],
+ ['Make 10 friends',8,()=>friendsN()>=10],['Get into a relationship',6,()=>!!P().partner||!!relGet()],['Score 70+ in an exam',8,()=>Object.values(P().exams||{}).some(r=>r.score>=70)],
  ['Reach Level 200',6,()=>(P().yr||1)>=2],['Complete 20 daily tasks',10,()=>S.tasksDone>=20],['Reach your final year',10,()=>isFinalYear(P())],['Graduate',20,()=>!!P().grad],['Graduate with First Class',30,()=>P().grad==='First Class'],['Win 5 pickup games',8,()=>S.wins>=5],['Attend 20 lectures',10,()=>P().att.reduce((a,b)=>a+b,0)>=20]];
 function fillWhims(){if(!S||!S.whims)return;S.whims=S.whims.filter(w=>!w.done||performance.now()-w.doneT<6000);
   while(S.whims.filter(w=>!w.done).length<3){const have=new Set(S.whims.map(w=>w.id)),pool=WHIMS.filter(w=>!have.has(w.id)&&(!w.when||w.when()));if(!pool.length)break;

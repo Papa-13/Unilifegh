@@ -6,7 +6,7 @@ function ser(v,d=0,own){if(d>14)return undefined;if(v==null)return v;const t=typ
   if(!own&&S&&S.npcs&&S.npcs.includes(v))return{__npc:v.id};if(Array.isArray(v))return v.map(x=>{const r=ser(x,d+1);return r===undefined?null:r});
   if(v instanceof Map||v instanceof Set)return undefined;const o={};for(const k in v){if(SKIPK.has(k)||k[0]==='_')continue;const r=ser(v[k],d+1);if(r!==undefined)o[k]=r}return o}
 function deser(v){if(v==null||typeof v!=='object')return v;if(Array.isArray(v))return v.map(deser);if('__npc' in v)return S.npcs.find(n=>n.id===v.__npc)||null;const o={};for(const k in v)o[k]=deser(v[k]);return o}
-function makeSave(){if(!S||!S.p)return null;const sv={v:1,ts:Date.now(),campus:MP.campus,cn:MP.campus?campName(MP.campus):null,rn:MP.rn,look:ser(myLook),pre:ser(PRE),p:ser(S.p),npcs:S.npcs.map(n=>ser(n,0,true)),S:{},mp:{friends:MP.friends,lastRead:MP.lastRead,blocked:MP.blocked}};
+function makeSave(){if(!S||!S.p)return null;const sv={v:1,ts:Date.now(),campus:MP.campus,cn:MP.campus?campName(MP.campus):null,rn:MP.rn,look:ser(myLook),pre:ser(PRE),p:ser(S.p),npcs:S.npcs.map(n=>ser(n,0,true)),S:{},mp:{friends:MP.friends,lastRead:MP.lastRead,blocked:MP.blocked,rel:relGet(),relSeen:[...relSeen()].slice(-300)}};
   for(const k in S){if(SKIPS.has(k))continue;const v=ser(S[k]);if(v===undefined)continue;if(k==='msgs'&&Array.isArray(v)){sv.S[k]=v.slice(0,80);continue}try{if(JSON.stringify(v).length<40000)sv.S[k]=v}catch(e){}}return sv}
 let SAVING=false;async function saveGame(){const sv=makeSave();if(!sv)return;try{localStorage.setItem('freshers-save',JSON.stringify(sv))}catch(e){}
   if(MP.db&&MP.uid&&!SAVING){SAVING=true;try{await MP.db.doc('data/users/'+MP.uid+'/save').set(sv)}catch(e){}SAVING=false}
@@ -23,7 +23,7 @@ async function loadGame(sv){if(sv&&sv.campus&&sv.cn&&String(sv.campus)[0]==='u')
   const sp=deser(sv.p);delete sp.look;Object.assign(p,sp);p.target=null;p.path=null;p.pose=null;p.inCar=false;p.onBus=null;
   Object.assign(S,deser(sv.S||{}));ensureAcad();S.mates=S.npcs.filter(n=>n.mate);S.paused=false;S.busy=null;S.lastHour=-1;
   if(MP.campus){const sd=Math.floor(S.min/1440),tod=campusMin()%1440;campusAlign(sd+(tod<S.min%1440?1:0))}else S.campOff=null;
-  if(sv.mp){Object.assign(MP.friends,sv.mp.friends||{});Object.assign(MP.lastRead,sv.mp.lastRead||{});Object.assign(MP.blocked,sv.mp.blocked||{})}
+  if(sv.mp){if(sv.mp.rel!==undefined&&!mpStore.get('rel',null))relSet(sv.mp.rel);if(Array.isArray(sv.mp.relSeen))sv.mp.relSeen.forEach(x=>relSeen().add(x));Object.assign(MP.friends,sv.mp.friends||{});Object.assign(MP.lastRead,sv.mp.lastRead||{});Object.assign(MP.blocked,sv.mp.blocked||{})}
   if(!isFinite(p.x)||solidAt(p.x,p.y,6)){const d=homeB().door;p.x=d[0];p.y=d[1]+24*outDir(homeB())}
   mpSyncMates();showGame();setTimeout(()=>{toast(`Welcome back, ${p.name}! Day ${day()+1} · ${hm(S.min)}${MP.campus?' · '+campName(MP.campus):''}`);if(MP.pendingWelcome){toast(`📬 ${MP.pendingWelcome} new message${MP.pendingWelcome>1?'s':''} while you were away. Tap 🌐`);MP.pendingWelcome=0}},900);
   if(MP.campus)mpWriteMember()}

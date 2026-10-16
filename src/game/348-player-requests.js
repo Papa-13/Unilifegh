@@ -9,7 +9,10 @@ const ASK_KINDS={
   dap:{ic:'🤜',want:'give you a dap',noun:'the dap',did:'gave a dap to',g:'dap'},
   laugh:{ic:'😂',want:'laugh with you',noun:'laughing together',did:'laughed with',g:'laugh'},
   dance:{ic:'💃',want:'dance with you',noun:'the dance',did:'danced with',g:'dance'},
-  walk:{ic:'🚶',want:'walk with you',noun:'walking together',did:'started walking with',g:'wave'}};
+  walk:{ic:'🚶',want:'walk with you',noun:'walking together',did:'started walking with',g:'wave'},
+  flirt:{ic:'😏',want:'flirt with you',noun:'the flirting',did:'flirted with',g:'laugh',rom:5},
+  date:{ic:'🌹',want:'go on a date with you',noun:'the date',did:'went on a date with',g:'wave',rom:12},
+  kiss:{ic:'💋',want:'kiss you',noun:'the kiss',did:'kissed',g:'hug',rom:8}};
 const ASK_WAIT=20000;
 const ASK={out:{},seen:new Set()};
 
@@ -51,4 +54,6 @@ function askDo(rp,ck,a,iAsked){const K=ASK_KINDS[a],p=P();
   p.needs.social=clamp(p.needs.social+(a==='hug'?6:4));p.needs.fun=clamp(p.needs.fun+(a==='dance'||a==='laugh'?5:2));
   if(MP.friends[ck])MP.friends[ck].lv=Math.min(100,(MP.friends[ck].lv||20)+(a==='hug'?3:2));
   try{ev('talk',{a:'real'});if(a==='dance')ev('emote',{k:'dance',n:1});if(a==='laugh')ev('talk',{a:'joke',good:true})}catch(e){}
-  mpSys(ck,iAsked?`You ${K.did} ${rp.nm} ${K.ic}`:`${rp.nm} ${K.did.replace(/^gave a dap to$/,'gave you a dap').replace(/ with$/,' with you').replace(/^hugged$/,'hugged you')} ${K.ic}`)}
+  if(K.rom){romAdd(ck,K.rom);p.needs.fun=clamp(p.needs.fun+(a==='date'?12:4));if(a==='date')p.needs.social=clamp(p.needs.social+12);if(iAsked)try{romBroadcast(rp,ck,a)}catch(e){}
+    if(a==='date')toast(`🌹 You're on a date with ${rp.nm}${IS&&IS.title?' at '+IS.title:''}. Romance +${K.rom}`)}
+  mpSys(ck,iAsked?`You ${K.did} ${rp.nm} ${K.ic}`:`${rp.nm} ${K.did.replace(/^gave a dap to$/,'gave you a dap').replace(/ with$/,' with you').replace(/^hugged$/,'hugged you').replace(/^kissed$/,'kissed you')} ${K.ic}`)}

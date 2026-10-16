@@ -5,7 +5,7 @@ const myInKey=()=>!IS?null:IS.kind==='room'?(IS.mine?myRoomKey():IS.owner&&IS.ow
 function mpPresence(){if(!S||!S.p)return null;const p=P(),inB=myInKey(),L=p.look;
   return{g:'freshers',nm:mpClean(p.name,16),uid:MP.uid,lk:{gender:L.gender,skin:L.skin,hair:L.hair,outfit:L.outfit,pal:L.pal,shoes:L.shoes,extra:L.extra,bag:L.bag},
     x:Math.round(p.x),y:Math.round(p.y),f:p.face!=null?+p.face.toFixed(2):null,ps:p.inCar?'car':(['sit','sitTalk','phone','talk','dance','lie'].includes(p.pose)?p.pose:null),in:inB,car:!!p.inCar,
-    mo:(()=>{try{return moodInfo().ic}catch(e){return''}})(),hm:p.home,pr:mpClean(lvlLabel()+' · '+p.prog,40),ty:MP.typing&&Date.now()-MP.typing.t<4000?MP.typing.to:null,wk:S.follow||null,ix:IS?Math.round(p.ix*100)/100:null,iz:IS?Math.round(p.iz*100)/100:null,mu:MUS.room&&inMyRoom()&&MUS.room.key===inB?{i:MUS.room.i,s:Math.round(MUS.room.s)}:null,out:MP.out}}
+    mo:(()=>{try{return moodInfo().ic}catch(e){return''}})(),hm:p.home,pr:mpClean(lvlLabel()+' · '+p.prog,40),ty:MP.typing&&Date.now()-MP.typing.t<4000?MP.typing.to:null,wk:S.follow||null,rl:(()=>{const r=relGet();return r?{k:r.ck,n:mpClean(r.nm,16)}:null})(),ix:IS?Math.round(p.ix*100)/100:null,iz:IS?Math.round(p.iz*100)/100:null,mu:MUS.room&&inMyRoom()&&MUS.room.key===inB?{i:MUS.room.i,s:Math.round(MUS.room.s)}:null,out:MP.out}}
 function mpTick(){document.body.classList.toggle('live',sharedClock());if(!MP.lobby)return;
   const lp={g:'freshers',cp:MP.campus,cn:MP.campus&&MP.campus[0]==='u'?MP.cnames[MP.campus]||null:null,nm:mpClean(S&&S.p?P().name:(myLook&&myLook.name)||'',16),uid:MP.uid,st:S&&!$('game').hidden?'play':'menu'},lk=JSON.stringify(lp);if(lk!==MP.lastLobby){MP.lastLobby=lk;MP.lobby.presence(lp).catch(()=>{})}
   if(!MP.croom)return;let pr=mpPresence();if(!pr)return;let k=JSON.stringify(pr);const enc=new TextEncoder();while(enc.encode(k).length>3700&&MP.out.length){MP.out.shift();pr=mpPresence();k=JSON.stringify(pr)}
@@ -18,7 +18,7 @@ function mpPeers(ch){const live=new Set(),newest={};
     if(!rp){rp={peer:q.peer,by,isMe:q.isMe,guest:q.guest,first:Date.now(),phase:0,x:0,y:0,tx:0,ty:0};MP.peers.set(q.peer,rp);if(S&&!q.isMe&&!$('game').hidden)toast(`🌐 ${mpClean(pr.nm,16)||'A student'} just came online`)}
     rp.by=by;rp.nm=mpClean(pr.nm,16)||'Student';rp.in=typeof pr.in==='string'?pr.in.slice(0,60):null;rp.car=!!pr.car;rp.mo=mpClean(pr.mo,4);rp.hm=typeof pr.hm==='string'&&BID[pr.hm]?pr.hm:null;rp.pr=mpClean(pr.pr,40);rp.upd=q.updatedAt;
     if(typeof pr.x==='number'&&typeof pr.y==='number'){rp.tx=clamp(pr.x,0,MW);rp.ty=clamp(pr.y,0,MH);if(!rp.placed){rp.x=rp.tx;rp.y=rp.ty;rp.placed=1}}
-    rp.face2=typeof pr.f==='number'?pr.f:null;rp.ps=typeof pr.ps==='string'?pr.ps:null;rp.typ=typeof pr.ty==='string'?pr.ty:null;rp.ix=typeof pr.ix==='number'?pr.ix:null;rp.iz=typeof pr.iz==='number'?pr.iz:null;
+    rp.face2=typeof pr.f==='number'?pr.f:null;rp.ps=typeof pr.ps==='string'?pr.ps:null;rp.typ=typeof pr.ty==='string'?pr.ty:null;rp.rl=pr.rl&&typeof pr.rl==='object'&&typeof pr.rl.k==='string'&&pr.rl.k.length<64?{k:pr.rl.k,n:mpClean(pr.rl.n,16)}:null;rp.ix=typeof pr.ix==='number'?pr.ix:null;rp.iz=typeof pr.iz==='number'?pr.iz:null;
     rp.mu=pr.mu&&typeof pr.mu==='object'&&Number.isInteger(pr.mu.i)&&pr.mu.i>=0&&pr.mu.i<CLUB_TRACKS.length&&typeof pr.mu.s==='number'?{i:pr.mu.i,s:pr.mu.s}:null;
     const lk=JSON.stringify(pr.lk||{})+rp.nm;if(lk!==rp.lkK&&S){rp.lkK=lk;rp.lookV=mpLook(pr.lk);mpMesh(rp,rp.lookV)}
     if(Array.isArray(pr.out))pr.out.slice(-8).forEach(m=>mpIn(rp,m))});
