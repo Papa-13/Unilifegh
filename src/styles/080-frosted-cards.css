@@ -1,0 +1,10 @@
+/* sheets & story as frosted cards */
+#sheet{background:linear-gradient(180deg,rgba(8,5,3,0) 0%,rgba(8,5,3,.15) 40%,rgba(8,5,3,.55) 100%)!important}
+#sheet .in{background:rgba(26,21,18,.9)!important;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.12)!important;border-radius:26px 26px 0 0!important;box-shadow:0 -12px 40px rgba(0,0,0,.45);max-height:86dvh!important}
+#sheet .in::before{content:'';display:block;width:42px;height:5px;border-radius:3px;background:rgba(255,255,255,.25);margin:-6px auto 2px;flex:none}
+#story .in{border-radius:24px!important;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.btn{background:linear-gradient(180deg,#ffd879,#e2a836);box-shadow:0 4px 14px rgba(232,178,74,.3),inset 0 -2px 0 rgba(0,0,0,.12);border-radius:14px}
+.btn.m{background:linear-gradient(180deg,#b23a4d,#7e2232)!important;box-shadow:0 4px 14px rgba(142,42,58,.4),inset 0 -2px 0 rgba(0,0,0,.18)}
+.btn.g{background:linear-gradient(180deg,#6fd497,#3c9e63)!important}.btn.b{background:linear-gradient(180deg,#86c2f0,#4a95d6)!important}
+.ghost{border-radius:14px;background:rgba(255,255,255,.04)}
+.pick{border-radius:12px}.tag{border-radius:6px}

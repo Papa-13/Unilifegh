@@ -1,5 +1,5 @@
 /* Firebase web app config for the "freshers" project (public by design; the security rules protect the data). */
-window.FIREBASE_CONFIG={
+export default {
   apiKey:"AIzaSyCI5S2yiBBGBMPMI4rGDb903EV2LQnvgYw",
   authDomain:"freshers-b6d87.firebaseapp.com",
   databaseURL:"https://freshers-b6d87-default-rtdb.europe-west1.firebasedatabase.app",

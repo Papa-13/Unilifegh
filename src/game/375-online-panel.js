@@ -1,0 +1,85 @@
+/* ---- the 🌐 panel ---- */
+function mpOnline(){return [...MP.peers.values()].filter(rp=>!rp.isMe&&!MP.blocked[mpKey(rp)])}
+function mpWhere(rp){if(rp.in){if(rp.in===myRoomKey())return 'in your room';if(rp.in.startsWith('r:'))return 'in their room';if(rp.in.startsWith('v:'))return 'visiting a friend';if(BID[rp.in])return 'in '+BID[rp.in].name}if(rp.car)return 'on the road';const b=locOf(rp.x,rp.y);return b?'at '+b.name:zoneOf(rp.x,rp.y)}
+function mpBadge(){const b=$('mpB');if(!b)return;const n=mpOnline().length,u=allThreads().reduce((a,k)=>a+unreadOf(k),0)+(MP.campUnread||0);b.querySelector('i').textContent=u?u:n?n:'';b.classList.toggle('hot',!!u);b.classList.toggle('dim',!MP.croom)}
+function mpPanel(tab){S.paused=true;openSheet();MP.view={tab:tab||'online'};mpRedraw()}
+function mpSoft(){const V=MP.view;if(!V||$('sheet').hidden)return;
+  if(V.key){const st=$('mpSt');if(st){const o=onlineInfo(V.key),me=MP.uid||('p:'+MP.peer),typing=o.rp&&o.rp.typ&&(o.rp.typ===MP.uid||o.rp.typ==='p:'+MP.peer);st.textContent=typing?'✍️ typing…':o.txt}return}if(V.tab==='camp')return;
+  const sig=V.tab+'|'+mpOnline().map(r=>r.peer+r.nm+mpWhere(r)+(r.mo||'')).join(',')+'|'+MP.lobbyPeers.length;if(sig!==V.sig)mpRedraw()}
+function mpRedraw(){const V=MP.view;if(!V||$('sheet').hidden){MP.view=null;return}const In=$('sheetIn');
+  if(V.key&&V.drawn===V.key&&$('mpth')){mpThreadMsgs();return}
+  if(!V.key&&V.tab==='camp'&&V.drawn==='camp'&&$('mpth')){mpCampMsgs();return}
+  V.drawn=V.key||V.tab;V.sig=V.tab+'|'+mpOnline().map(r=>r.peer+r.nm+mpWhere(r)+(r.mo||'')).join(',')+'|'+MP.lobbyPeers.length;
+  if(V.key)return mpThread();
+  const L=mpOnline(),TH=allThreads(),un=TH.reduce((a,k)=>a+unreadOf(k),0),fr=Object.keys(MP.friends).filter(k=>!MP.blocked[k]);
+  const tabs=[['online',`🟢 Here (${L.length})`],['camp',`🗣️ Campus chat${MP.campUnread?` (${MP.campUnread})`:''}`],['chats',`💬 Chats${un?` (${un})`:''}`],['friends',`🤝 Friends (${fr.length})`]];
+  let body='';const cName=MP.campus?campName(MP.campus):null,res=MP.campus?(campResidents()[MP.campus]||1):0;
+  const head=MP.campus?`<div class="say" style="margin:6px 0">🏫 <b>${esc(cName)}</b> · ${res}/${CAMP_MAX} students live here · ${L.length+1} online now</div>`:`<div class="say" style="margin:6px 0">You're playing solo. Start a new student on an online campus from the main menu to meet real students.</div>`;
+  if(!MP.lobby)body=`<div class="say">Multiplayer isn't connected. Sign in from the main menu to play online.</div>`;
+  else if(V.tab==='online')body=L.length?`<div class="list">${L.map(rp=>`<div class="item"><i class="sw2" style="border-radius:50%;background:${rp.look?PAL[rp.look.pal].a:'#7fd8ff'}"></i><div class="grow"><b>${esc(rp.nm)}${MP.friends[mpKey(rp)]?' 🤝':''}${realMates().some(m=>m.uid===rp.by)?' 🛏':''}</b><small>${esc(rp.mo||'')} ${esc(mpWhere(rp))}${rp.pr?' · '+esc(rp.pr):''}</small></div><button class="btn sm" data-mc="${esc(rp.peer)}">Say hi</button>${!rp.in?`<button class="ghost sm" data-mg="${esc(rp.peer)}" aria-label="Walk to ${esc(rp.nm)}">🚶</button>`:''}</div>`).join('')}</div>`
+    :`<p style="font-size:14px">${MP.campus?'No one else on this campus is online right now. They\'ll show up here when they come back, and you can still message your friends.':'Nobody here.'}</p>`;
+  else if(V.tab==='camp')body=MP.croom?`<div class="mpth" id="mpth"></div><div class="mpin"><input id="mpTx" maxlength="240" placeholder="Message everyone on ${esc(cName||'campus')}…" autocomplete="off"><button class="btn sm" id="mpSend">Send</button></div>`:'<p>Join an online campus to use campus chat.</p>';
+  else if(V.tab==='chats')body=TH.length?`<div class="chatl">${TH.map(k=>{const t=thread(k),l=t[t.length-1]||{tx:''},o=onlineInfo(k),u=unreadOf(k);return `<button class="chat" data-ck="${esc(k)}"><span class="av" style="background:${o.on?'#2f9e5a':'#555'}">${esc(threadName(k)[0])}</span><span class="grow"><b>${esc(threadName(k))}${MP.friends[k]?' 🤝':''}</b><small>${l.me?'You: ':''}${esc(l.k==='fr'?'Friend request':l.k==='fa'?'Friends now 🎉':l.tx)}</small></span><time>${o.on?'online':ago(l.t||Date.now())}</time>${u?`<span class="badge">${u}</span>`:''}</button>`}).join('')}</div>`:'<p style="font-size:14px">No chats yet. Tap a student on campus, or someone in Here, to start one. Friends can message you even while you\'re offline.</p>';
+  else body=fr.length?`<div class="list">${fr.map(k=>{const o=onlineInfo(k);return `<div class="item"><div class="grow"><b>${esc(threadName(k))}</b><small>${esc(o.txt)}${MP.members[k]&&MP.members[k].cp?' · '+esc(campName(MP.members[k].cp)):''}</small></div><button class="btn sm" data-ck="${esc(k)}">Message</button></div>`}).join('')}</div>`:'<p style="font-size:14px">Add students you meet as friends. You can message them any time, even when they\'re offline.</p>';
+  In.innerHTML=`<div class="eyebrow">🌐 Real students</div>${head}<div class="tabs mptabs">${tabs.map(([k,t])=>`<button class="${V.tab===k?'on':''}" data-mt="${k}">${t}</button>`).join('')}</div>${body}<button class="ghost sm" id="bye">Close</button>`;
+  In.querySelectorAll('[data-mt]').forEach(b=>b.onclick=()=>{V.tab=b.dataset.mt;V.drawn=null;mpRedraw()});
+  In.querySelectorAll('[data-mc]').forEach(b=>b.onclick=()=>{const rp=MP.peers.get(b.dataset.mc);if(rp)mpCard(rp)});
+  In.querySelectorAll('[data-mg]').forEach(b=>b.onclick=()=>{const rp=MP.peers.get(b.dataset.mg);if(!rp)return;closeSheet();if(IS)leaveRoom(true);P().target={x:rp.x+20,y:rp.y+10};P().path=null;S.goDo=null;toast(`🚶 Walking over to ${rp.nm}…`)});
+  In.querySelectorAll('[data-ck]').forEach(b=>b.onclick=()=>{V.key=b.dataset.ck;V.drawn=null;mpRedraw()});
+  if(V.tab==='camp'&&$('mpTx')){mpCampMsgs();const go=()=>{const t=$('mpTx'),v=mpClean(t.value);if(!v)return;if(mpSend('*all','m',v)){MP.camp.push({nm:P().name,tx:v,t:Date.now(),me:1});t.value='';mpCampMsgs();t.focus()}};$('mpSend').onclick=go;$('mpTx').onkeydown=e=>{if(e.key==='Enter')go()}}
+  $('bye').onclick=()=>{MP.view=null;closeSheet()};mpBadge()}
+function mpCampMsgs(){const th=$('mpth');if(!th)return;MP.campUnread=0;const H=MP.camp.length?MP.camp.map(m=>`<div class="bub ${m.me?'bout':'bin'}">${m.me?'':`<b>${esc(m.nm)}</b> `}${esc(m.tx)}<time>${new Date(m.t).toTimeString().slice(0,5)}</time></div>`).join(''):'<p style="font-size:13px;opacity:.7">Say hi to everyone on campus 👋 Campus chat reaches everyone online on this campus right now.</p>';if(th.__h!==H){th.__h=H;th.innerHTML=H;th.scrollTop=th.scrollHeight}mpBadge()}
+function mpThreadMsgs(){const V=MP.view,k=V.key,fr=MP.friends[k],T=$('mpth');if(!T)return;const ms=thread(k);markRead(k);mpSeen(k);let lastDay='';const seenT=(MP.mailIn[k]||{}).seen||0,lastMine=ms.filter(m=>m.me&&!m.sys&&m.k==='m').slice(-1)[0];
+  const reqIn=ms.some(m=>!m.me&&m.k==='fr')&&!fr;
+  const H=ms.map(m=>m.sys?`<div class="sysm">${esc(m.tx)}</div>`:m.k==='fr'?`<div class="sysm">${m.me?'You sent a friend request ✉️':`${esc(threadName(k))} wants to be friends`}</div>`:m.k==='fa'?`<div class="sysm">${m.me?'You accepted 🤝':`${esc(threadName(k))} accepted 🎉`}</div>`:(()=>{const dd=new Date(m.t).toDateString(),sep=dd!==lastDay?`<div class="sysm daysep">${dd===new Date().toDateString()?'Today':new Date(m.t).toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})}</div>`:'';lastDay=dd;return sep+`<div class="bub ${m.me?'bout':'bin'}">${esc(m.tx)}<time>${new Date(m.t).toTimeString().slice(0,5)}${m===lastMine?(seenT>=m.t?' · Seen ✓✓':' · Sent ✓'):''}</time></div>`})()).join('')
+    +(reqIn?`<div class="sysm"><button class="btn sm" data-acc="1">Accept friend request</button></div>`:'')||`<p style="font-size:13px;opacity:.7;text-align:center">This is a real person. Say hi 👋 Be kind.</p>`;
+  if(T.__h!==H){T.__h=H;T.innerHTML=H;T.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{mpAccept(k)});T.scrollTop=T.scrollHeight}mpBadge()}
+function mpAccept(k){const nm=threadName(k);if(MP.db&&MP.uid&&!k.startsWith('p:'))mailSend(k,'fa','');else{const rp=[...MP.peers.values()].find(r=>mpKey(r)===k);if(rp)mpSend(k,'fa','')}mpMakeFriend(k,nm);toast(`🤝 You and ${nm} are friends now`);MP.view.drawn=null;mpRedraw()}
+function mpCard(rp){if(!S||!rp)return;S.paused=true;openSheet();MP.view=null;const k=mpKey(rp),fr=MP.friends[k],L=rp.lookV,rm=realMates().some(m=>m.uid===rp.by),sentReq=thread(k).some(m=>m.me&&m.k==='fr'),inReq=thread(k).some(m=>!m.me&&m.k==='fr')&&!fr,walking=S.follow===rp.peer;
+  const near=!IS&&!rp.in&&Math.hypot(rp.x-P().x,rp.y-P().y)<160,lv=fr?(fr.lv||20):0;
+  $('sheetIn').innerHTML=`<div class="who"><i class="av" style="background:${L?PAL[L.pal].a:'#7fd8ff'};border-color:${L?PAL[L.pal].b:'#7fd8ff'}"></i><div><h3>${esc(rp.nm)} ${rp.mo||''}</h3>
+    <div class="tags"><span class="tag" style="background:#1f4f6b;color:#bfefff">🌐 Real student</span>${fr?'<span class="tag g">🤝 Friend</span>':''}${rm?'<span class="tag y">🛏 Your roommate</span>':''}${rp.pr?`<span class="tag">${esc(rp.pr)}</span>`:''}${rp.hm?`<span class="tag">${esc(BID[rp.hm].name)}</span>`:''}<span class="tag">${esc(mpWhere(rp))}</span></div></div></div>
+    ${fr?`<div class="rel"><span>Friendship</span><div class="bar"><i style="width:${lv}%"></i></div></div>`:''}
+    ${inReq?`<div class="say">${esc(rp.nm)} wants to be your friend. <button class="btn sm" id="pcAcc">Accept</button></div>`:''}
+    <div class="grid2"><button class="btn" id="pcMsg">💬 Message</button>
+      ${[['wave','👋 Wave'],['handshake','🤝 Handshake'],['dap','🤜 Dap'],['laugh','😂 Laugh together'],['dance','💃 Dance together']].concat(fr?[['hug','🤗 Hug']]:[]).map(([a,t])=>`<button class="ghost sm" data-pa="${a}" ${near?'':'disabled'}>${t}</button>`).join('')}
+      ${!IS&&!rp.in?`<button class="ghost sm" id="pcWalk">${walking?'✋ Stop walking together':'🚶 Walk together'}</button>`:''}
+      ${!fr&&!sentReq&&!inReq?'<button class="ghost sm" id="pcFr">➕ Add friend</button>':''}${sentReq&&!fr?'<button class="ghost sm" disabled>✉️ Friend request sent</button>':''}
+      <button class="ghost sm" id="pcMap">🗺 Show on map</button></div>
+    ${near?'':'<p style="font-size:12px;opacity:.7;margin:4px 0">Walk closer to wave, dap, hug or dance with them.</p>'}
+    <div class="row" style="justify-content:space-between"><button class="ghost sm" id="pcBlock">🚫 Block</button><button class="btn sm" id="bye">Close</button></div>`;
+  const act=a=>{mpSend(k,'act',a);try{ev('talk',{a:'real'});if(a==='wave'||a==='dance')ev('emote',{k:a,n:1});if(a==='laugh')ev('talk',{a:'joke',good:true})}catch(e){};mpSys(k,`You ${ {wave:'waved 👋',dap:'gave a dap 🤜🤛',handshake:'shook hands 🤝',hug:'hugged 🤗',laugh:'laughed together 😂',dance:'danced together 💃'}[a]}`);const p=P();p.face=Math.atan2(rp.x-p.x,rp.y-p.y);try{setGest(p,a==='laugh'?'laugh':a==='dance'?'dance':a,2.2)}catch(e){}if(a==='dance')try{p.pose='dance';setTimeout(()=>{if(P().pose==='dance')P().pose=null},4000)}catch(e){}p.needs.social=clamp(p.needs.social+3);p.needs.fun=clamp(p.needs.fun+2);if(MP.friends[k])MP.friends[k].lv=Math.min(100,(MP.friends[k].lv||20)+1)};
+  $('sheetIn').querySelectorAll('[data-pa]').forEach(b=>b.onclick=()=>{closeSheet();act(b.dataset.pa)});
+  $('pcMsg').onclick=()=>{closeSheet();mpChatKey(k)};
+  if($('pcWalk'))$('pcWalk').onclick=()=>{closeSheet();if(walking){S.follow=null;mpSend(k,'act','stopwalk');toast(`You stopped walking with ${rp.nm}`)}else{S.follow=rp.peer;mpSend(k,'act','walk');try{if(fr)ev('walkreal')}catch(e){}toast(`🚶 Walking with ${rp.nm}. Tap the ground to go your own way.`)}};
+  if($('pcFr'))$('pcFr').onclick=()=>{if(MP.db&&MP.uid&&!k.startsWith('p:'))mailSend(k,'fr','');else mpSend(k,'fr','');toast('Friend request sent ✉️');closeSheet()};
+  if($('pcAcc'))$('pcAcc').onclick=()=>{MP.view={key:k};mpAccept(k);closeSheet()};
+  $('pcMap').onclick=()=>{closeSheet();campusMap()};
+  $('pcBlock').onclick=()=>{if(!confirm(`Block ${rp.nm}? You won't see their messages.`))return;MP.blocked[k]=1;mpStore.set('blocked',MP.blocked);if(S.follow===rp.peer)S.follow=null;toast(`🚫 ${rp.nm} is blocked.`);closeSheet()};
+  $('bye').onclick=closeSheet}
+function mpFollowTick(){if(!S||!S.follow)return;const rp=MP.peers.get(S.follow),p=P();if(!rp||rp.in||rp.car||IS){S.follow=null;return}if(S.busy)return;S._fwT=(S._fwT||0)-1;if(S._fwT>0)return;S._fwT=8;const d=Math.hypot(rp.x-p.x,rp.y-p.y);if(d>42){p.target={x:rp.x+16,y:rp.y+10};p.path=null}}
+function mpChatKey(k){if(!S)return;S.paused=true;openSheet();MP.view={tab:'chats',key:k};mpRedraw()}
+function mpChat(rp){mpChatKey(mpKey(rp))}
+function mpThread(){const V=MP.view,k=V.key,fr=MP.friends[k],o=onlineInfo(k),rp=o.rp,canMail=MP.db&&MP.uid&&!k.startsWith('p:'),canSend=canMail||rp;
+  const draft=$('mpTx')?$('mpTx').value:'';const In=$('sheetIn'),nm=threadName(k),sent=thread(k).some(m=>m.me&&m.k==='fr');
+  In.innerHTML=`<div class="row" style="justify-content:space-between;align-items:center"><button class="ghost sm" id="mpBack">‹ Back</button><div style="text-align:center"><b>${esc(nm)}</b> ${fr?'🤝':''}<small id="mpSt" style="display:block;opacity:.7">${esc(o.txt)}</small></div><button class="ghost sm" id="mpMore" aria-label="More">⋯</button></div>
+    <div class="mpth" id="mpth"></div>
+    ${rp?`<div class="mpacts">${[['wave','👋'],['dap','🤜'],['handshake','🤝'],['hug','🤗'],['laugh','😂'],['dance','💃']].map(([a,e])=>`<button class="ghost sm" data-ma="${a}" aria-label="${a}">${e}</button>`).join('')}</div>`:''}
+    ${!fr&&!sent&&canSend?'<button class="ghost sm" id="mpFr">➕ Add friend</button>':''}
+    ${canSend?`<div class="mpemo">${['😂','❤️','🔥','🙏','😅','👍','😭','🎉','👀','💯'].map(e=>`<button type="button" data-em="${e}">${e}</button>`).join('')}</div><div class="mpin"><input id="mpTx" maxlength="240" placeholder="${o.on?'Type a message…':'They\'re offline. They\'ll see it when they\'re back…'}" autocomplete="off" enterkeyhint="send"><button class="btn sm" id="mpSend">Send</button></div>`:'<p style="font-size:13px;opacity:.7">They\'re offline. You can message them when they\'re back.</p>'}
+    <div id="mpMenu" hidden class="grid2"><button class="ghost sm" id="mpBlock">🚫 Block ${esc(nm)}</button>${rp?`<button class="ghost sm" id="mpWalk">🚶 Walk to them</button>`:''}</div>`;
+  mpThreadMsgs();const tx=$('mpTx');
+  if(tx){tx.value=draft;const go=async()=>{const v=mpClean(tx.value);if(!v)return;const r2=onlineInfo(k).rp;let ok=false;
+      if(canMail)ok=await mailSend(k,'m',v);else if(r2){const m=mpSend(k,'m',v);if(m){const th=MP.chats[k]=MP.chats[k]||{nm,ms:[]};th.ms.push({me:1,tx:v,t:Date.now()});mpStore.set('chats',MP.chats);ok=true}}
+      if(!ok)return;try{const mine=thread(k).filter(m=>m.me&&m.k==='m').length;ev('talk',{a:mine<=1?'hi':'chat'});ev('chat',{})}catch(e){}if(r2&&!IS)chatBubble(P().mesh,v);P().needs.social=clamp(P().needs.social+2);if(MP.friends[k])MP.friends[k].lv=Math.min(100,(MP.friends[k].lv||20)+2);tx.value='';mpThreadMsgs();tx.focus()};
+    $('mpSend').onclick=go;tx.onkeydown=e=>{if(e.key==='Enter')go()};tx.oninput=()=>{MP.typing={to:MP.uid&&!k.startsWith('p:')?k:k,t:Date.now()}};
+    In.querySelectorAll('[data-em]').forEach(b=>b.onclick=()=>{tx.value=(tx.value+b.dataset.em).slice(0,240);tx.focus()})}
+  In.querySelectorAll('[data-ma]').forEach(b=>b.onclick=()=>{const a=b.dataset.ma;const r2=onlineInfo(k).rp;if(!r2)return;mpSend(k,'act',a);mpSys(k,`You ${ {wave:'waved 👋',dap:'gave a dap 🤜🤛',handshake:'shook hands 🤝',hug:'hugged 🤗',laugh:'laughed 😂',dance:'danced 💃'}[a]}`);try{setGest(P(),a==='laugh'?'laugh':a,2)}catch(e){}mpThreadMsgs()});
+  if($('mpFr'))$('mpFr').onclick=()=>{if(canMail)mailSend(k,'fr','');else mpSend(k,'fr','');toast('Friend request sent ✉️');$('mpFr').remove();setTimeout(mpThreadMsgs,50)};
+  $('mpBack').onclick=()=>{V.key=null;V.drawn=null;mpRedraw()};$('mpMore').onclick=()=>{$('mpMenu').hidden=!$('mpMenu').hidden};
+  $('mpBlock').onclick=()=>{MP.blocked[k]=1;mpStore.set('blocked',MP.blocked);toast(`🚫 ${nm} is blocked. You won't see their messages.`);V.key=null;V.drawn=null;mpRedraw()};
+  if($('mpWalk'))$('mpWalk').onclick=()=>{const r2=onlineInfo(k).rp;if(!r2)return;closeSheet();if(IS)leaveRoom(true);P().target={x:r2.x+20,y:r2.y+10};P().path=null};
+  mpBadge()}
+function mpSay(){S.paused=true;openSheet();$('sheetIn').innerHTML=`<div class="eyebrow">🗨️ Say something out loud</div><h3>Everyone nearby will see it over your head</h3><div class="mpin"><input id="mpTx" maxlength="160" placeholder="e.g. Who wants to play football? ⚽" autocomplete="off"><button class="btn sm" id="mpSend">Say</button></div><button class="ghost sm" id="bye">Cancel</button>`;
+  const go=()=>{const v=mpClean($('mpTx').value,160);if(!v)return;if(mpSend('*near','m',v)){chatBubble(P().mesh,v);closeSheet()}};$('mpSend').onclick=go;$('mpTx').onkeydown=e=>{if(e.key==='Enter')go()};setTimeout(()=>$('mpTx').focus(),50);$('bye').onclick=closeSheet}
+function mpNear(){if(!S||IS)return null;const p=P();let best=null,bd=110;for(const rp of MP.peers.values()){if(rp.isMe||!rp.mesh||rp.in||rp.car)continue;const d=Math.hypot(rp.x-p.x,rp.y-p.y);if(d<bd){bd=d;best=rp}}return best}

@@ -1,0 +1,7 @@
+/* ================= jobs ================= */
+function jobBoard(){S.paused=true;openSheet();const p=P();
+  const jobs=[['print','Print & Type assistant','Weekdays 08:00–17:00 · 3h shifts · GH₵60 a shift'],['stall',"Auntie Esi's Night Market stall",'18:00–21:00 · GH₵80 a shift + free food'],['tutor','Peer tutor (level 100 maths)','Library 15:00–20:00 · GH₵100 a session · needs a good study record']];
+  const draw=(note='')=>{$('sheetIn').innerHTML=`<div class="eyebrow">Job board</div><h3>Part-time work</h3><p style="font-size:14px">One job at a time. Don't let it eat your lectures.</p>${note?`<div class="say">${note}</div>`:''}
+    <div class="list">${jobs.map(([k,t,d])=>`<div class="item"><div class="grow"><b>${t}</b><small>${d}</small></div>${p.job===k?'<span class="tag g">Your job</span>':`<button class="btn sm" data-j="${k}">Apply</button>`}</div>`).join('')}</div><button class="ghost sm" id="bye">Close</button>`;
+    $('sheetIn').querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>{const k=b.dataset.j;if(k==='tutor'&&p.study<50)return draw('The tutoring coordinator says: "Come back when your study record is stronger." (Study 50+ needed)');
+      p.job=k;advance(20);draw(`You got the job! ${k==='print'?'Go to Print & Type on a weekday to work a shift.':k==='stall'?'Go to the Night Market between 18:00 and 21:00.':'Go to the library between 15:00 and 20:00.'}`)});$('bye').onclick=closeSheet};draw()}

@@ -1,0 +1,10 @@
+/* accommodation */
+.rooms{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.room{background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;text-align:left;color:var(--fg)}
+.room:hover:not(:disabled){border-color:var(--gold)}
+.room:disabled{opacity:.5;cursor:default}
+.room .beds{display:flex;gap:4px}.room .beds i{width:18px;height:12px;border-radius:3px;background:var(--gold)}
+.room .price{font-family:var(--mono);font-weight:700;font-size:18px;color:var(--gold)}
+.room ul{margin:0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.5}
+.room .pros li::marker{color:var(--green)} .room .cons li::marker{color:var(--red)}
+.sum{display:flex;gap:18px;flex-wrap:wrap;font-size:14px;color:var(--muted)} .sum b{color:var(--fg);font-family:var(--mono)}

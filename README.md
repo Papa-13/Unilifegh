@@ -1,62 +1,56 @@
-# Freshers: web version (Vercel + Firebase)
+# YOLO 🎓 · You Only Live Once
 
-This folder is a complete static website. Firebase provides the online parts:
+Live the life of a Ghanaian university student, from Level 100 to graduation: lectures, hostels, friends, love and hustles, on online campuses of up to 50 real players.
 
-| Game feature | Firebase service |
+> Saved games and online data still use the original internal ids (`freshers-save`, `freshers-b6d87`, …). Don't rename those, or players lose their saves.
+
+- **Play:** the website (Vercel) uses Firebase for sign-in, live campuses, chat and saves.
+- **Tech:** plain JavaScript + [three.js](https://threejs.org) r128 for 3D, [Vite](https://vitejs.dev) to run and build it, Firebase for online play.
+
+## Run it on your computer
+
+You need [Node.js](https://nodejs.org) 18 or newer.
+
+```bash
+npm install      # once
+npm run dev      # opens http://localhost:5173 — the page reloads when you save a file
+```
+
+| Command | What it does |
 |---|---|
-| Sign in (Google or guest) | Authentication |
-| Live campus: who's online, walking around, campus chat, emotes | Realtime Database |
-| Campus residents (35/50), real roommates, private messages that wait for you, saved students | Cloud Firestore |
+| `npm run dev` | Play locally while you work on it |
+| `npm run check` | Checks the game code for mistakes and says which file they're in |
+| `npm run build` | Builds the website into `dist/` (Vercel runs this for you) |
+| `npm run preview` | Plays the built website locally |
+| `npm run build:artifact` | Builds the single-file claude.ai version into `dist-artifact/` |
 
-If `firebase-config.js` still has the placeholder values, the game runs offline (solo only).
+## Folders
 
-## 1. Set up Firebase (about 10 minutes)
-
-1. Go to https://console.firebase.google.com, click **Add project**, give it a name (e.g. `freshers`). Google Analytics is optional.
-2. **Authentication**: Build → Authentication → Get started. Under *Sign-in method*, enable **Google** and **Anonymous**.
-3. **Firestore**: Build → Firestore Database → Create database → *production mode* → pick a location near your players (e.g. `eur3` for Europe). Open the **Rules** tab, replace everything with the contents of `firestore.rules`, click **Publish**.
-4. **Realtime Database**: Build → Realtime Database → Create database → same region → *locked mode*. Open the **Rules** tab, replace everything with the contents of `database.rules.json`, click **Publish**.
-5. **Web app config**: Project settings (gear icon) → General → *Your apps* → click the `</>` (Web) icon → register the app (no hosting needed). Copy the `firebaseConfig` values into `firebase-config.js`. Make sure `databaseURL` is filled in (it's shown at the top of the Realtime Database page).
-
-These config values are meant to be public; the rules files are what protect your players' data.
-
-## 2. Deploy to Vercel
-
-Option A, from your computer:
-
-```bash
-npm i -g vercel
-cd freshers-web
-vercel          # first time: answer the prompts, framework = "Other"
-vercel --prod   # publish to your live URL
+```
+index.html            the page: the HTML for menus, HUD and panels
+src/
+  game/               the game, split by topic (see docs/ARCHITECTURE.md)
+    010-world-data.js       buildings, colleges, hostels, shop items, characters…
+    070-time.js             the clock, hourly events, texts you receive
+    140-building-actions.js what you can do at each building
+    320-needs-mood-tasks-gems.js  needs, moods, daily tasks, milestones, gems
+    205-academic-years.js   Level 100 → final year, trails, vacation, graduation
+    385-intro-art.js        launch animation, skyline, step strip for the intro screens
+    370-375 online-*.js     multiplayer: campuses, presence, chat, messages
+    …
+    990-boot.js             starts the game (runs last)
+  styles/             the look, split by screen
+  online/             Firebase: sign-in, live rooms, database (website only)
+  main.js             website entry: starts Firebase
+firebase/             security rules to paste into the Firebase console
+tools/                build helpers (you rarely need to touch these)
+docs/                 how the code fits together and how to add features
 ```
 
-Option B: put this folder in a GitHub repository, then on https://vercel.com click **Add New → Project**, import the repo, framework preset **Other**, no build command, output directory `.` (root).
+## Deploying
 
-## 3. Allow sign-in on your Vercel domain
+The repo is set up for Vercel: every push to `main` builds and goes live automatically. See [docs/DEPLOY.md](docs/DEPLOY.md) for the full Firebase + Vercel setup.
 
-Firebase console → Authentication → Settings → **Authorized domains** → **Add domain** → your Vercel URL, e.g. `freshers-yourname.vercel.app` (and any custom domain).
+## Adding features
 
-Then open your site, sign in, and send the link to friends.
-
-## Free-plan limits (Firebase Spark plan)
-
-- Realtime Database: **100 people online at the same time**, 10 GB of downloads per month.
-- Firestore: 50,000 reads and 20,000 writes per day. The game saves each online player every 30 seconds, so that's roughly 150+ hours of play per day across all players.
-
-That's plenty for testing with friends. If it grows, switch to the pay-as-you-go Blaze plan.
-
-## Privacy and safety
-
-- Private messages are stored one document per sender→recipient; the rules let only those two people read them.
-- Saved students are readable only by their owner.
-- Everything another player types is shown as plain text; players can block each other in the chat menu.
-- Guest accounts are tied to one browser. Players who sign in with Google can continue on any device.
-
-## Updating the game later
-
-`index.html` is generated from the main game file:
-
-```bash
-python3 build_web.py path/to/freshers.html
-```
+See [docs/ADDING-FEATURES.md](docs/ADDING-FEATURES.md) for recipes: new building actions, shop items, daily tasks, screens and online features.

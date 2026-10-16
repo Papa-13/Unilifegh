@@ -1,15 +1,15 @@
-/* Freshers web build: gives the game the same online features it gets on claude.ai
+/* YOLO web build: gives the game the same online features it gets on claude.ai
    (live rooms, a small document database, a player id), backed by Firebase.
    - room  -> Firebase Realtime Database (who is on a campus, where they walk, campus chat)
    - db    -> Cloud Firestore (campus members, private messages, saved student lives)
    - user  -> Firebase Authentication (Google or guest sign-in)                          */
-import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import {getAuth,onAuthStateChanged,signInAnonymously,GoogleAuthProvider,signInWithPopup,signInWithRedirect,signOut} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import {getFirestore,doc as fsDoc,collection as fsColl,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot,query,where,orderBy,limit,getDocs} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-import {getDatabase,ref,set,remove,onDisconnect,onValue,onChildAdded,onChildChanged,onChildRemoved,serverTimestamp,goOffline} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+import {initializeApp} from 'firebase/app';
+import {getAuth,onAuthStateChanged,signInAnonymously,GoogleAuthProvider,signInWithPopup,signInWithRedirect,signOut} from 'firebase/auth';
+import {getFirestore,doc as fsDoc,collection as fsColl,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot,query,where,orderBy,limit,getDocs} from 'firebase/firestore';
+import {getDatabase,ref,set,remove,onDisconnect,onValue,onChildAdded,onChildChanged,onChildRemoved,serverTimestamp,goOffline} from 'firebase/database';
+import cfg from './firebase-config.js';
 
-const cfg=window.FIREBASE_CONFIG;
-if(!cfg||!cfg.apiKey||String(cfg.apiKey).includes('PASTE')){console.warn('Freshers: no Firebase config, playing offline');window.__fbResolve(null)}
+if(!cfg||!cfg.apiKey||String(cfg.apiKey).includes('PASTE')){console.warn('YOLO: no Firebase config, playing offline');window.__fbResolve(null)}
 else start().catch(e=>{console.error(e);window.__fbResolve(null)});
 
 async function start(){
@@ -24,7 +24,7 @@ async function start(){
 /* ---------- sign-in screen ---------- */
 function signInScreen(auth){return new Promise(res=>{
   const o=document.createElement('div');o.id='fbSign';
-  o.innerHTML=`<div class="fbs-in"><div class="fbs-eye">AKWAABA UNIVERSITY</div><h2>Freshers 🎓</h2><p>Sign in to join an online campus with real students. Your student and your chats are saved to your account.</p>
+  o.innerHTML=`<div class="fbs-in"><div class="fbs-eye">YOU ONLY LIVE ONCE</div><h2>YO<span style="color:#e8b24a">LO</span> 🎓</h2><p>Sign in to join an online campus with real students. Your student and your chats are saved to your account.</p>
    <button id="fbG" class="fbs-btn fbs-main">Continue with Google</button><button id="fbA" class="fbs-btn">Play as a guest</button><button id="fbO" class="fbs-btn fbs-ghost">Play offline</button>
    <small>Guest students are saved on this device only. Use Google to play from any device.</small><div id="fbErr"></div></div>`;
   const st=document.createElement('style');st.textContent=`#fbSign{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:radial-gradient(circle at 50% 0,#3a1d22,#0f0c0a 70%);color:#f6efe6;font:16px/1.5 Figtree,system-ui,sans-serif;padding:20px}

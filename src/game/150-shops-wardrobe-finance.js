@@ -1,0 +1,41 @@
+/* ================= shops, wardrobe, salon, housing, finance ================= */
+function mall(){
+  S.paused=true;openSheet();const p=P();const g=p.look.gender;
+  const draw=(tab='clothes',note='')=>{let body='';
+    if(tab==='clothes')body=`<p style="font-size:14px">New outfits go into your wardrobe. Change in your room. GH₵90 each.</p><div class="list">${Object.entries(OUTFIT[g]).map(([o,on])=>`<div class="item"><div class="grow"><b>${on}</b><div class="row" style="margin-top:6px">${Object.entries(PAL).map(([k,pp])=>{const own=p.wardrobe.some(x=>x.outfit===o&&x.pal===k);return `<button class="pick pal" data-buy="${o}|${k}" ${own?'disabled':''} title="${pp.name}"><i style="background:linear-gradient(135deg,${pp.a} 50%,${pp.b} 50%)"></i>${own?'Owned':'GH₵90'}</button>`}).join('')}</div></div></div>`).join('')}</div>`;
+    if(tab==='home')body=`<div class="list">${SHOP.map(it=>`<div class="item"><div class="grow"><b>${it.name}</b><small>${it.desc}</small></div>${p.items.includes(it.id)?'<span class="tag g">In your room</span>':`<button class="btn sm" data-item="${it.id}">${cedi(it.price)}</button>`}</div>`).join('')}</div>`;
+    if(tab==='food')body=`<div class="item"><div class="grow"><b>Provisions pack</b><small>Gari, sugar, milk, Milo, sardines, noodles. 6 servings. You have ${p.prov}.</small></div><button class="btn sm" id="prov">GH₵60</button></div><p style="font-size:13px">Madina Market (by trotro) is cheaper.</p>`;
+    $('sheetIn').innerHTML=`<div class="row" style="justify-content:space-between"><h3>🛍️ Campus Mall</h3><span class="tag y">${cedi(p.money)}</span></div>
+      <div class="tabs">${[['clothes','Clothes'],['home','Room items'],['food','Provisions']].map(([k,l])=>`<button class="pick" aria-pressed="${k===tab}" data-t="${k}">${l}</button>`).join('')}</div>${note?`<div class="say">${note}</div>`:''}${body}<button class="ghost sm" id="bye">Close</button>`;
+    $('sheetIn').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>draw(b.dataset.t));
+    $('sheetIn').querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{const [o,k]=b.dataset.buy.split('|');if(!spend(90))return draw(tab,'Not enough money.');p.wardrobe.push({outfit:o,pal:k});draw(tab,`Bought: ${OUTFIT[g][o]} in ${PAL[k].name}.`)});
+    $('sheetIn').querySelectorAll('[data-item]').forEach(b=>b.onclick=()=>{const it=SHOP.find(x=>x.id===b.dataset.item);if(!spend(it.price))return draw(tab,'Not enough money.');p.items.push(it.id);draw(tab,`${it.name} delivered to your room.`)});
+    const pr=$('prov');if(pr)pr.onclick=()=>{if(!spend(60))return draw(tab,'Not enough money.');p.prov+=6;draw(tab,'Provisions packed into your food cupboard.')};
+    $('bye').onclick=()=>{advance(30);closeSheet()}};draw();
+}
+function swimSuit(c,on,isMe){if(!c||!c.look)return;if(on){if(c._dry)return;c._dry=c.look;c.look=Object.assign({},c.look,{outfit:'swim',shoes:'slides',bag:null,extra:['specs','earrings','chain'].includes(c.look.extra)?c.look.extra:null})}else if(c._dry){c.look=c._dry;c._dry=null}else return;
+  const par=c.mesh.parent,pos=c.mesh.position.clone(),ry=c.mesh.rotation.y,vis=c.mesh.visible;if(par)par.remove(c.mesh);disposeTree(c.mesh);
+  const h=makeHuman(c.look,isMe?{label:c.name,labelColor:'#e8b24a',ring:true}:{label:c.name});Object.assign(c,{mesh:h.g,legs:h.legs,knees:h.knees,arms:h.arms,elbows:h.elbows,head:h.head,lids:h.lids,torso:h.torso,_pv:null,_props:null});h.g.position.copy(pos);h.g.rotation.y=ry;h.g.visible=vis;(par||scene).add(h.g)}
+function rebuildPlayer(){const p=P();const par=p.mesh.parent;const pos=p.mesh.position.clone();if(par)par.remove(p.mesh);disposeTree(p.mesh);
+  const h=makeHuman(p.look,{label:p.name,labelColor:'#e8b24a',ring:true});Object.assign(p,{mesh:h.g,legs:h.legs,knees:h.knees,arms:h.arms,elbows:h.elbows,head:h.head,lids:h.lids,torso:h.torso});h.g.position.copy(pos);(par||scene).add(h.g)}
+function wardrobe(){S.paused=true;openSheet();const p=P();
+  $('sheetIn').innerHTML=`<h3>👕 Your clothes</h3><div class="list">${p.wardrobe.map((w,i)=>`<div class="item"><i class="sw2" style="background:linear-gradient(135deg,${PAL[w.pal].a} 50%,${PAL[w.pal].b} 50%)"></i><div class="grow"><b>${OUTFIT[p.look.gender][w.outfit]}</b><small>${PAL[w.pal].name}</small></div>${p.look.outfit===w.outfit&&p.look.pal===w.pal?'<span class="tag g">Wearing</span>':`<button class="btn sm" data-w="${i}">Wear</button>`}</div>`).join('')}</div><p style="font-size:13px">Buy more clothes at the Campus Mall.</p><button class="ghost sm" id="bye">Close</button>`;
+  $('sheetIn').querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{const w=p.wardrobe[+b.dataset.w];p.look.outfit=w.outfit;p.look.pal=w.pal;advance(10);rebuildPlayer();closeSheet();toast('Looking fresh. ✨')});$('bye').onclick=closeSheet}
+function salon(){S.paused=true;openSheet();const p=P();const g=p.look.gender;
+  $('sheetIn').innerHTML=`<h3>💇🏾 Barber & Salon</h3><div class="list">${Object.entries(HAIR[g]).map(([k,n])=>`<div class="item"><div class="grow"><b>${n}</b><small>${HAIRPRICE[k]>=120?'Takes most of the afternoon':'Quick'}</small></div>${p.look.hair===k?'<span class="tag g">Current</span>':`<button class="btn sm" data-h="${k}">${cedi(HAIRPRICE[k])}</button>`}</div>`).join('')}</div><button class="ghost sm" id="bye">Close</button>`;
+  $('sheetIn').querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>{const k=b.dataset.h;if(!spend(HAIRPRICE[k]))return;p.look.hair=k;closeSheet();rebuildPlayer();doAct(HAIRPRICE[k]>=120?'Getting your hair done':'Getting a cut',HAIRPRICE[k]>=120?240:45,{fun:10})});$('bye').onclick=closeSheet}
+function housing(){S.paused=true;openSheet();const p=P();
+  $('sheetIn').innerHTML=`<div class="eyebrow">Housing desk</div><h3>${esc(roomOf().name)} · ${homeB().name}</h3>
+   <p style="font-size:14px">Rent is paid per academic year. Moving mid-year costs half the new room's yearly price, and you don't get money back for your old room.</p>
+   <div class="list">${HOSTELS.flatMap(h=>h.rooms.map(r=>`<div class="item"><div class="grow"><b>${h.name} · ${r.name}</b><small>📐 ${r.m2} m² · ${h.blurb}</small></div>${r.id===p.room?'<span class="tag g">Current</span>':`<button class="btn sm" data-r="${r.id}">${cedi(r.price/2)}</button>`}</div>`)).join('')}</div><button class="ghost sm" id="bye">Close</button>`;
+  $('sheetIn').querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{const r=ROOMS[b.dataset.r];if(!spend(r.price/2))return;moveRoom(r.id);closeSheet();toast(`Moved into ${BID[r.hostel].name}. New key in hand. 🔑`)});$('bye').onclick=closeSheet}
+function moveRoom(id){const p=P(),rt=ROOMS[id];p.room=id;p.home=rt.hostel;if(MP.campus){MP.rn=pickRoomNo(id);try{mpWriteMember();mpSyncMates()}catch(e){}}assignMates();if(S.mates[0])msg(S.mates[0].name,'Ei, you\'re my new roommate? Welcome! 🙌')}
+function finance(){S.paused=true;openSheet();const p=P();
+  const draw=(note='')=>{$('sheetIn').innerHTML=`<div class="eyebrow">Student Affairs · finance</div><h3>Loans & bursaries</h3>${note?`<div class="say">${note}</div>`:''}
+   <div class="list">
+    <div class="item"><div class="grow"><b>Students Loan Trust Fund</b><small>GH₵1,500 this semester. You repay after you graduate and start working. Needy students qualify.</small></div>${p.loanTaken?'<span class="tag g">Received</span>':`<button class="btn sm" id="sltf">Apply</button>`}</div>
+    <div class="item"><div class="grow"><b>SRC needy-student bursary</b><small>GH₵600 grant. For students from struggling homes with a grade forecast of 50+.</small></div>${p.bursary?'<span class="tag g">Received</span>':`<button class="btn sm" id="burs">Apply</button>`}</div>
+   </div><button class="ghost sm" id="bye">Close</button>`;
+   const s1=$('sltf');if(s1)s1.onclick=()=>{if(p.bg==='rich')return draw('Your family income is too high to qualify. Sorry.');p.loanTaken=true;p.money+=1500;advance(30);draw('Approved! GH₵1,500 is on your MoMo. Remember, you pay it back after school.')};
+   const s2=$('burs');if(s2)s2.onclick=()=>{if(p.bg!=='poor')return draw('The bursary is only for students from struggling homes.');if(forecast()<50)return draw(`Your grade forecast is ${forecast()}. Get it to 50 and apply again.`);p.bursary=true;p.money+=600;advance(30);draw('Granted! GH₵600 from the SRC bursary. 🙏')};
+   $('bye').onclick=closeSheet};draw()}
