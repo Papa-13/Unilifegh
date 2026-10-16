@@ -175,7 +175,7 @@ function roomActions(){
     if(o.id==='room'&&IS.mine){if((p.mess||0)>=30)a.push([`🧹 Clean & tidy your room (30m)${p.mess>70?' · it\'s really messy':''}`,()=>{doAct('Cleaning and tidying your room',30,{energy:-5,fun:-2});const t=S.busy;if(t){const d=t.done;t.done=()=>{d();p.mess=0;refreshRoom();toast('Room is spotless now ✨')}}},null,'b']);
       if(IS.ledL)a.push(['🌈 Change LED colour',()=>{const L=[0x8a4bff,0x2fd4ff,0xff3c9a,0x3cff8a,0xffb03c,0xffffff];const i=(L.indexOf(p.ledCol||0x8a4bff)+1)%L.length;p.ledCol=L[i];IS.ledM.color.setHex(L[i]);IS.ledL.color.setHex(L[i])}])}
     if(o.id==='desk'&&IS.mine){const m=roomMult()*(p.items.includes('lamp')?1.25:1)*(p.items.includes('shelf')?1.1:1);a.push([`Study at your desk (2h, +${Math.round(9*m)})`,()=>doAct('Studying at your desk',120,{study:Math.round(9*m),energy:-8,fun:-6})]);
-      if(p.items.includes('speaker'))a.push(['Play music',()=>{doAct('Vibing to Afrobeats',45,{fun:20,social:5});S.mates.forEach(n=>{if(IS.people.some(q=>q.n===n&&!q.sleeping))n.friend=clamp(n.friend+4)})}]);
+      if(p.items.includes('speaker'))a.push([MUS.src&&MUS.src.kind==='room'?'🔊 Speaker: change the song':'🔊 Play music on your speaker',()=>musSongs('room')]);
       if(IS.tv)a.push(['Watch TV (1h)',()=>doAct('Watching TV',60,{fun:18})]);
       if(p.items.includes('kettle'))a.push(['☕ Make tea or Milo (10m)',()=>doAct('Sipping hot Milo',10,{hunger:6,energy:5,fun:3})]);
       if(p.items.includes('iron'))a.push(['👔 Iron your clothes (15m)',()=>{doAct('Ironing your clothes',15,{fun:-1});P().ironed=day();setTimeout(()=>toast('Sharp! You look neat today 👔✨'),1800)}]);

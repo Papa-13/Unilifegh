@@ -20,3 +20,5 @@
 #djCard.pill{width:auto;padding:4px}#djCard.pill::before{display:none}#djCard.pill button{padding:8px 14px}
 @media (min-width:1024px) and (min-height:560px){#djCard{top:calc(var(--sat) + 290px)}}
 @media (prefers-reduced-motion:reduce){.dj-screen.live .dj-eq i{animation:none;height:55%}}
+/* phone music follows you outdoors too: on phones the card sits on the right, clear of the map and needs */
+@media (max-width:1023px){#djCard[data-kind=phone]{left:auto;right:calc(12px + var(--sar));top:calc(var(--sat) + 340px)}}

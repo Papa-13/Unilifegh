@@ -118,7 +118,7 @@ function enterBuilding(id,back){fadeIn();S.shuttleWait=null;const BD=IS?(IS.budd
     const tiles=[];for(let i=0;i<5;i++)for(let j=0;j<3;j++){const t=mesh(new THREE.PlaneGeometry(.92,.92),new THREE.MeshBasicMaterial({color:0x330044}),-1.0+i*.95,.012,-.45+j*.95,s);t.rotation.x=-Math.PI/2;tiles.push(t)}
     B_(2.2,1.05,.7,0x111018,.9,.53,-D/2+1.1,true);box(2.24,.05,.74,0x7a2ea0,.9,1.07,-D/2+1.1,s);[.4,1.4].forEach(x=>mesh(cyl(.18,.18,.03,16),lam(0x222222),x,1.1,-D/2+1.1,s));
     [-.7,2.5].forEach(x=>{B_(.6,1.6,.5,0x0b0b0e,x,.8,-D/2+.6,true);[.5,1.1].forEach(y=>mesh(cyl(.17,.17,.03,14),lam(0x333333),x,y,-D/2+.86,s).rotation.x=Math.PI/2)});
-    addInPerson(staffLook('m',{outfit:'tee',pal:'black',extra:'headphones',hair:'fade'}),'DJ Kweku',.9,-D/2+.5,0,'dj',{color:'#d9a6ff'});
+    addInPerson(staffLook('m',{outfit:'tee',pal:'black',extra:'headphones',hair:'fade'}),'🎧 DJ Kwaku Flames',.9,-D/2+.5,0,'dj',{color:'#d9a6ff'});
     const neon=mesh(new THREE.PlaneGeometry(3,.5),new THREE.MeshBasicMaterial({map:textTex('CLUB VIBES',{font:'900 52px system-ui',color:'#ffd6ff',stroke:false,bg:'#5a1d6e'})}),.9,2.45,-D/2+.1,s);
     B_(.6,1.05,3.2,0x2a1f18,-W/2+1.3,.53,0,true);box(.66,.05,3.24,0xd9a537,-W/2+1.3,1.07,0,s);
     [1.36,1.76].forEach(y=>box(.14,.04,3.2,0x5a3e28,-W/2+.16,y,0,s));for(let i=0;i<12;i++)mesh(cyl(.035,.04,.26,8),lam([0x3a7a2a,0x8e2a3a,0xd9a537,0x2f6b9b][i%4]),-W/2+.16,1.51+(i%2)*.4,-1.45+i*.26,s);
