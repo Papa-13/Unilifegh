@@ -86,7 +86,7 @@ function thoughtTick(){const p=P();if(!p||!p.mesh)return;const sp=THOUGHT.sp,hos
 function foodPlaces(){const h=hour();return [['canteen',h>=7&&h<20],['night',h>=18||h<1],['shawarma',h>=10&&h<23],['mall',h>=9&&h<21]].filter(([id,o])=>o&&BID[id]).map(([id])=>BID[id]).sort((a,b)=>Math.hypot(a.door[0]-P().x,a.door[1]-P().y)-Math.hypot(b.door[0]-P().x,b.door[1]-P().y))}
 function walkTo(b){if(IS)leaveRoom(true);const p=P();p.target={x:b.door[0],y:b.door[1]+(b.door[1]>b.y+b.h/2?14:-14)};acts(true)}
 function needFixes(k){const p=P(),a=[],mine=IS&&IS.mine;
-  if(k==='hunger'){if(mine&&p.prov>0)a.push([`🥣 Eat from your chop box (${p.prov})`,()=>{p.prov--;doAct('Eating gari, sugar and milk',20,{hunger:28})}]);
+  if(k==='hunger'){if(mine&&p.prov>0)a.push([`🥣 Eat from your food cupboard (${p.prov} left)`,()=>{p.prov--;doAct('Eating gari, sugar and milk',20,{hunger:28})}]);
     const f=foodPlaces()[0];if(f)a.push([`🚶 Get food at ${f.name}`,()=>walkTo(f)]);a.push(['🛵 Order food to you',()=>phone('apps')])}
   if(k==='energy'){if(mine){a.push(['😴 Sleep',()=>sleep()]);a.push(['💤 Nap (2h)',()=>nap()])}else a.push(['🏠 Go home to rest',()=>walkTo(homeB())]);if(BID.pharm)a.push(['☕ Grab an energy drink (pharmacy)',()=>walkTo(BID.pharm)])}
   if(k==='hygiene'){if(mine)a.push(['🚿 Take a shower',()=>doAct('Taking a shower',20,{hygiene:100,fun:5,energy:4})]);else a.push(['🏠 Go home and shower',()=>walkTo(homeB())])}
@@ -110,7 +110,7 @@ function needWatch(dt){NW+=dt;
     if(a.k==='sleep'&&!IS){const b=homeB();if(dist(p,{x:b.door[0],y:b.door[1]})<80){enterRoom('me');setTimeout(()=>{if(IS&&IS.mine&&!S.busy){const h=hour();h>=20||h<5?sleep():nap()}},300)}}}}
 const simN=()=>{const n=P().name;return n&&n!=='You'?n:'Your Sim'};
 function freeWill(){const p=P(),n=p.needs;S.idleT=0;
-  if(n.hunger<15){if(IS&&IS.mine&&p.prov>0){toast(`${simN()} is starving and grabs something from the chop box (free will)`);p.prov--;doAct('Eating gari, sugar and milk',20,{hunger:28});return}
+  if(n.hunger<15){if(IS&&IS.mine&&p.prov>0){toast(`${simN()} is starving and grabs something from the food cupboard (free will)`);p.prov--;doAct('Eating gari, sugar and milk',20,{hunger:28});return}
     const f=foodPlaces()[0];if(f&&p.money>=15){toast(`${simN()} is hungry and heads to ${f.name} (free will). Tap anywhere to take over.`);walkTo(f);S.auto={k:'eat',b:f.id};return}}
   if(n.energy<12){if(IS&&IS.mine){const h=hour();toast(`${simN()} is exhausted and lies down (free will)`);h>=20||h<5?sleep():nap();return}if(!IS){toast(`${simN()} is exhausted and walks home (free will). Tap anywhere to take over.`);walkTo(homeB());S.auto={k:'sleep'};return}}
   if(n.hygiene<12&&IS&&IS.mine&&!IS.bathBusy){toast(`${simN()} can't stand the smell any more and showers (free will)`);doAct('Taking a shower',20,{hygiene:100,fun:5,energy:4})}}

@@ -165,7 +165,7 @@ function playFifa(){const mates=IS.people.filter(q=>q.n&&!q.lying&&!/bathing/.te
   if(mates.length){mates.forEach(n=>n.friend=clamp(n.friend+4));const t=S.busy;if(t){const d=t.done;t.done=()=>{d();const w=Math.random();toast(w<.45?`You beat ${mates[0].name} 3–1. Trash talk activated 😂`:w<.8?`${mates[0].name} beat you on penalties 😩 Rematch tomorrow`:'2–2 draw. Nobody is sleeping tonight 🎮')}}}}
 function roomActions(){
   const p=P(),near=IS.objs.filter(o=>Math.hypot(o.x-p.ix,o.z-p.iz)<o.r),a=[];
-  if(IS.mine)a.push(['🎨 Decorate',()=>decorate(),null,'b']);
+  if(IS.mine)a.push(['🎨 Decorate & shop for your room',()=>decorate(),null,'b']);
   if(IS.mine&&!IS.guest)a.push(['📱 Invite a friend over',()=>inviteSheet()]);
   if(IS.mine&&!IS.rt.kitchen)a.push(['🍳 Go to the shared kitchen',()=>enterBuilding('hkitchen','room'),null,'b']);
   near.forEach(o=>{
@@ -211,13 +211,21 @@ function knockBath(){const q=IS&&IS.bathBusy;if(!q)return;const nm=q.n.name;
   if(Math.random()<.6){IS.scene.remove(q.mesh);IS.people=IS.people.filter(x=>x!==q);IS.bathBusy=null;IS.water.visible=false;addInPerson(q.n.look,nm+' · roommate',.3,.5,.7,'talk',{n:q.n});IS.grid=null;q.n.friend=clamp(q.n.friend-1);toast(`${nm}: "Sorry sorry, I'm done! The bathroom is yours." 🧼`)}
   else toast(`${nm}: "Two minutes! I'm rinsing!" 🫧`);acts(true)}
 function nearInterior(){let best=null,bd=1.1;if(!IS)return null;IS.people.forEach(q=>{if(q.sleeping)return;const d=Math.hypot(q.x-P().ix,q.z-P().iz);if(d<bd){bd=d;best=q.n}});return best}
-function decorate(){
+/* decorate from your room: colours, and furniture & appliances ordered on HomeMart (delivered to your room).
+   The same shop opens from the phone (Apps → HomeMart). Delivery costs a little; the Campus Mall has no delivery fee. */
+const HM_FEE=15;
+function decorate(tab){
   S.paused=true;openSheet();const p=P();
-  const draw=(note='')=>{const row=(k,t)=>`<div class="opt"><span class="eyebrow">${t} · ${cedi(DECOPRICE[k])}</span><div class="chips">${Object.entries(DECO[k]).map(([id,[nm,c]])=>`<button class="pick pal" data-d="${k}|${id}" aria-pressed="${p.deco[k]===id}"><i style="background:${!c?'transparent':c==='kente'||c==='ankara'?`linear-gradient(135deg,${PAL[c].a} 50%,${PAL[c].b} 50%)`:c};${!c?'border:1px dashed var(--line)':''}"></i>${nm}</button>`).join('')}</div></div>`;
-    $('sheetIn').innerHTML=`<div class="row" style="justify-content:space-between"><h3>🎨 Decorate your room</h3><span class="tag y">${cedi(p.money)}</span></div>${note?`<div class="say">${note}</div>`:''}
-     ${row('wall','Wall colour')}${row('sheet','Your bedsheet')}${row('curtain','Curtains')}
-     <p style="font-size:13px">Furniture and decorations (fan, lamp, rug, plant, mirror…) are at the Campus Mall.</p><button class="ghost sm" id="bye">Done</button>`;
-    $('sheetIn').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const [k,id]=b.dataset.d.split('|');if(p.deco[k]===id)return;if(!spend(DECOPRICE[k]))return draw('Not enough money.');p.deco[k]=id;draw(`Updated your ${k==='sheet'?'bedsheet':k}.`)});
-    $('bye').onclick=()=>{closeSheet();refreshRoom()}};
-  draw();
+  const draw=(t='items',note='')=>{const row=(k,ti)=>`<div class="opt"><span class="eyebrow">${ti} · ${cedi(DECOPRICE[k])}</span><div class="chips">${Object.entries(DECO[k]).map(([id,[nm,c]])=>`<button class="pick pal" data-d="${k}|${id}" aria-pressed="${p.deco[k]===id}"><i style="background:${!c?'transparent':c==='kente'||c==='ankara'?`linear-gradient(135deg,${PAL[c].a} 50%,${PAL[c].b} 50%)`:c};${!c?'border:1px dashed var(--line)':''}"></i>${nm}</button>`).join('')}</div></div>`;
+    const items=`<p style="font-size:13px;margin:0">Order on <b>HomeMart</b> and it's delivered to your room. Delivery ${cedi(HM_FEE)}. (No delivery fee if you buy at the Campus Mall.)</p>
+      <div class="list">${SHOP.map(it=>`<div class="item"><div class="grow"><b>${it.name}</b><small>${it.desc}</small></div>${p.items.includes(it.id)?'<span class="tag g">In your room</span>':`<button class="btn sm" data-hm="${it.id}">${cedi(it.price+HM_FEE)}</button>`}</div>`).join('')}</div>`;
+    $('sheetIn').innerHTML=`<div class="row" style="justify-content:space-between"><h3>🎨 Decorate your room</h3><span class="tag y">${cedi(p.money)}</span></div>
+     <div class="tabs">${[['items','🛋️ Furniture & appliances'],['colours','🖌️ Colours']].map(([k,l])=>`<button class="pick" aria-pressed="${k===t}" data-dt="${k}">${l}</button>`).join('')}</div>${note?`<div class="say">${note}</div>`:''}
+     ${t==='items'?items:row('wall','Wall colour')+row('sheet','Your bedsheet')+row('curtain','Curtains')}<button class="ghost sm" id="bye">Done</button>`;
+    $('sheetIn').querySelectorAll('[data-dt]').forEach(b=>b.onclick=()=>draw(b.dataset.dt));
+    $('sheetIn').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const [k,id]=b.dataset.d.split('|');if(p.deco[k]===id)return;if(!spend(DECOPRICE[k]))return draw(t,'Not enough money.');p.deco[k]=id;draw(t,`Updated your ${k==='sheet'?'bedsheet':k}.`)});
+    $('sheetIn').querySelectorAll('[data-hm]').forEach(b=>b.onclick=()=>{const it=SHOP.find(x=>x.id===b.dataset.hm);if(!it||p.items.includes(it.id))return;if(!spend(it.price+HM_FEE))return draw(t,'Not enough money on MoMo.');p.items.push(it.id);S.decoChanged=1;
+      draw(t,IS&&IS.kind==='room'&&IS.mine?`📦 ${it.name} delivered! It's in your room now.`:`📦 ${it.name} ordered. It's waiting in your room.`);try{ev('act',{l:'Decorating'})}catch(e){}});
+    $('bye').onclick=()=>{closeSheet();if(IS&&IS.kind==='room'&&IS.mine)refreshRoom()}};
+  draw(tab||'items');
 }
