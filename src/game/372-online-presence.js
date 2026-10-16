@@ -1,6 +1,7 @@
 /* ---- presence ---- */
 /* which indoor place I'm in: my room key, a friend's room, or a building id (null outdoors) */
-const myInKey=()=>IS?(IS.kind==='room'?(IS.mine?myRoomKey():'v:'+(IS.owner&&IS.owner.home)):IS.bid):null;
+const myInKey=()=>!IS?null:IS.kind==='room'?(IS.mine?myRoomKey():IS.owner&&IS.owner.real?realRoomKey(IS.owner):'v:'+(IS.owner&&IS.owner.home)):
+  IS.bid==='hkitch'?'hkitch:'+P().home:(IS.bid==='hbath'||IS.bid==='lecoff')?'priv:'+(MP.peer||'me'):IS.bid;
 function mpPresence(){if(!S||!S.p)return null;const p=P(),inB=myInKey(),L=p.look;
   return{g:'freshers',nm:mpClean(p.name,16),uid:MP.uid,lk:{gender:L.gender,skin:L.skin,hair:L.hair,outfit:L.outfit,pal:L.pal,shoes:L.shoes,extra:L.extra,bag:L.bag},
     x:Math.round(p.x),y:Math.round(p.y),f:p.face!=null?+p.face.toFixed(2):null,ps:p.inCar?'car':(['sit','sitTalk','phone','talk','dance','lie'].includes(p.pose)?p.pose:null),in:inB,car:!!p.inCar,
@@ -33,6 +34,11 @@ function mpRoomSync(){if(!IS)return;const key=myInKey();if(!key)return;IS.mpp=IS
 
 /* each frame: real players inside walk to where they are and do what they're doing (dancing, sitting…) */
 function mpInTick(dt){if(!IS||!IS.mpp)return;const hw=IS.W/2-.3,hd=IS.D/2-.3;
-  for(const q of IS.mpp.values()){const rp=q.mp;if(!rp)continue;const tx=clamp(rp.ix??q.x,-hw,hw),tz=clamp(rp.iz??q.z,-hd,hd),dx=tx-q.x,dz=tz-q.z,d=Math.hypot(dx,dz);
+  /* two people can't stand in one spot: in a lecture everyone's game seats them in "their" seat, so
+     if someone's spot is taken (by you or a player placed before them), they shift along the row */
+  const me=P(),taken=[[me.ix,me.iz]],free=(x,z)=>taken.every(([a,c])=>Math.hypot(a-x,c-z)>.45);
+  for(const q of [...IS.mpp.values()].sort((a,b)=>a.mp&&b.mp&&a.mp.peer<b.mp.peer?-1:1)){const rp=q.mp;if(!rp)continue;let tx=clamp(rp.ix??q.x,-hw,hw),tz=clamp(rp.iz??q.z,-hd,hd);
+    for(let k=1;k<7&&!free(tx,tz);k++){const nx=clamp((rp.ix??q.x)+(k%2?1:-1)*Math.ceil(k/2)*.75,-hw,hw);if(free(nx,tz)){tx=nx;break}if(k===6)tz=clamp(tz+.9,-hd,hd)}taken.push([tx,tz]);
+    const dx=tx-q.x,dz=tz-q.z,d=Math.hypot(dx,dz);
     if(d>2.5){q.x=tx;q.z=tz;q.mov=false}else if(d>.04){const st=Math.min(d,dt*1.9);q.x+=dx/d*st;q.z+=dz/d*st;q.mov=true;q.mesh.rotation.y=Math.atan2(dx,dz)}else q.mov=false;
     q.pose=q.mov?null:(rp.ps&&rp.ps!=='car'?rp.ps:'idle');q.mesh.position.set(q.x,q.spotY||0,q.z)}}

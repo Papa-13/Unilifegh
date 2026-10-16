@@ -36,6 +36,8 @@ src/
     320-needs-mood-tasks-gems.js  needs, moods, daily tasks, milestones, gems
     205-academic-years.js   Level 100 → final year, trails, vacation, graduation
     385-intro-art.js        launch animation, skyline, step strip for the intro screens
+    346-play-together.js    sports against real students (penalties, shooting contest, swim race)
+    347-visit-friends.js    asking to visit a real friend's room, and room invites
     370-375 online-*.js     multiplayer: campuses, presence, chat, messages
     …
     990-boot.js             starts the game (runs last)

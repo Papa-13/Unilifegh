@@ -16,6 +16,7 @@ function placeActions(b,inside){
     if(['canteen','mall'].includes(b.id)||COLLEGES[b.id]){if(p.flyers>=10)a.push(['Share 10 flyers',()=>shareFlyers(b),null,'b']);if(p.race&&!p.race.done)a.push(['Hold a campaign rally (45m)',()=>rally(b),null,'b'])}
     if(b.id===p.col&&examNow())a.push([`📝 Your ${courseName(examNow()[2])} exam is on now · go inside`,null]);else if(b.id===p.col&&lectureNow())a.push([`📚 Your ${courseName(lectureNow()[0])} lecture is on now · go inside`,null]);else if(b.id===p.col)a.push(['🎓 Your college',null,nextLecture()]);return a}
   if(b.id===p.home)a.push([`Enter your room (${roomOf().name})`,()=>enterRoom('me'),null,'b']);
+  if(b.home&&typeof MP!=='undefined'&&MP.campus)visitList().filter(([ck,v])=>v.home===b.id).forEach(([ck,v])=>a.push([`🚪 Go to ${v.nm}'s room 🌐`,()=>visitEnter(ck),null,'b']));
   if(b.home){const fr=S.npcs.filter(n=>n.home===b.id&&!n.mate&&n.friend>=30),vh=hour()>=8&&hour()<22;fr.forEach(n=>{const ok=n.visitOK===day(),pt=P().partner===n;if(ok)a.push([`🚪 Go to ${n.name}'s room`,vh||pt?()=>visitRoom(n):null,vh||pt?`${n.name} said yes`:'visiting hours 08–22','b']);else if(n.visitNo===day())a.push([`${n.name} said not today`,null]);else if(n.contact)a.push([`📱 Text ${n.name}: "Can I come over?"`,vh||pt?()=>askVisitText(n):null,vh||pt?null:'visiting hours 08–22']);else a.push([`Ask ${n.name} in person to visit`,null,'get their number first'])});if(b.id!==p.home&&!fr.length)a.push(['🔒 Residents only',null,`make friends (30+) with someone who lives here to visit`])}
   if(b.id===p.home&&!inside)a.push(['📱 Invite a friend over',()=>inviteSheet()]);
   if(b.id===p.home&&!inside){const rt=roomOf();if(!rt.kitchen)a.push(['🍳 Shared kitchen',()=>enterBuilding('hkitchen')])}
@@ -30,6 +31,7 @@ function placeActions(b,inside){
     a.push(['Chill in the lounge (30m)',()=>doAct('Chilling in the lounge',30,{energy:6,social:6,fun:5})]);
     a.push(['Request a song · GH₵10',()=>{if(!spend(10))return;p.needs.fun=clamp(p.needs.fun+8);toast(`DJ Kweku: "Shout out to ${p.name==='You'?'my fresher':p.name}! This one's for you!" 🎧🔥`)}])}
   if(b.id==='market'){if(h>=6&&h<19){a.push(['🧺 Buy foodstuff',()=>marketSheet(),null,'b']);a.push(['Buy a provisions pack · GH₵50',()=>{if(!spend(50))return;p.prov+=6;doAct('Buying foodstuff at the market',15,{})}])}else a.push(['Market closed (06:00–19:00)',null])}
+  if(b.id==='pool'&&h>=6&&h<19&&typeof MP!=='undefined'&&MP.campus)sgRealHere('pool').slice(0,3).forEach(rp=>a.push([`🏊 Race ${rp.nm} (real student)`,()=>sgInvite(rp,'sw'),null,'b']));
   if(b.id==='pool'){if(h>=6&&h<19){const free=p.home==='royal';a.push([free?'🏊 Swim (45m, free for Royal Crest)':'🏊 Swim (45m) · GH₵15',()=>{if(!free&&!spend(15))return;p.fit++;doAct('Swimming',45,{fun:22,energy:-10,hygiene:8});meetRandom('pool')},null,'b']);a.push(['Chill by the pool (30m)',()=>doAct('Chilling by the pool',30,{fun:10,energy:5})])}else a.push(['Pool closed (06:00–19:00)',null])}
   if(b.id==='parade'){const ev=eventNow();
     if(!ev){const nx=nextEvent();a.push(['No event right now',null,nx?`Next: ${nx.name}, ${DAYS[(S.semStart+nx.sd)%7]} ${hm(nx.from*60)}`:'SRC Week is over this semester']);

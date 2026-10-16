@@ -13,8 +13,8 @@ function fadeIn(){const f=$('fade');if(!f)return;f.classList.add('on');requestAn
 function enterRoom(owner){setTimeout(()=>{try{roomTalk(owner)}catch(e){console.error(e)}},1600);return enterRoom0(owner)}
 function enterRoom0(owner){fadeIn();
   const mine=owner==='me';
-  const rt=mine?roomOf():ROOMS[(HOSTELS.find(h=>h.id===owner.home)||HOSTELS[0]).rooms[0].id];
-  const tier=rt.tier,beds=rt.beds,W=rt.W||(beds>=3?6.8:5.6),D=rt.D||5.2,deco=mine?P().deco:{wall:pick(['cream','sky','mint','grey']),sheet:pick(['blue','green','white']),curtain:pick(['none','teal','white'])};
+  const rt=mine?roomOf():owner.real&&ROOMS[owner.room]?ROOMS[owner.room]:ROOMS[(HOSTELS.find(h=>h.id===owner.home)||HOSTELS[0]).rooms[0].id];
+  const tier=rt.tier,beds=rt.beds,W=rt.W||(beds>=3?6.8:5.6),D=rt.D||5.2,deco=mine?P().deco:owner.real&&owner.deco?owner.deco:{wall:pick(['cream','sky','mint','grey']),sheet:pick(['blue','green','white']),curtain:pick(['none','teal','white'])};
   const s=new THREE.Scene();s.background=new THREE.Color(0x14110f);
   const rh=new THREE.HemisphereLight(0xfff4e6,0x40302a,.8);s.add(rh);
   const bulb=new THREE.PointLight(0xffe2b0,.8,14,1.4);bulb.position.set(0,2.6,.5);s.add(bulb);
@@ -143,8 +143,8 @@ function enterRoom0(owner){fadeIn();
   if(gst){IS.guest=gst;addInPerson(gst.look,gst.name+' · visiting',-.5,.4,.5,'talk',{n:gst});IS.objs.push({id:'hang',label:'Hang out',x:-.4,z:.6,r:9})}
   let bm=null;const hh=hour();if(mine&&tier<=1&&!night&&((hh>=5.5&&hh<9)||(hh>=18&&hh<22))&&Math.random()<.4)bm=S.mates.find(m=>homeNow(m));
   if(bm){IS.bathBusy=addInPerson(bm.look,bm.name+' · bathing',IS.spots.shower.x,IS.spots.shower.z,Math.PI/4,'shower',{n:bm,noObst:1});IS.water.visible=true}
-  if(mine)S.mates.forEach(m=>{if(m!==bm&&(homeNow(m)||night))placePerson(m,m.bed,night)});else placePerson(owner,0,false);
-  const p=P();if(p.mesh.parent)p.mesh.parent.remove(p.mesh);s.add(p.mesh);p.ix=-W/2+.7;p.iz=dz;p.itarget=null;if(IS.guest)IS.buddy=IS.guest;else if(!mine)IS.buddy=owner;
+  if(mine)S.mates.forEach(m=>{if(m!==bm&&(homeNow(m)||night))placePerson(m,m.bed,night)});else if(!owner.real)placePerson(owner,0,false);
+  const p=P();if(p.mesh.parent)p.mesh.parent.remove(p.mesh);s.add(p.mesh);p.ix=-W/2+.7;p.iz=dz;p.itarget=null;if(IS.guest)IS.buddy=IS.guest;else if(!mine&&!owner.real)IS.buddy=owner;
   IS.title=mine?`Your room · ${homeB().name}`:`${owner.name}'s room · ${BID[owner.home].name}`;
   render(0,true);acts(true);setTimeout(()=>{try{mpRoomSync()}catch(e){}},50);
 }
@@ -196,7 +196,9 @@ function roomActions(){
     if(o.id==='cooker')a.push(['🍳 Cook with the rice cooker',()=>cookSheet('cooker')]);
     if(o.id==='kitchen')a.push(['🍳 Cook in your kitchenette',()=>cookSheet('room')]);
     if(o.id==='stock')a.push([`Check stock (${p.biz.stock} ${BIZ[p.biz.type].label})`,()=>bizSheet()]);
-    if(o.id==='hang'){const n=IS.guest||IS.owner,night=hour()>=20||hour()<4;
+    if(o.id==='hang'&&IS.owner&&IS.owner.real){const o2=IS.owner,bump=v=>{const f=MP.friends[o2.ck];if(f)f.lv=Math.min(100,(f.lv||20)+v)};
+      a.push([`Hang out in ${o2.name}'s room (1h)`,()=>{doAct(`Hanging out in ${o2.name}'s room`,60,{social:22,fun:15});bump(6)}]);a.push(['Study together (2h)',()=>{S.groupStudy=(S.groupStudy||0)+1;doAct('Studying together',120,{study:11,energy:-8});bump(4)}])}
+    else if(o.id==='hang'){const n=IS.guest||IS.owner,night=hour()>=20||hour()<4;
       if(n===p.partner&&night&&!(S.sleepover&&S.sleepover.day===day()))a.push([IS.mine?`🌙 Ask ${n.name} to stay the night`:`🌙 Ask to stay the night`,()=>sleepoverAsk(n,IS.mine),null,'b']);
       if(IS.mine&&IS.guest)a.push([`👋 Say bye to ${n.name}`,()=>byeGuest()]);a.push(['Hang out (1h)',()=>{doAct(`Hanging out in ${n.name}'s room`,60,{social:22,fun:15});n.friend=clamp(n.friend+8);memTogether(n,`${n.name}'s room`)}]);
       a.push(['Study together (2h)',()=>{S.groupStudy=(S.groupStudy||0)+1;doAct('Studying together',120,{study:11,energy:-8});n.friend=clamp(n.friend+6)}])}

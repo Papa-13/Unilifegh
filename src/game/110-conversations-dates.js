@@ -72,7 +72,7 @@ function memActs(list,inside,b){const p=P();if(S.busy)return;const rec=recentMem
   if(inside&&IS.kind==='room'&&IS.mine)list.push([`📓 Journal about ${memShort(un)}`,()=>reflect(un,true)]);
   else if(!inside&&b&&b.open)list.push([`🧠 Reflect on ${memShort(un)}`,()=>reflect(un,false)])}
 /* someone asks how it went when you walk into a room */
-function roomTalk(owner){if(!IS||IS.kind!=='room'||S.busy||!$('story').hidden)return;const p=P();
+function roomTalk(owner){if(!IS||IS.kind!=='room'||S.busy||!$('story').hidden||(owner&&owner.real))return;const p=P();
   if(owner==='me'){const q=IS.people.find(q=>q.n&&q.n.mate&&!q.sleeping);if(!q)return;const mate=q.n;
     const m=recentMems(1).filter(m=>!m.asked&&!m.who.includes(mate.id)&&!m.told.includes(mate.id)).slice(-1)[0];if(!m)return;m.asked=true;
     try{setGest(q,'wave',1.6)}catch(e){}

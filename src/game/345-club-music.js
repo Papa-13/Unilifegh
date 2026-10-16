@@ -32,7 +32,7 @@ const inMyRoom=()=>!!(S&&IS&&IS.kind==='room'&&IS.mine&&$('game')&&!$('game').hi
 function musWant(){if(!S||!S.p||$('game').hidden)return null;const now=musNowMs();
   if(MUS.phone.on)return{kind:'phone',i:MUS.phone.i,s:MUS.phone.s,key:`p${MUS.phone.i}:${MUS.phone.s}`};
   if(inClub()){const d=djAt(now);return{kind:'club',i:d.i,s:now-d.off*1000,key:'c'+d.slot}}
-  if(inMyRoom()){const k=myRoomKey();let best=MUS.room&&MUS.room.key===k?{i:MUS.room.i,s:MUS.room.s,by:null}:null;
+  if(S&&IS&&IS.kind==='room'){const k=myInKey();let best=MUS.room&&inMyRoom()&&MUS.room.key===k?{i:MUS.room.i,s:MUS.room.s,by:null}:null;
     for(const rp of (typeof MP!=='undefined'?MP.peers.values():[]))if(!rp.isMe&&rp.in===k&&rp.mu&&(!best||rp.mu.s>best.s))best={i:rp.mu.i,s:rp.mu.s,by:rp.nm};
     if(best)return{kind:'room',i:best.i,s:best.s,by:best.by,key:`r${best.i}:${best.s}`}}
   return null}

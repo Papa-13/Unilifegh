@@ -22,3 +22,23 @@
 @media (prefers-reduced-motion:reduce){.dj-screen.live .dj-eq i{animation:none;height:55%}}
 /* phone music follows you outdoors too: on phones the card sits on the right, clear of the map and needs */
 @media (max-width:1023px){#djCard[data-kind=phone]{left:auto;right:calc(12px + var(--sar));top:calc(var(--sat) + 340px)}}
+
+/* ================= play together: the game panel for sports against real students ================= */
+#sgUI{position:fixed;z-index:30;left:50%;bottom:calc(var(--sab) + 12px);transform:translateX(-50%);width:min(420px,calc(100vw - 24px));padding:12px;border-radius:20px;
+  background:rgba(26,12,30,.94);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.16);box-shadow:0 14px 40px rgba(0,0,0,.5);color:#fbf3e2;display:flex;flex-direction:column;gap:10px}
+#sgUI::before{content:"";position:absolute;left:18px;right:18px;top:0;height:4px;border-radius:0 0 4px 4px;background:var(--kente)}
+.sg-top{display:flex;align-items:center;gap:8px;font:700 13px var(--body)}.sg-top span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sg-top span:nth-of-type(2){text-align:right}
+.sg-top b{font:400 24px var(--sign);color:var(--kgold);padding:0 6px}.sg-top button{flex:none;width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:none;color:inherit;cursor:pointer}
+.sg-stage{border-radius:14px;overflow:hidden}.sg-svg{display:block;width:100%;height:auto}
+.sg-keep,.sg-ball{transition:transform .55s cubic-bezier(.2,.8,.3,1);transform-box:fill-box;transform-origin:center}
+.sg-hball{transition:transform .8s cubic-bezier(.3,0,.6,1)}.sg-hball.in{transform:translate(165px,-68px)}.sg-hball.miss{transform:translate(185px,-82px)}
+.sg-msg{margin:0;font-size:14.5px;line-height:1.35;min-height:20px}.sg-big{font:400 20px var(--sign);color:var(--kgold);margin-right:6px}
+.sg-btns{display:flex;gap:6px}.sg-btns button{flex:1;padding:12px 4px;border-radius:12px;border:2px solid #120a12;background:var(--kgold);color:#1d1206;font:800 13.5px var(--body);cursor:pointer;box-shadow:3px 3px 0 #120a12}
+.sg-btns button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #120a12}.sg-btns button:disabled{filter:saturate(.3) brightness(.75);cursor:default}
+.sg-timer{height:5px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}.sg-timer i{display:block;height:100%;width:100%;background:var(--kred)}
+.sg-meter{position:relative;height:26px;border-radius:13px;background:linear-gradient(90deg,#d93a2b 0 37%,#1e9a57 37% 63%,#d93a2b 63%)}
+.sg-meter i{position:absolute;top:-4px;width:6px;height:34px;margin-left:-3px;border-radius:3px;background:#fff;box-shadow:0 0 0 2px #120a12}
+.sg-pool{display:flex;flex-direction:column;gap:6px;padding:10px;border-radius:14px;background:repeating-linear-gradient(90deg,#2a8fc4 0 38px,#2784b6 38px 40px)}
+.sg-pool .lane{position:relative;height:40px;border-bottom:2px dashed rgba(255,255,255,.5)}.sg-pool .lane span{position:absolute;left:0;top:4px;font-size:26px;transition:left .15s linear}
+.sg-pool .lane small{position:absolute;right:4px;top:12px;font:700 11px var(--body);color:#e8f6ff}
+@media (min-width:1024px) and (min-height:560px){#sgUI{left:auto;right:340px;transform:none;bottom:calc(var(--sab) + 90px)}}
