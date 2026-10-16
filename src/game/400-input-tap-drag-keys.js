@@ -28,3 +28,12 @@ addEventListener('resize',()=>{if(PIE)pieLayout()});
 $('zin').onclick=()=>zoom=clamp(zoom*.85,.55,1.8);$('zout').onclick=()=>zoom=clamp(zoom*1.15,.55,1.8);
 addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;const k=e.key.length===1?e.key.toLowerCase():e.key;if(S&&!$('game').hidden&&['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(k))e.preventDefault();keys[k]=true});
 addEventListener('keyup',e=>{const k=e.key.length===1?e.key.toLowerCase():e.key;keys[k]=false});
+
+/* 🏠 back to the main menu: saves your student, steps out of any building, leaves the live campus
+   (so other players don't see you standing still), and shows the welcome screen with Continue */
+function goHome(){if(!S||!S.p)return welcome();if(SG){try{mpSend(SG.opp.ck,'sg',`quit|${SG.gid}`)}catch(e){}sgEnd(true)}
+  closeSheet();$('story').hidden=true;try{saveGame()}catch(e){}if(IS)leaveRoom(true);S.follow=null;try{musStop()}catch(e){}
+  if(MP.croom){try{MP.croom.leave()}catch(e){}MP.croom=null;for(const rp of MP.peers.values())if(rp.mesh){scene.remove(rp.mesh);disposeTree(rp.mesh)}MP.peers.clear();MP.campus=null}
+  welcome()}
+$('homeB').onclick=()=>{if(!S)return;S.paused=true;openSheet();$('sheetIn').innerHTML=`<h3>🏠 Go to the main menu?</h3><p style="font-size:14px">Your student is saved. Tap <b>Continue</b> on the main menu to carry on where you left off.</p>
+  <div class="row"><button class="btn" id="homeGo">🏠 Main menu</button><button class="ghost" id="bye">Keep playing</button></div>`;$('homeGo').onclick=goHome;$('bye').onclick=closeSheet};
