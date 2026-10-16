@@ -39,3 +39,18 @@
 .sg-pool .lane{position:relative;height:40px;border-bottom:2px dashed rgba(255,255,255,.5)}.sg-pool .lane span{position:absolute;left:0;top:4px;font-size:26px;transition:left .15s linear}
 .sg-pool .lane small{position:absolute;right:4px;top:12px;font:700 11px var(--body);color:#e8f6ff}
 @media (min-width:1024px) and (min-height:560px){#sgUI{left:auto;right:340px;transform:none;bottom:calc(var(--sab) + 90px)}}
+
+/* ================= requests from real players: "Papa wants to hug you" ================= */
+#askPop{position:fixed;z-index:35;left:50%;top:calc(var(--sat) + 110px);transform:translateX(-50%);width:min(380px,calc(100vw - 24px));display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.ask{pointer-events:auto;display:flex;align-items:center;gap:10px;padding:10px 10px 10px 10px;border-radius:18px;background:rgba(26,12,30,.95);color:#fbf3e2;
+  border:1.5px solid rgba(245,180,31,.55);box-shadow:0 12px 30px rgba(0,0,0,.45);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);animation:askIn .3s cubic-bezier(.2,1.4,.4,1)}
+.ask.out{opacity:0;transform:translateY(-8px);transition:.25s}
+.ask-ic{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:22px;background:#5a2340;border:2px solid #120a12}
+.ask-t{flex:1;min-width:0;font:600 14px/1.3 var(--body);position:relative;padding-bottom:7px}.ask-t b{font-weight:800}
+.ask-bar{position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:2px;background:var(--kente);transform-origin:left}
+.ask button{flex:none;border-radius:12px;cursor:pointer;font:800 14px var(--body)}
+.ask-no{width:38px;height:38px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:inherit}
+.ask-yes{height:38px;padding:0 14px;border:2px solid #120a12;background:var(--kgold);color:#1d1206;box-shadow:3px 3px 0 #120a12}
+.ask-yes:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #120a12}
+@keyframes askIn{from{opacity:0;transform:translateY(-14px) scale(.96)}}
+@media (prefers-reduced-motion:reduce){.ask{animation:none}}
