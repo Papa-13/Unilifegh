@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "YOLO (You Only Live Once): a Ghanaian university life game with real players",
+  "description": "YOLO: a Ghanaian university life game with real players",
   "scripts": {
     "dev": "vite",
     "build": "npm run check && vite build",

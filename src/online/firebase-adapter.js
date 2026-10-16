@@ -26,7 +26,7 @@ async function start(){
 /* ---------- sign-in screen ---------- */
 function signInScreen(auth){return new Promise(res=>{
   const o=document.createElement('div');o.id='fbSign';
-  o.innerHTML=`<div class="fbs-in"><div class="fbs-eye">YOU ONLY LIVE ONCE</div><h2>YO<span style="color:#e8b24a">LO</span> 🎓</h2><p>Sign in to join an online campus with real students. Your student and your chats are saved to your account.</p>
+  o.innerHTML=`<div class="fbs-in"><div class="fbs-eye">A GHANAIAN LIFE GAME</div><h2>YO<span style="color:#e8b24a">LO</span> 🎓</h2><p>Sign in to join an online campus with real students. Your student and your chats are saved to your account.</p>
    <button id="fbG" class="fbs-btn fbs-main">Continue with Google</button><button id="fbA" class="fbs-btn">Play as a guest</button><button id="fbO" class="fbs-btn fbs-ghost">Play offline</button>
    <small>Guest students are saved on this device only. Use Google to play from any device.</small><div id="fbErr"></div></div>`;
   const st=document.createElement('style');st.textContent=`#fbSign{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:radial-gradient(circle at 50% 0,#3a1d22,#0f0c0a 70%);color:#f6efe6;font:16px/1.5 Figtree,system-ui,sans-serif;padding:20px}
