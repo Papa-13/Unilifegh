@@ -1,27 +1,24 @@
-/* ================= Club Vibes "now playing" card ================= */
-#djCard{position:fixed;z-index:8;left:calc(12px + var(--sal));top:calc(var(--sat) + 104px);width:216px;padding:8px;border-radius:18px;
-  background:rgba(26,12,30,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.14);
-  box-shadow:0 10px 30px rgba(0,0,0,.45);color:#fbf3e2;display:flex;flex-direction:column;gap:7px;animation:fadein .2s ease}
-#djCard::before{content:"";position:absolute;left:14px;right:14px;top:0;height:3px;border-radius:0 0 3px 3px;background:var(--kente)}
-.dj-screen{position:relative;width:200px;height:200px;border-radius:12px;overflow:hidden;background:#000}
+/* ================= music bar: slim, at the bottom; the video only shows when you tap 📺 ================= */
+#djCard{position:fixed;z-index:8;left:50%;transform:translateX(-50%);bottom:calc(var(--sab) + 124px);width:min(330px,calc(100vw - 120px));color:#fbf3e2;animation:fadein .2s ease}
+.dj-bar{display:flex;align-items:center;gap:4px;height:42px;padding:0 4px 0 10px;border-radius:21px;background:rgba(26,12,30,.86);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.14);box-shadow:0 6px 18px rgba(0,0,0,.35);position:relative;overflow:hidden}
+.dj-bar::after{content:"";position:absolute;left:12px;right:12px;bottom:0;height:2px;background:var(--kente);opacity:.8}
+.dj-eq{flex:none;display:flex;align-items:flex-end;gap:2px;height:16px;width:18px}
+.dj-eq i{flex:1;height:30%;border-radius:1px;background:var(--kgold);animation:eq .9s ease-in-out infinite}
+.dj-eq i:nth-child(2){animation-delay:-.3s;background:var(--kred)}.dj-eq i:nth-child(3){animation-delay:-.6s;background:var(--kgreen)}.dj-eq i:nth-child(4){animation-delay:-.15s}
+@keyframes eq{0%,100%{height:25%}50%{height:100%}}
+.dj-meta{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.15;padding:0 4px}
+.dj-meta b{font:800 12.5px var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dj-meta span{font:600 10.5px var(--body);color:var(--kgold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dj-bar button{flex:none;width:32px;height:32px;border-radius:50%;border:0;background:rgba(255,255,255,.08);color:inherit;font-size:14px;cursor:pointer;display:grid;place-items:center;padding:0}
+.dj-bar button:hover{background:rgba(255,255,255,.18)}.dj-bar button[aria-pressed=true]{background:rgba(245,180,31,.25)}
+.dj-bar .dj-tap{background:var(--kgold);color:#1d1206;width:30px;height:30px}.dj-bar .dj-tap:not([hidden])+.dj-eq{display:none}
+/* the YouTube player: tucked away (still running) until 📺, then it pops up above the bar */
+.dj-screen{position:absolute;left:50%;bottom:50px;width:200px;height:200px;margin-left:-100px;border-radius:14px;overflow:hidden;background:#000;
+  opacity:0;pointer-events:none;transform:translateY(10px) scale(.96);transition:opacity .2s,transform .2s;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 .dj-screen iframe{display:block;width:200px;height:200px;border:0}
-.dj-eq{position:absolute;inset:auto 0 0 0;height:52px;display:none;align-items:flex-end;justify-content:center;gap:6px;padding-bottom:16px}
-.dj-screen.beat{background:radial-gradient(circle at 50% 40%,#7a2ea0,#1a0c1e 70%)}.dj-screen.beat .dj-eq{display:flex;inset:0;height:auto;align-items:center}
-.dj-eq i{width:12px;height:30%;border-radius:4px;background:var(--kgold)}
-.dj-screen.live .dj-eq i{animation:eq .9s ease-in-out infinite}.dj-eq i:nth-child(2){animation-delay:-.3s!important;background:var(--kred)}
-.dj-eq i:nth-child(3){animation-delay:-.6s!important;background:var(--kgreen)}.dj-eq i:nth-child(4){animation-delay:-.15s!important;background:var(--kred)}.dj-eq i:nth-child(5){animation-delay:-.45s!important}
-.dj-tap{position:absolute;inset:0;border:0;background:rgba(10,4,12,.72);color:#fbf3e2;font:800 15px var(--body);cursor:pointer}
-@keyframes eq{0%,100%{height:20%}50%{height:80%}}
-.dj-meta{display:flex;flex-direction:column;line-height:1.2;padding:0 2px}
-.dj-meta small{font:700 11px var(--body);color:#d8c3c9}.dj-meta b{font:800 14px var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dj-meta span{font-size:12px;color:var(--kgold)}
-.dj-btns{display:flex;gap:5px}
-.dj-btns button,#djCard.pill button{flex:1;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:inherit;border-radius:10px;padding:7px 0;font:700 12px var(--body);cursor:pointer}
-.dj-btns button:hover,#djCard.pill button:hover{background:rgba(255,255,255,.16)}
-#djCard.pill{width:auto;padding:4px}#djCard.pill::before{display:none}#djCard.pill button{padding:8px 14px}
-@media (min-width:1024px) and (min-height:560px){#djCard{top:calc(var(--sat) + 290px)}}
-@media (prefers-reduced-motion:reduce){.dj-screen.live .dj-eq i{animation:none;height:55%}}
-/* phone music follows you outdoors too: on phones the card sits on the right, clear of the map and needs */
-@media (max-width:1023px){#djCard[data-kind=phone]{left:auto;right:calc(12px + var(--sar));top:calc(var(--sat) + 340px)}}
+#djCard.vid .dj-screen{opacity:1;pointer-events:auto;transform:none}
+@media (min-width:1024px) and (min-height:560px){#djCard{bottom:calc(var(--sab) + 22px);width:340px}}
+@media (prefers-reduced-motion:reduce){.dj-eq i{animation:none;height:60%}}
 
 /* ================= play together: the game panel for sports against real students ================= */
 #sgUI{position:fixed;z-index:30;left:50%;bottom:calc(var(--sab) + 12px);transform:translateX(-50%);width:min(420px,calc(100vw - 24px));padding:12px;border-radius:20px;

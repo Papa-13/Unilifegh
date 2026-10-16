@@ -29,7 +29,7 @@ function placeActions(b,inside){
   if(b.id==='club'&&inside){a.push(['💃 Dance (1h)',()=>{S.clubDay=clubNight();doAct('Dancing at the club',60,{fun:30,social:15,energy:-15,hygiene:-10});meetRandom('club')},null,'b']);
     a.push(['Buy a drink at the bar · GH₵20',()=>{if(spend(20))doAct('Having a drink at the bar',20,{fun:8,hunger:3})}]);
     a.push(['Chill in the lounge (30m)',()=>doAct('Chilling in the lounge',30,{energy:6,social:6,fun:5})]);
-    a.push(['Request a song · GH₵10',()=>{if(!spend(10))return;p.needs.fun=clamp(p.needs.fun+8);toast(`DJ Kweku: "Shout out to ${p.name==='You'?'my fresher':p.name}! This one's for you!" 🎧🔥`)}])}
+    a.push(['📣 Ask the DJ for a shout-out · GH₵10',()=>{if(!spend(10))return;p.needs.fun=clamp(p.needs.fun+8);toast(`DJ Kwaku Flames: "Shout out to ${p.name==='You'?'my fresher':p.name}! This one's for you!" 🎧🔥`)}])}
   if(b.id==='market'){if(h>=6&&h<19){a.push(['🧺 Buy foodstuff',()=>marketSheet(),null,'b']);a.push(['Buy a provisions pack · GH₵50',()=>{if(!spend(50))return;p.prov+=6;doAct('Buying foodstuff at the market',15,{})}])}else a.push(['Market closed (06:00–19:00)',null])}
   if(b.id==='pool'&&h>=6&&h<19&&typeof MP!=='undefined'&&MP.campus)sgRealHere('pool').slice(0,3).forEach(rp=>a.push([`🏊 Race ${rp.nm} (real student)`,()=>sgInvite(rp,'sw'),null,'b']));
   if(b.id==='pool'){if(h>=6&&h<19){const free=p.home==='royal';a.push([free?'🏊 Swim (45m, free for Royal Crest)':'🏊 Swim (45m) · GH₵15',()=>{if(!free&&!spend(15))return;p.fit++;doAct('Swimming',45,{fun:22,energy:-10,hygiene:8});meetRandom('pool')},null,'b']);a.push(['Chill by the pool (30m)',()=>doAct('Chilling by the pool',30,{fun:10,energy:5})])}else a.push(['Pool closed (06:00–19:00)',null])}

@@ -77,21 +77,25 @@ function musNext(){const w=MUS.src;if(!w)return;const n=CLUB_TRACKS.length;if(w.
 
 /* ---- the "now playing" card ---- */
 function musCard(){const w=MUS.src;let c=$('djCard');if(!c){c=document.createElement('div');c.id='djCard';c.setAttribute('role','region');c.setAttribute('aria-label','Music');document.body.appendChild(c)}
-  const canCtl=w.kind==='phone'||(w.kind==='room'&&P().items.includes('speaker'));c.dataset.kind=w.kind;
-  c.innerHTML=`<div class="dj-screen" id="djScreen"><div id="djYT"></div><div class="dj-eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-      <button class="dj-tap" id="djTap" hidden>▶ Tap to hear the music</button></div>
-    <div class="dj-meta"><small id="djWho"></small><b id="djT"></b><span id="djA"></span></div>
-    <div class="dj-btns">${canCtl?`<button id="djNx" aria-label="Next song">⏭</button><button id="djRq">🎵 Songs</button><button id="djSt" aria-label="Stop the music">⏹</button>`
-      :`<button id="djMute" aria-pressed="${MUS.muted}">${MUS.muted?'🔇 Unmute':'🔊 Mute'}</button>${w.kind==='club'?'<button id="djUp">⏱ Next up</button>':''}`}</div>`;
-  if($('djMute'))$('djMute').onclick=()=>{MUS.muted=!MUS.muted;musVol();$('djMute').textContent=MUS.muted?'🔇 Unmute':'🔊 Mute';$('djMute').setAttribute('aria-pressed',MUS.muted)};
+  /* a slim bar: what's playing and a few buttons. The video stays tucked away until you tap 📺 */
+  const canCtl=w.kind==='phone'||(w.kind==='room'&&P().items.includes('speaker'));c.dataset.kind=w.kind;c.classList.toggle('vid',!!MUS.vid);
+  const B=(id,ic,lbl,extra='')=>`<button id="${id}" aria-label="${lbl}" title="${lbl}" ${extra}>${ic}</button>`;
+  c.innerHTML=`<div class="dj-screen" id="djScreen"><div id="djYT"></div></div>
+    <div class="dj-bar"><button class="dj-tap" id="djTap" hidden aria-label="Tap to hear the music">▶</button><span class="dj-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <div class="dj-meta"><b id="djT"></b><span id="djA"></span></div>
+      ${canCtl?B('djNx','⏭','Next song')+B('djRq','🎵','Choose a song')+B('djSt','⏹','Stop the music')
+        :B('djMute',MUS.muted?'🔇':'🔊',MUS.muted?'Unmute':'Mute',`aria-pressed="${MUS.muted}"`)+(w.kind==='club'?B('djUp','⏱','What\'s next'):'')}
+      ${B('djVid','📺',MUS.vid?'Hide the video':'Show the video',`aria-pressed="${!!MUS.vid}"`)}</div>`;
+  if($('djMute'))$('djMute').onclick=()=>{MUS.muted=!MUS.muted;musVol();$('djMute').textContent=MUS.muted?'🔇':'🔊';$('djMute').setAttribute('aria-pressed',MUS.muted);$('djMute').setAttribute('aria-label',MUS.muted?'Unmute':'Mute')};
   if($('djUp'))$('djUp').onclick=()=>{const now=djAt(musNowMs()),nx=djAt((now.slot+1)*DJ_SLOT*1000+500),left=Math.ceil(DJ_SLOT-now.off);toast(`⏱ Next up in ${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}: ${CLUB_TRACKS[nx.i].t} · ${CLUB_TRACKS[nx.i].a}`)};
   if($('djNx'))$('djNx').onclick=musNext;
   if($('djRq'))$('djRq').onclick=()=>musSongs(w.kind);
   if($('djSt'))$('djSt').onclick=()=>w.kind==='phone'?phoneStop():speakerStop();
+  $('djVid').onclick=()=>{MUS.vid=!MUS.vid;c.classList.toggle('vid',MUS.vid);$('djVid').setAttribute('aria-pressed',MUS.vid);$('djVid').setAttribute('aria-label',MUS.vid?'Hide the video':'Show the video')};
   $('djTap').onclick=()=>{try{ACX&&ACX.resume&&ACX.resume()}catch(e){}if(MUS.player&&MUS.player.playVideo){MUS.player.seekTo(musOff(),true);MUS.player.playVideo()}$('djTap').hidden=true}}
-function musMeta(){const w=MUS.src,t=$('djT'),a=$('djA'),who=$('djWho');if(!t||!w)return;
-  who.textContent=w.kind==='club'?'🎧 DJ Kwaku Flames is playing':w.kind==='phone'?'📱 Your phone · only you hear this':w.by?`🔊 ${w.by}'s speaker`:'🔊 Your speaker';
-  if(MUS.mode==='beat'){t.textContent=w.kind==='club'?'Club beat':'Afrobeats mix';a.textContent='Original mix · YouTube unavailable here'}else{const k=CLUB_TRACKS[w.i];t.textContent=k.t;a.textContent=k.a}}
+function musMeta(){const w=MUS.src,t=$('djT'),a=$('djA');if(!t||!w)return;
+  const who=w.kind==='club'?'🎧 DJ Kwaku Flames':w.kind==='phone'?'📱 Only you':w.by?`🔊 ${w.by}'s speaker`:'🔊 Your speaker';
+  if(MUS.mode==='beat'){t.textContent=w.kind==='club'?'Club beat':'Afrobeats mix';a.textContent=who+' · original mix'}else{const k=CLUB_TRACKS[w.i];t.textContent=k.t;a.textContent=`${who} · ${k.a}`}}
 function musVol(){try{MUS.player&&MUS.player.setVolume&&MUS.player.setVolume(MUS.muted?0:80)}catch(e){}if(BEAT.bus)BEAT.bus.gain.value=MUS.muted?0:.32}
 
 /* song picker for the speaker or phone; for the club it shows the DJ's set */
