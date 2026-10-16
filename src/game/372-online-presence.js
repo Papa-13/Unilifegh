@@ -7,11 +7,13 @@ function mpPresence(){if(!S||!S.p)return null;const p=P(),inB=myInKey(),L=p.look
     x:Math.round(p.x),y:Math.round(p.y),f:p.face!=null?+p.face.toFixed(2):null,ps:p.inCar?'car':(['sit','sitTalk','phone','talk','dance','lie'].includes(p.pose)?p.pose:null),in:inB,car:!!p.inCar,
     mo:(()=>{try{return moodInfo().ic}catch(e){return''}})(),hm:p.home,pr:mpClean(lvlLabel()+' · '+p.prog,40),ty:MP.typing&&Date.now()-MP.typing.t<4000?MP.typing.to:null,wk:S.follow||null,ix:IS?Math.round(p.ix*100)/100:null,iz:IS?Math.round(p.iz*100)/100:null,mu:MUS.room&&inMyRoom()&&MUS.room.key===inB?{i:MUS.room.i,s:Math.round(MUS.room.s)}:null,out:MP.out}}
 function mpTick(){document.body.classList.toggle('live',sharedClock());if(!MP.lobby)return;
-  const lp={g:'freshers',cp:MP.campus,nm:mpClean(S&&S.p?P().name:(myLook&&myLook.name)||'',16),uid:MP.uid,st:S&&!$('game').hidden?'play':'menu'},lk=JSON.stringify(lp);if(lk!==MP.lastLobby){MP.lastLobby=lk;MP.lobby.presence(lp).catch(()=>{})}
+  const lp={g:'freshers',cp:MP.campus,cn:MP.campus&&MP.campus[0]==='u'?MP.cnames[MP.campus]||null:null,nm:mpClean(S&&S.p?P().name:(myLook&&myLook.name)||'',16),uid:MP.uid,st:S&&!$('game').hidden?'play':'menu'},lk=JSON.stringify(lp);if(lk!==MP.lastLobby){MP.lastLobby=lk;MP.lobby.presence(lp).catch(()=>{})}
   if(!MP.croom)return;let pr=mpPresence();if(!pr)return;let k=JSON.stringify(pr);const enc=new TextEncoder();while(enc.encode(k).length>3700&&MP.out.length){MP.out.shift();pr=mpPresence();k=JSON.stringify(pr)}
   if(k===MP.lastPres&&performance.now()-MP.lastT<4000)return;MP.lastPres=k;MP.lastT=performance.now();MP.croom.presence(pr).catch(()=>{})}
-function mpPeers(ch){const live=new Set();
-  ch.peers.forEach(q=>{if(q.sameTab||q.kind!=='viewer')return;const pr=q.presence||{};if(pr.g!=='freshers'||typeof pr.nm!=='string')return;live.add(q.peer);
+function mpPeers(ch){const live=new Set(),newest={};
+  ch.peers.forEach(q=>{const by=q.by||(q.presence&&q.presence.uid);if(!by||q.sameTab)return;if(!newest[by]||(q.updatedAt||0)>(newest[by].updatedAt||0))newest[by]=q});
+  ch.peers.forEach(q=>{if(q.sameTab||q.kind!=='viewer')return;const by0=q.by||(q.presence&&q.presence.uid);
+    if(q.isMe||(by0&&MP.uid&&by0===MP.uid)||(by0&&newest[by0]!==q))return;const pr=q.presence||{};if(pr.g!=='freshers'||typeof pr.nm!=='string')return;live.add(q.peer);
     let rp=MP.peers.get(q.peer);const by=q.by||(okId(pr.uid)?pr.uid:null);
     if(!rp){rp={peer:q.peer,by,isMe:q.isMe,guest:q.guest,first:Date.now(),phase:0,x:0,y:0,tx:0,ty:0};MP.peers.set(q.peer,rp);if(S&&!q.isMe&&!$('game').hidden)toast(`🌐 ${mpClean(pr.nm,16)||'A student'} just came online`)}
     rp.by=by;rp.nm=mpClean(pr.nm,16)||'Student';rp.in=typeof pr.in==='string'?pr.in.slice(0,60):null;rp.car=!!pr.car;rp.mo=mpClean(pr.mo,4);rp.hm=typeof pr.hm==='string'&&BID[pr.hm]?pr.hm:null;rp.pr=mpClean(pr.pr,40);rp.upd=q.updatedAt;

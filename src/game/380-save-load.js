@@ -6,7 +6,7 @@ function ser(v,d=0,own){if(d>14)return undefined;if(v==null)return v;const t=typ
   if(!own&&S&&S.npcs&&S.npcs.includes(v))return{__npc:v.id};if(Array.isArray(v))return v.map(x=>{const r=ser(x,d+1);return r===undefined?null:r});
   if(v instanceof Map||v instanceof Set)return undefined;const o={};for(const k in v){if(SKIPK.has(k)||k[0]==='_')continue;const r=ser(v[k],d+1);if(r!==undefined)o[k]=r}return o}
 function deser(v){if(v==null||typeof v!=='object')return v;if(Array.isArray(v))return v.map(deser);if('__npc' in v)return S.npcs.find(n=>n.id===v.__npc)||null;const o={};for(const k in v)o[k]=deser(v[k]);return o}
-function makeSave(){if(!S||!S.p)return null;const sv={v:1,ts:Date.now(),campus:MP.campus,rn:MP.rn,look:ser(myLook),pre:ser(PRE),p:ser(S.p),npcs:S.npcs.map(n=>ser(n,0,true)),S:{},mp:{friends:MP.friends,lastRead:MP.lastRead,blocked:MP.blocked}};
+function makeSave(){if(!S||!S.p)return null;const sv={v:1,ts:Date.now(),campus:MP.campus,cn:MP.campus?campName(MP.campus):null,rn:MP.rn,look:ser(myLook),pre:ser(PRE),p:ser(S.p),npcs:S.npcs.map(n=>ser(n,0,true)),S:{},mp:{friends:MP.friends,lastRead:MP.lastRead,blocked:MP.blocked}};
   for(const k in S){if(SKIPS.has(k))continue;const v=ser(S[k]);if(v===undefined)continue;if(k==='msgs'&&Array.isArray(v)){sv.S[k]=v.slice(0,80);continue}try{if(JSON.stringify(v).length<40000)sv.S[k]=v}catch(e){}}return sv}
 let SAVING=false;async function saveGame(){const sv=makeSave();if(!sv)return;try{localStorage.setItem('freshers-save',JSON.stringify(sv))}catch(e){}
   if(MP.db&&MP.uid&&!SAVING){SAVING=true;try{await MP.db.doc('data/users/'+MP.uid+'/save').set(sv)}catch(e){}SAVING=false}
@@ -14,7 +14,7 @@ let SAVING=false;async function saveGame(){const sv=makeSave();if(!sv)return;try
 async function findSave(){let a=null,b=null;try{a=JSON.parse(localStorage.getItem('freshers-save')||'null')}catch(e){}
   if(MP.db&&MP.uid)try{const d=await MP.db.doc('data/users/'+MP.uid+'/save').get();if(d.exists)b=d.data()}catch(e){}
   const ok=x=>x&&x.v===1&&x.p&&x.pre&&x.look&&ROOMS[x.pre.room];return [a,b].filter(ok).sort((x,y)=>(y.ts||0)-(x.ts||0))[0]||null}
-async function loadGame(sv){myLook=Object.assign({},sv.look);PRE=Object.assign({},sv.pre);MP.campus=null;MP.rn=sv.rn||1;
+async function loadGame(sv){if(sv&&sv.campus&&sv.cn&&String(sv.campus)[0]==='u')MP.cnames[sv.campus]=mpClean(sv.cn,24);myLook=Object.assign({},sv.look);PRE=Object.assign({},sv.pre);MP.campus=null;MP.rn=sv.rn||1;
   if(sv.campus&&MP.lobby)await joinCampus(sv.campus);
   NOBOTS=!!sv.campus;newGame();const p=P();
   (sv.npcs||[]).forEach(o=>{if(!o)return;const n=S.npcs.find(x=>x.id===o.id);if(!n)return;const relook=o.look&&JSON.stringify(o.look)!==JSON.stringify(n.look);

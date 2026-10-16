@@ -170,3 +170,7 @@ body.setup #panel.form{background:radial-gradient(120% 70% at 50% -10%,#5a2340 0
   .form .scr{max-width:760px}
 }
 @media (prefers-reduced-motion:reduce){.letter,.stamp,.reel-in,.sunball{animation-duration:.01s!important;animation-delay:0s!important}}
+/* start-a-new-campus card */
+.cboard.cnew{border-style:dashed;border-color:rgba(245,180,31,.55)}
+.cnew-row{display:flex;gap:8px;margin-top:8px}.cnew-row input{flex:1;min-width:0;border-radius:12px;border:1.5px solid rgba(255,255,255,.25);background:rgba(0,0,0,.25);color:#fbf3e2;padding:9px 12px;font:600 15px var(--body)}
+.cnew-row input:focus{outline:2px solid var(--kgold);outline-offset:1px}.cn-err{color:#ffb3a8!important;min-height:0}

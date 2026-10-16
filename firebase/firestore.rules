@@ -7,7 +7,8 @@ service cloud.firestore {
     match /members/{uid} {
       allow read: if signedIn();
       allow create, update: if signedIn() && request.auth.uid == uid
-        && request.resource.data.keys().hasOnly(['cp', 'nm', 'room', 'rn', 'at'])
+        && request.resource.data.keys().hasOnly(['cp', 'nm', 'room', 'rn', 'at', 'cn'])
+        && (!('cn' in request.resource.data) || (request.resource.data.cn is string && request.resource.data.cn.size() <= 24))
         && request.resource.data.cp is string && request.resource.data.cp.size() <= 8
         && request.resource.data.nm is string && request.resource.data.nm.size() <= 16;
       allow delete: if signedIn() && request.auth.uid == uid;

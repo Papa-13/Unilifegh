@@ -13,6 +13,10 @@ Already done for the `freshers-b6d87` project. For a new Firebase project:
 
 The config values are public by design; the rules protect players' data.
 
+## Updating the rules
+
+When `firebase/firestore.rules` or `firebase/database.rules.json` change (for example, player-made campuses needed new rules), paste the new contents into Firebase → Firestore → **Rules** and Realtime Database → **Rules**, then click **Publish**.
+
 ## Vercel
 
 The repo includes `vercel.json`, so Vercel knows to run `npm run build` and publish `dist/`.

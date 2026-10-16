@@ -78,7 +78,9 @@ function roomApi(rtdb,uid,name){
       out.push({peer:id,by:typeof p.slow.by==='string'?p.slow.by:null,isMe:p.slow.by===uid,sameTab:false,kind:'viewer',guest:false,presence:Object.freeze(pr),updatedAt:(p.fast&&p.fast.t)||p.slow.t||Date.now()})}
     return Object.freeze(out)};
   const watch=(kind)=>{const r=ref(rtdb,`${base}/${kind}`);
-    unsubs.push(onChildAdded(r,s=>{peerOf(s.key)[kind]=s.val();fire()}),onChildChanged(r,s=>{peerOf(s.key)[kind]=s.val();fire()}),
+    // an entry with my account but a different peer id is me from before a refresh: remove it so I don't see a copy of myself
+    const stale=s=>{const v=s.val();if(v&&v.by===uid&&s.key!==myPeer){remove(ref(rtdb,`${base}/slow/${s.key}`)).catch(()=>{});remove(ref(rtdb,`${base}/fast/${s.key}`)).catch(()=>{});return true}return false};
+    unsubs.push(onChildAdded(r,s=>{if(stale(s))return;peerOf(s.key)[kind]=s.val();fire()}),onChildChanged(r,s=>{peerOf(s.key)[kind]=s.val();fire()}),
       onChildRemoved(r,s=>{const p=peers.get(s.key);if(p){p[kind]=null;if(!p.slow&&!p.fast)peers.delete(s.key);if(kind==='slow')peers.delete(s.key)}fire()}))};
   watch('slow');watch('fast');
   let connected=false;unsubs.push(onValue(ref(rtdb,'.info/connected'),s=>{connected=!!s.val();if(connected&&!dead){onDisconnect(slowR).remove();onDisconnect(fastR).remove();lastSlow='';lastFast='';push()}ch.forEach(h=>h(connected))}));
