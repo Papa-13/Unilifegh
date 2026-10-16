@@ -19,7 +19,7 @@ const MP={cnames:{},lobby:null,croom:null,db:null,uid:null,peer:null,campus:null
   blocked:{},friends:{},lastRead:{},sys:{},chats:{},unread:{},camp:[],ready:false,readyFns:[]};
 const mpStore={get(k,d){try{const v=localStorage.getItem('fr-mp-'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('fr-mp-'+k,JSON.stringify(v))}catch(e){}}};
 MP.friends=mpStore.get('friends',{});MP.chats=mpStore.get('chats',{});MP.blocked=mpStore.get('blocked',{});MP.lastRead=mpStore.get('lastRead',{});
-const mpClean=(t,n=240)=>String(t==null?'':t).replace(/[\u0000-\u001f\u007f​-‏‪-‮⁦-⁩]/g,' ').replace(/\s+/g,' ').trim().slice(0,n);
+const mpClean=(t,n=240)=>swearMask(String(t==null?'':t).replace(/[\u0000-\u001f\u007f​-‏‪-‮⁦-⁩]/g,' ').replace(/\s+/g,' ').trim().slice(0,n));
 function mpLook(L){const g=L&&L.gender==='f'?'f':'m',ok=(v,set)=>set.includes(v)?v:pick(set),r={gender:g};
   r.skin=ok(L&&L.skin,SKINS);r.hair=ok(L&&L.hair,Object.keys(HAIR[g]));r.outfit=ok(L&&L.outfit,Object.keys(OUTFIT[g]));r.pal=ok(L&&L.pal,Object.keys(PAL));r.shoes=ok(L&&L.shoes,Object.keys(SHOES));r.extra=ok(L&&L.extra,Object.keys(EXTRA));r.bag=ok(L&&L.bag,['backpack','tote','none']);return r}
 const mpKey=rp=>rp.by||('p:'+rp.peer);

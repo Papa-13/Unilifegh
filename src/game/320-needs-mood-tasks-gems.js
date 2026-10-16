@@ -52,12 +52,12 @@ function fillWhims(){if(!S||!S.whims)return;S.whims=S.whims.filter(w=>!w.done||p
   while(S.whims.filter(w=>!w.done).length<3){const have=new Set(S.whims.map(w=>w.id)),pool=WHIMS.filter(w=>!have.has(w.id)&&(!w.when||w.when()));if(!pool.length)break;
     const pri=pool.filter(w=>w.pri&&w.pri()),W=pick(pri.length&&Math.random()<.7?pri:pool);S.whims.push({id:W.id,prog:0,done:false})}}
 function ev(type,d){if(!S||!S.whims)return;let changed=false;S.whims.forEach(w=>{if(w.done)return;const W=WHIMS.find(x=>x.id===w.id);if(!W)return;let r=false;try{r=W.ev(type,d)}catch(e){}
-    if(!r)return;w.prog+=typeof r==='number'?r:1;changed=true;if(w.prog>=(W.n||1)){w.done=true;w.doneT=performance.now();S.gems=(S.gems||0)+W.g;S.tasksDone++;P().needs.fun=clamp(P().needs.fun+4);
+    if(!r)return;w.prog+=typeof r==='number'?r:1;changed=true;if(w.prog>=(W.n||1)){w.done=true;w.doneT=performance.now();gemsEarn('task',`${W.id}:${day()}:${MP.campus||'solo'}:${P().name}`,W.g);S.tasksDone++;P().needs.fun=clamp(P().needs.fun+4);
       setTimeout(()=>toast(`🎯 Task complete: ${W.t} · +${W.g} 💎`),type==='act'?1200:200);gemPop(W.g)}});if(changed&&$('taskSheet'))taskSheet()}
-function checkMiles(){MILES.forEach(([t,g,f],i)=>{if(S.miles[i])return;let ok=false;try{ok=f()}catch(e){}if(ok){S.miles[i]=1;S.gems+=g;setTimeout(()=>toast(`🏅 Milestone: ${t} · +${g} 💎`),1800);gemPop(g)}});if(S.whims.length)ev('tick')}
+function checkMiles(){MILES.forEach(([t,g,f],i)=>{if(S.miles[i])return;let ok=false;try{ok=f()}catch(e){}if(ok){S.miles[i]=1;gemsEarn('mile',i,g);setTimeout(()=>toast(`🏅 Milestone: ${t} · +${g} 💎`),1800);gemPop(g)}});if(S.whims.length)ev('tick')}
 function gemPop(g){const b=$('gemBtn');if(!b)return;b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop')}
 function gemCost(){const b=S.busy;if(!b||!b.timed)return 0;const rem=b.timed.start+b.timed.mins-S.min;return Math.max(1,Math.ceil(rem/60))}
-function gemFinish(){const b=S.busy;if(!b||!b.timed)return;const c=gemCost();if((S.gems||0)<c){toast(`You need ${c} 💎 to finish this now. Complete tasks (🎯) to earn gems, or speed up time ▶▶`);return}S.gems-=c;b.skip=true;busyStep(0);if(S.busy===b&&b.game){b.timed.ap=1;finishBusy()}hud()}
+async function gemFinish(){const b=S.busy;if(!b||!b.timed)return;const c=gemCost();if((S.gems||0)<c){toast(`You need ${c} 💎 to finish this now. Complete tasks (🎯) to earn gems, or speed up time ▶▶`);return}if(!(await gemsSpend(c))||S.busy!==b)return;b.skip=true;busyStep(0);if(S.busy===b&&b.game){b.timed.ap=1;finishBusy()}hud()}
 function busyHud(){const b=S.busy;if(!b||!b.timed)return;const T=b.timed,k=clamp((S.min-T.start)/T.mins,0,1),rem=Math.max(0,Math.ceil(T.start+T.mins-S.min));
   const bar=$('busyBar');if(bar)bar.style.width=(k*100).toFixed(1)+'%';const r=$('busyRem');if(r)r.textContent=rem>=60?`${Math.floor(rem/60)}h ${rem%60}m left`:`${rem}m left`;
   const g=$('gemSkip');if(g){const c=gemCost();g.textContent=innerWidth<700?`⚡ Finish · 💎${c}`:`⚡ Finish now · 💎${c}`;g.classList.toggle('dim',(S.gems||0)<c)}}

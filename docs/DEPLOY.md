@@ -17,6 +17,20 @@ The config values are public by design; the rules protect players' data.
 
 When `firebase/firestore.rules` or `firebase/database.rules.json` change (for example, player-made campuses needed new rules), paste the new contents into Firebase → Firestore → **Rules** and Realtime Database → **Rules**, then click **Publish**.
 
+## The gem bank (server-side gems)
+
+Gems are kept on the server by `api/gems.js` (a Vercel function), so players can't fake them. It needs a Firebase service account:
+
+1. Firebase console → ⚙️ Project settings → **Service accounts** → **Generate new private key** → a `.json` file downloads. Keep it secret: never put it in GitHub.
+2. Vercel → your project → **Settings → Environment Variables** → add `FIREBASE_SERVICE_ACCOUNT`, and paste the whole contents of that file as the value (all environments).
+3. Vercel → **Deployments** → ⋯ on the latest → **Redeploy**.
+
+Until this is set up, the game keeps gems on each phone like before. Rules in `api/_gems-rules.js`: 6 to start, at most 25 gems a day from daily tasks, each milestone pays once, spending needs enough gems.
+
+## Reports
+
+Player reports (🚩) are in Firebase → Firestore → `reports`. Only you can read them there.
+
 ## Vercel
 
 The repo includes `vercel.json`, so Vercel knows to run `npm run build` and publish `dist/`.

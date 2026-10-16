@@ -40,12 +40,15 @@ src/
     347-visit-friends.js    asking to visit a real friend's room, and room invites
     348-player-requests.js  accept/decline pop-ups for hugs, daps, flirts, dates, kisses
     349-relationships.js    partners, break-ups, cheating, witnesses and getting caught
+    321-gem-bank.js         gems kept on the server (falls back to local)
+    368-safe-chat.js        swear filter and 🚩 reports
     370-375 online-*.js     multiplayer: campuses, presence, chat, messages
     …
     990-boot.js             starts the game (runs last)
   styles/             the look, split by screen
   online/             Firebase: sign-in, live rooms, database (website only)
   main.js             website entry: starts Firebase
+api/                  server functions on Vercel (gems.js: the gem bank)
 firebase/             security rules to paste into the Firebase console
 tools/                build helpers (you rarely need to touch these)
 docs/                 how the code fits together and how to add features

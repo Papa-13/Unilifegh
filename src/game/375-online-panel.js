@@ -56,7 +56,7 @@ function mpCard(rp){if(!S||!rp)return;S.paused=true;openSheet();MP.view=null;con
         ${!fr?'<small style="opacity:.75">Become friends to kiss or ask them out.</small>':''}${r&&!mine?`<small style="opacity:.75">You're dating ${esc(r.nm)}. Flirting, dates or kisses with someone else is cheating, and people talk… 👀</small>`:''}</div>`})()}
     ${(()=>{const ks=sgKindsFor(rp);return ks.length?`<div class="say" style="margin:6px 0"><b>Play together</b><div class="grid2" style="margin-top:6px">${ks.map(x=>`<button class="btn sm" data-sgk="${x}">${SG_KINDS[x].ic} ${SG_KINDS[x].name[0].toUpperCase()+SG_KINDS[x].name.slice(1)}</button>`).join('')}</div></div>`:''})()}
     ${near?'':'<p style="font-size:12px;opacity:.7;margin:4px 0">Walk closer to wave, dap, hug or dance with them.</p>'}
-    <div class="row" style="justify-content:space-between"><button class="ghost sm" id="pcBlock">🚫 Block</button><button class="btn sm" id="bye">Close</button></div>`;
+    <div class="row" style="justify-content:space-between"><span style="display:flex;gap:6px"><button class="ghost sm" id="pcBlock">🚫 Block</button><button class="ghost sm" id="pcReport">🚩 Report</button></span><button class="btn sm" id="bye">Close</button></div>`;
   const act=a=>{if(ASK_KINDS[a])return mpAsk(rp,a);mpSend(k,'act',a);try{ev('talk',{a:'real'});if(a==='wave'||a==='dance')ev('emote',{k:a,n:1});if(a==='laugh')ev('talk',{a:'joke',good:true})}catch(e){};mpSys(k,`You ${ {wave:'waved 👋',dap:'gave a dap 🤜🤛',handshake:'shook hands 🤝',hug:'hugged 🤗',laugh:'laughed together 😂',dance:'danced together 💃'}[a]}`);const p=P();p.face=Math.atan2(rp.x-p.x,rp.y-p.y);try{setGest(p,a==='laugh'?'laugh':a==='dance'?'dance':a,2.2)}catch(e){}if(a==='dance')try{p.pose='dance';setTimeout(()=>{if(P().pose==='dance')P().pose=null},4000)}catch(e){}p.needs.social=clamp(p.needs.social+3);p.needs.fun=clamp(p.needs.fun+2);if(MP.friends[k])MP.friends[k].lv=Math.min(100,(MP.friends[k].lv||20)+1)};
   $('sheetIn').querySelectorAll('[data-pa]').forEach(b=>b.onclick=()=>{closeSheet();act(b.dataset.pa)});
   $('pcMsg').onclick=()=>{closeSheet();mpChatKey(k)};
@@ -67,6 +67,7 @@ function mpCard(rp){if(!S||!rp)return;S.paused=true;openSheet();MP.view=null;con
   if($('pcGo'))$('pcGo').onclick=()=>{closeSheet();relAsk(rp,k,rp.nm,rp.lookV&&rp.lookV.gender)};if($('pcBreak'))$('pcBreak').onclick=()=>{closeSheet();relBreak(k,rp.nm)};
   if($('pcVisit'))$('pcVisit').onclick=()=>{closeSheet();visitOKFor(k)?visitGo(k):visitAsk(rp)};
   $('sheetIn').querySelectorAll('[data-sgk]').forEach(b=>b.onclick=()=>{closeSheet();sgInvite(rp,b.dataset.sgk)});
+  $('pcReport').onclick=()=>mpReport(k,rp.nm);
   $('pcBlock').onclick=()=>{if(!confirm(`Block ${rp.nm}? You won't see their messages.`))return;MP.blocked[k]=1;mpStore.set('blocked',MP.blocked);if(S.follow===rp.peer)S.follow=null;toast(`🚫 ${rp.nm} is blocked.`);closeSheet()};
   $('bye').onclick=closeSheet}
 function mpFollowTick(){if(!S||!S.follow)return;const rp=MP.peers.get(S.follow),p=P();if(!rp||rp.in||rp.car||IS){S.follow=null;return}if(S.busy)return;S._fwT=(S._fwT||0)-1;if(S._fwT>0)return;S._fwT=8;const d=Math.hypot(rp.x-p.x,rp.y-p.y);if(d>42){p.target={x:rp.x+16,y:rp.y+10};p.path=null}}
@@ -79,7 +80,7 @@ function mpThread(){const V=MP.view,k=V.key,fr=MP.friends[k],o=onlineInfo(k),rp=
     ${rp?`<div class="mpacts">${[['wave','👋'],['dap','🤜'],['handshake','🤝'],['hug','🤗'],['laugh','😂'],['dance','💃']].map(([a,e])=>`<button class="ghost sm" data-ma="${a}" aria-label="${a}">${e}</button>`).join('')}</div>`:''}
     ${!fr&&!sent&&canSend?'<button class="ghost sm" id="mpFr">➕ Add friend</button>':''}
     ${canSend?`<div class="mpemo">${['😂','❤️','🔥','🙏','😅','👍','😭','🎉','👀','💯'].map(e=>`<button type="button" data-em="${e}">${e}</button>`).join('')}</div><div class="mpin"><input id="mpTx" maxlength="240" placeholder="${o.on?'Type a message…':'They\'re offline. They\'ll see it when they\'re back…'}" autocomplete="off" enterkeyhint="send"><button class="btn sm" id="mpSend">Send</button></div>`:'<p style="font-size:13px;opacity:.7">They\'re offline. You can message them when they\'re back.</p>'}
-    <div id="mpMenu" hidden class="grid2"><button class="ghost sm" id="mpBlock">🚫 Block ${esc(nm)}</button>${rp?`<button class="ghost sm" id="mpWalk">🚶 Walk to them</button>`:''}</div>`;
+    <div id="mpMenu" hidden class="grid2"><button class="ghost sm" id="mpBlock">🚫 Block ${esc(nm)}</button><button class="ghost sm" id="mpReport">🚩 Report ${esc(nm)}</button>${rp?`<button class="ghost sm" id="mpWalk">🚶 Walk to them</button>`:''}</div>`;
   mpThreadMsgs();const tx=$('mpTx');
   if(tx){tx.value=draft;const go=async()=>{const v=mpClean(tx.value);if(!v)return;const r2=onlineInfo(k).rp;let ok=false;
       if(canMail)ok=await mailSend(k,'m',v);else if(r2){const m=mpSend(k,'m',v);if(m){const th=MP.chats[k]=MP.chats[k]||{nm,ms:[]};th.ms.push({me:1,tx:v,t:Date.now()});mpStore.set('chats',MP.chats);ok=true}}
@@ -89,7 +90,7 @@ function mpThread(){const V=MP.view,k=V.key,fr=MP.friends[k],o=onlineInfo(k),rp=
   In.querySelectorAll('[data-ma]').forEach(b=>b.onclick=()=>{const a=b.dataset.ma;const r2=onlineInfo(k).rp;if(!r2)return;if(ASK_KINDS[a]){mpAsk(r2,a);return}mpSend(k,'act',a);mpSys(k,`You ${ {wave:'waved 👋',dap:'gave a dap 🤜🤛',handshake:'shook hands 🤝',hug:'hugged 🤗',laugh:'laughed 😂',dance:'danced 💃'}[a]}`);try{setGest(P(),a==='laugh'?'laugh':a,2)}catch(e){}mpThreadMsgs()});
   if($('mpFr'))$('mpFr').onclick=()=>{if(canMail)mailSend(k,'fr','');else mpSend(k,'fr','');toast('Friend request sent ✉️');$('mpFr').remove();setTimeout(mpThreadMsgs,50)};
   $('mpBack').onclick=()=>{V.key=null;V.drawn=null;mpRedraw()};$('mpMore').onclick=()=>{$('mpMenu').hidden=!$('mpMenu').hidden};
-  $('mpBlock').onclick=()=>{MP.blocked[k]=1;mpStore.set('blocked',MP.blocked);toast(`🚫 ${nm} is blocked. You won't see their messages.`);V.key=null;V.drawn=null;mpRedraw()};
+  $('mpReport').onclick=()=>mpReport(k,nm);$('mpBlock').onclick=()=>{MP.blocked[k]=1;mpStore.set('blocked',MP.blocked);toast(`🚫 ${nm} is blocked. You won't see their messages.`);V.key=null;V.drawn=null;mpRedraw()};
   if($('mpWalk'))$('mpWalk').onclick=()=>{const r2=onlineInfo(k).rp;if(!r2)return;closeSheet();if(IS)leaveRoom(true);P().target={x:r2.x+20,y:r2.y+10};P().path=null};
   mpBadge()}
 function mpSay(){S.paused=true;openSheet();$('sheetIn').innerHTML=`<div class="eyebrow">🗨️ Say something out loud</div><h3>Everyone nearby will see it over your head</h3><div class="mpin"><input id="mpTx" maxlength="160" placeholder="e.g. Who wants to play football? ⚽" autocomplete="off"><button class="btn sm" id="mpSend">Say</button></div><button class="ghost sm" id="bye">Cancel</button>`;

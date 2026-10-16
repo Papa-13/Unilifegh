@@ -26,6 +26,23 @@ service cloud.firestore {
       allow delete: if signedIn() && resource.data.from == request.auth.uid;
     }
 
+    // Gems: only the game's server (api/gems.js) changes them. You can read your own.
+    match /wallets/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // 🚩 Reports: players can send one; only the owner reads them (in the Firebase console).
+    match /reports/{id} {
+      allow create: if signedIn()
+        && request.resource.data.by == request.auth.uid
+        && request.resource.data.keys().hasOnly(['by', 'about', 'nm', 'reason', 'note', 'msgs', 'campus', 'at'])
+        && request.resource.data.reason in ['harass', 'sexual', 'hate', 'scam', 'spam', 'other']
+        && request.resource.data.note is string && request.resource.data.note.size() <= 300
+        && request.resource.data.msgs is list && request.resource.data.msgs.size() <= 10;
+      allow read, update, delete: if false;
+    }
+
     // Each player's saved student. Nobody else can read it.
     match /data/users/{uid}/{doc=**} {
       allow read, write: if signedIn() && request.auth.uid == uid;
