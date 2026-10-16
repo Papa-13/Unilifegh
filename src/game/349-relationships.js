@@ -48,8 +48,8 @@ function relIn(ck,nm,k,tx,id){const seen=relSeen();if(id){if(seen.has(id))return
   if(k==='ct'){const [onm,ch]=String(tx).split('|');if(ch==='b'){if(r&&r.ck===ck)relSet(null);relShow(`<div class="eyebrow">😬 Caught</div><h3>${esc(nm)} found out about you and ${esc(mpClean(onm,16))}</h3><p class="scene">${esc(nm)} broke up with you. 💔</p>`,[['Okay','g',()=>{}]])}
     else relShow(`<div class="eyebrow">😬 Caught</div><h3>${esc(nm)} found out about you and ${esc(mpClean(onm,16))}</h3><p class="scene">…and decided to forgive you. Don't make it a habit.</p>`,[['Phew','g',()=>{}]]);mpSys(ck,ch==='b'?`${nm} caught you and broke up 💔`:`${nm} caught you, but forgave you`);return}}
 /* every relationship message in the mailbox, oldest first, each handled once */
-function relMail(){const all=[];for(const [u,v] of Object.entries(MP.mailIn||{}))(v.ms||[]).forEach(m=>{if(REL_KINDS.includes(m.k)&&Date.now()-m.t<7*86400000)all.push([u,v.nm,m])});
-  all.sort((a,b)=>a[2].t-b[2].t).forEach(([u,nm,m])=>relIn(u,nm,m.k,m.tx,u+'|'+m.i+'|'+m.t))}
+function relMail(){const all=[];for(const [u,v] of Object.entries(MP.mailIn||{}))(v.ms||[]).forEach(m=>{if((REL_KINDS.includes(m.k)||LOAN_KINDS.includes(m.k))&&Date.now()-m.t<7*86400000)all.push([u,v.nm,m])});
+  all.sort((a,b)=>a[2].t-b[2].t).forEach(([u,nm,m])=>(LOAN_KINDS.includes(m.k)?loanIn:relIn)(u,nm,m.k,m.tx,u+'|'+m.i+'|'+m.t))}
 
 /* ---- cheating: romantic moments are seen by whoever is around ---- */
 const ROM_WORD={flirt:'flirting with',date:'on a date with',kiss:'kissing'};
@@ -79,4 +79,5 @@ function realContactsHTML(){const fr=Object.entries(MP.friends).filter(([k])=>!M
     return `<div class="item"><i class="sw2" style="border-radius:50%;background:${o.on?'#2f9e5a':'#666'}"></i><div class="grow"><b>${esc(threadName(k))}${r&&r.ck===k?' 💍':''}</b><small>${esc(o.txt)} · friendship ${f.lv||20}%${romOf(k)?` · ❤️ ${romOf(k)}%`:''}</small></div><button class="btn sm" data-rc="${esc(k)}">💬 Chat</button></div>`}).join('')}</div>`}
 /* how relationship messages read in a chat */
 function relLine(m,nm){const T={gq:m.me?`You asked ${nm} out 💍`:`${nm} asked you out 💍`,ga:m.me?`You said yes to ${nm} ❤️`:`${nm} said yes ❤️`,gn:m.me?'You said not now':`${nm} said not now`,
-  bu:m.me?`You broke up with ${nm} 💔`:`${nm} broke up with you 💔`,tl:m.me?'You told them what you saw 👀':`${nm} told you something 👀`,ct:m.me?`You found out 💔`:`${nm} found out 😬`};return T[m.k]||''}
+  bu:m.me?`You broke up with ${nm} 💔`:`${nm} broke up with you 💔`,tl:m.me?'You told them what you saw 👀':`${nm} told you something 👀`,ct:m.me?`You found out 💔`:`${nm} found out 😬`,
+  lq:m.me?'You asked to borrow money 🤝':`${nm} asked to borrow money 🤝`,la:m.me?'You lent them money 💸':`${nm} lent you money 💸`,ln:m.me?'You said no to lending':`${nm} said no to lending`,mo:m.me?'You sent money 💸':`${nm} sent you money 💸`};return T[m.k]||''}

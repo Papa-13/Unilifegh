@@ -27,6 +27,14 @@ Gems are kept on the server by `api/gems.js` (a Vercel function), so players can
 
 Until this is set up, the game keeps gems on each phone like before. Rules in `api/_gems-rules.js`: 6 to start, at most 25 gems a day from daily tasks, each milestone pays once, spending needs enough gems.
 
+## The MoMo bank (money and loans between real players)
+
+`api/momo.js` uses the same `FIREBASE_SERVICE_ACCOUNT` as the gem bank, so there is nothing extra to set up.
+It keeps each online student's cedis in `wallets/{uid}` and loan records (✅ paid back / ⚠️ late) in `rep/{uid}`.
+The rules (`api/_momo-rules.js`) limit how fast cedis can grow (GH₵2,500 per real hour), the size of a transfer
+(GH₵5,000) and how much can be sent per day (GH₵15,000). Change those numbers there.
+Make sure the latest `firebase/firestore.rules` (with the `rep` rule) is pasted into Firebase.
+
 ## Reports
 
 Player reports (🚩) are in Firebase → Firestore → `reports`. Only you can read them there.

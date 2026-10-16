@@ -32,6 +32,12 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Loan records (✅ paid back / ⚠️ late): everyone can read, only the server writes.
+    match /rep/{uid} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
     // 🚩 Reports: players can send one; only the owner reads them (in the Firebase console).
     match /reports/{id} {
       allow create: if signedIn()
