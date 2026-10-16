@@ -18,6 +18,8 @@ async function start(){
   const u=user||await signInScreen(auth);
   if(!u){goOffline(rtdb);window.__fbResolve(null);return}
   window.fbSignOut=async()=>{await signOut(auth);location.reload()};
+  // the server's clock, so the shared campus time and the club DJ line up on every phone
+  onValue(ref(rtdb,'.info/serverTimeOffset'),s=>{window.__srvOff=+s.val()||0});
   window.__fbResolve({user:userApi(u),db:dbApi(fs),room:roomApi(rtdb,u.uid,null)});
 }
 

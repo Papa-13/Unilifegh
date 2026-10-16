@@ -10,12 +10,12 @@
 .dj-eq i{width:12px;height:30%;border-radius:4px;background:var(--kgold)}
 .dj-screen.live .dj-eq i{animation:eq .9s ease-in-out infinite}.dj-eq i:nth-child(2){animation-delay:-.3s!important;background:var(--kred)}
 .dj-eq i:nth-child(3){animation-delay:-.6s!important;background:var(--kgreen)}.dj-eq i:nth-child(4){animation-delay:-.15s!important;background:var(--kred)}.dj-eq i:nth-child(5){animation-delay:-.45s!important}
+.dj-tap{position:absolute;inset:0;border:0;background:rgba(10,4,12,.72);color:#fbf3e2;font:800 15px var(--body);cursor:pointer}
 @keyframes eq{0%,100%{height:20%}50%{height:80%}}
 .dj-meta{display:flex;flex-direction:column;line-height:1.2;padding:0 2px}
 .dj-meta small{font:700 11px var(--body);color:#d8c3c9}.dj-meta b{font:800 14px var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dj-meta span{font-size:12px;color:var(--kgold)}
 .dj-btns{display:flex;gap:5px}
 .dj-btns button,#djCard.pill button{flex:1;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:inherit;border-radius:10px;padding:7px 0;font:700 12px var(--body);cursor:pointer}
-.dj-btns button:last-child{flex:0 0 34px}
 .dj-btns button:hover,#djCard.pill button:hover{background:rgba(255,255,255,.16)}
 #djCard.pill{width:auto;padding:4px}#djCard.pill::before{display:none}#djCard.pill button{padding:8px 14px}
 @media (min-width:1024px) and (min-height:560px){#djCard{top:calc(var(--sat) + 290px)}}

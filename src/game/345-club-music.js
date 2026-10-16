@@ -1,64 +1,87 @@
-/* ================= Club Vibes DJ: real Ghanaian hits inside the club =================
-   Songs play from the artists' official YouTube videos through YouTube's own player, which stays
-   visible on screen (that's how YouTube allows other sites to play its videos, and the artists keep
-   the views). If YouTube can't load (no internet, or a page that blocks it), the DJ plays an original
-   Afrobeats beat made in the browser instead. To add a song, add its official video id below. */
+/* ================= Club Vibes DJ: real Ghanaian hits, the same song for everyone in the club =================
+   The DJ runs the music, not the players. His set is worked out from the clock: every SLOT seconds he
+   moves to the next song, in an order everyone's game calculates the same way. So whoever is in the club,
+   on any phone, hears the same song at the same moment. Walk in mid-song and you join where it is.
+   Songs play from the artists' official YouTube videos through YouTube's own player, which stays visible
+   (that's how YouTube allows other sites to play its videos, and the artists keep the views).
+   If YouTube can't load, the DJ plays an original beat made in the browser, also in sync.
+   To add a song, add its official video id below. */
 const CLUB_TRACKS=[
   {id:'GIDiI5kyBDQ',t:'Kwaku the Traveller',a:'Black Sherif'},
   {id:'jFdD3Y8mqPI',t:'Second Sermon',a:'Black Sherif'},
   {id:'NPCC02SaJVg',t:'Terminator ft. Young Jonn',a:'King Promise'},
   {id:'BZjCr_ABHCE',t:'Odo Bi ft. Sarkodie',a:'Stonebwoy'},
   {id:'BppzVnoLygQ',t:'Touch It ft. Tyga',a:'KiDi'}];
-const DJ={on:false,off:false,i:0,mode:null,player:null,ytState:'idle',queue:null};
+const DJ_SLOT=180; // seconds per song in the DJ's set (he mixes into the next one at the 3-minute mark)
+const DJ={on:false,slot:-1,mode:null,player:null,muted:false,bad:{}};
 
-/* start/stop by itself when you walk into or out of the club */
+/* ---- the DJ's set: which song is on right now, and how far into it ---- */
+const djNowMs=()=>Date.now()+(window.__srvOff||0);
+function djOrder(round){const n=CLUB_TRACKS.length,a=[...Array(n).keys()];let s=(round*2654435761)>>>0;
+  for(let i=n-1;i>0;i--){s=(s*1103515245+12345)>>>0;const j=s%(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
+function djAt(ms){const sec=ms/1000,slot=Math.floor(sec/DJ_SLOT),n=CLUB_TRACKS.length;return{slot,off:sec-slot*DJ_SLOT,i:djOrder(Math.floor(slot/n))[slot%n]}}
+
+/* starts when you walk into the club and stops when you leave */
 function djTick(){const inClub=!!(S&&IS&&IS.bid==='club'&&$('game')&&!$('game').hidden);
-  if(inClub&&!DJ.on&&!DJ.off)djStart();else if(!inClub&&(DJ.on||DJ.off)){djStop();DJ.off=false}}
-setInterval(djTick,700);
+  if(inClub&&!DJ.on)djStart();else if(!inClub&&DJ.on)djStop();else if(DJ.on)djSync()}
+setInterval(djTick,1000);
 
-function djStart(i){DJ.on=true;DJ.off=false;if(i==null){i=DJ.queue!=null?DJ.queue:Math.floor(Math.random()*CLUB_TRACKS.length);DJ.queue=null}DJ.i=i;djCard();
+function djStart(){DJ.on=true;DJ.slot=-1;djCard();const now=djAt(djNowMs());djMeta(now.i);
   ytReady().then(ok=>{if(!DJ.on)return;if(ok)djYT();else djBeatMode()})}
-function djStop(){DJ.on=false;beatStop();try{DJ.player&&DJ.player.destroy()}catch(e){}DJ.player=null;DJ.mode=null;const c=$('djCard');if(c)c.remove()}
-function djPlay(i){if(!(S&&IS&&IS.bid==='club')){DJ.queue=i;toast(`🎧 The DJ will play ${CLUB_TRACKS[i].t} when you get to Club Vibes`);return}
-  DJ.i=i;if(DJ.mode==='yt'&&DJ.player&&DJ.player.loadVideoById){DJ.player.loadVideoById(CLUB_TRACKS[i].id);djMeta()}else{djStop();djStart(i)}}
-const djNext=()=>djPlay((DJ.i+1)%CLUB_TRACKS.length);
+function djStop(){DJ.on=false;beatStop();try{DJ.player&&DJ.player.destroy()}catch(e){}DJ.player=null;DJ.mode=null;DJ.slot=-1;const c=$('djCard');if(c)c.remove()}
 
-/* the "now playing" card: YouTube's player plus the song, artist and controls */
+/* keeps your player on the DJ's song and timing */
+function djSync(){const now=djAt(djNowMs());
+  if(now.slot!==DJ.slot){const first=DJ.slot<0;DJ.slot=now.slot;djMeta(now.i);if(!first&&DJ.mode==='yt')toast(`🎧 DJ Kwaku Flames: "Next one: ${CLUB_TRACKS[now.i].t}!"`);
+    if(DJ.mode==='yt'&&DJ.player&&DJ.player.loadVideoById){if(DJ.bad[now.i]){djBeatOn()}else{beatStop();DJ.player.loadVideoById({videoId:CLUB_TRACKS[now.i].id,startSeconds:now.off})}}}
+  else if(DJ.mode==='yt'&&DJ.player&&DJ.player.getCurrentTime&&!DJ.bad[now.i]){
+    const st=DJ.player.getPlayerState?DJ.player.getPlayerState():-1,cur=DJ.player.getCurrentTime();
+    if(st===1&&Math.abs(cur-now.off)>2.5)DJ.player.seekTo(now.off,true);
+    if(st===0&&BEAT.t==null)djBeatOn();   // song was shorter than the DJ's slot: he fills with his beat until the next one
+    $('djTap')&&($('djTap').hidden=!(st===-1||st===2||st===5)||now.off<1)}}
+
+/* ---- the "now playing" card: YouTube's player and the song; your only control is your own volume ---- */
 function djCard(){let c=$('djCard');if(!c){c=document.createElement('div');c.id='djCard';c.setAttribute('role','region');c.setAttribute('aria-label','Club music');document.body.appendChild(c)}
-  c.innerHTML=`<div class="dj-screen" id="djScreen"><div id="djYT"></div><div class="dj-eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div>
-    <div class="dj-meta"><small>🎧 DJ Kwaku Flames</small><b id="djT"></b><span id="djA"></span></div>
-    <div class="dj-btns"><button id="djNx" aria-label="Next song">⏭ Next</button><button id="djRq">🎵 Songs</button><button id="djX" aria-label="Stop the music">✕</button></div>`;
-  $('djNx').onclick=()=>DJ.mode==='beat'?toast('YouTube isn\'t available here, so the DJ is playing his own beat.'):djNext();
-  $('djRq').onclick=()=>djSongs();
-  $('djX').onclick=()=>{djStop();DJ.off=true;djPill()};djMeta()}
-function djMeta(){const t=$('djT'),a=$('djA');if(!t)return;if(DJ.mode==='beat'){t.textContent='Club beat';a.textContent='Original mix · YouTube unavailable here'}else{const k=CLUB_TRACKS[DJ.i];t.textContent=k.t;a.textContent=k.a}}
-/* after you stop the music, a small button lets you turn it back on */
-function djPill(){let c=$('djCard');if(!c){c=document.createElement('div');c.id='djCard';document.body.appendChild(c)}c.className='pill';c.innerHTML='<button id="djOn">🎵 Play music</button>';$('djOn').onclick=()=>{c.className='';djStart(DJ.i)}}
-function djSongs(){S.paused=true;openSheet();$('sheetIn').innerHTML=`<h3>🎧 Ask the DJ for a song</h3><p style="font-size:13px;opacity:.8">Official videos from the artists' YouTube channels.</p>
-  <div class="list">${CLUB_TRACKS.map((k,i)=>`<button class="item" data-tr="${i}" style="text-align:left;cursor:pointer"><div class="grow"><b>${esc(k.t)}</b><small>${esc(k.a)}</small></div>${DJ.on&&DJ.mode==='yt'&&DJ.i===i?'<span class="tag g">Playing</span>':''}</button>`).join('')}</div><button class="ghost sm" id="bye">Close</button>`;
-  $('sheetIn').querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{closeSheet();const i=+b.dataset.tr;if(DJ.off){DJ.off=false;const c=$('djCard');if(c)c.className=''}djPlay(i);toast(`🎧 DJ: "${CLUB_TRACKS[i].t}, coming up!"`)});$('bye').onclick=closeSheet}
+  c.innerHTML=`<div class="dj-screen" id="djScreen"><div id="djYT"></div><div class="dj-eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <button class="dj-tap" id="djTap" hidden>▶ Tap to hear the music</button></div>
+    <div class="dj-meta"><small>🎧 DJ Kwaku Flames is playing</small><b id="djT"></b><span id="djA"></span></div>
+    <div class="dj-btns"><button id="djMute" aria-pressed="${DJ.muted}">${DJ.muted?'🔇 Unmute':'🔊 Mute'}</button><button id="djUp" title="What's coming up">⏱ Next up</button></div>`;
+  $('djMute').onclick=()=>{DJ.muted=!DJ.muted;djVol();$('djMute').textContent=DJ.muted?'🔇 Unmute':'🔊 Mute';$('djMute').setAttribute('aria-pressed',DJ.muted)};
+  $('djUp').onclick=()=>{const now=djAt(djNowMs()),nx=djAt((now.slot+1)*DJ_SLOT*1000+500),left=Math.ceil(DJ_SLOT-now.off);toast(`⏱ Next up in ${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}: ${CLUB_TRACKS[nx.i].t} · ${CLUB_TRACKS[nx.i].a}`)};
+  $('djTap').onclick=()=>{try{ACX&&ACX.resume&&ACX.resume()}catch(e){}if(DJ.player&&DJ.player.playVideo){DJ.player.seekTo(djAt(djNowMs()).off,true);DJ.player.playVideo()}$('djTap').hidden=true}}
+function djMeta(i){const t=$('djT'),a=$('djA');if(!t)return;if(DJ.mode==='beat'){t.textContent='Club beat';a.textContent='Original mix · YouTube unavailable here'}else{const k=CLUB_TRACKS[i];t.textContent=k.t;a.textContent=k.a}}
+function djVol(){try{DJ.player&&DJ.player.setVolume&&DJ.player.setVolume(DJ.muted?0:80)}catch(e){}if(BEAT.bus)BEAT.bus.gain.value=DJ.muted?0:.32}
+
+/* club menu: shows the DJ's set (no skipping: the DJ decides) */
+function djSongs(){S.paused=true;openSheet();const now=djAt(djNowMs()),up=[0,1,2,3].map(k=>djAt((now.slot+k)*DJ_SLOT*1000+500));
+  $('sheetIn').innerHTML=`<h3>🎧 DJ Kwaku Flames' set</h3><p style="font-size:13px;opacity:.8">Everyone in Club Vibes hears the same song. Official videos from the artists' YouTube channels.</p>
+  <div class="list">${up.map((u,k)=>{const tr=CLUB_TRACKS[u.i],left=Math.ceil(DJ_SLOT-now.off)+(k-1)*DJ_SLOT;return `<div class="item"><div class="grow"><b>${esc(tr.t)}</b><small>${esc(tr.a)}</small></div><span class="tag${k?'':' g'}">${k?`in ${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`:'Now'}</span></div>`}).join('')}</div>
+  <button class="ghost sm" id="bye">Close</button>`;$('bye').onclick=closeSheet}
 
 /* ---- YouTube's player ---- */
 let YTP=null;function ytReady(){if(YTP)return YTP;YTP=new Promise(res=>{if(window.YT&&YT.Player)return res(true);
   const prev=window.onYouTubeIframeAPIReady;window.onYouTubeIframeAPIReady=()=>{try{prev&&prev()}catch(e){}res(true)};
   const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';s.async=true;s.onerror=()=>res(false);document.head.appendChild(s);setTimeout(()=>res(!!(window.YT&&YT.Player)),7000)});
   YTP.then(ok=>{if(!ok)YTP=null});return YTP}
-function djYT(){DJ.mode='yt';djMeta();const host=$('djYT');if(!host)return;let fails=0;
-  DJ.player=new YT.Player(host,{width:200,height:200,videoId:CLUB_TRACKS[DJ.i].id,host:'https://www.youtube-nocookie.com',
-    playerVars:{autoplay:1,playsinline:1,rel:0,modestbranding:1,controls:1},
-    events:{onReady:e=>{try{e.target.setVolume(80);e.target.playVideo()}catch(x){}},
-      onStateChange:e=>{const st=e.data;$('djScreen')&&$('djScreen').classList.toggle('live',st===1);if(st===0)djNext();if(st===1)fails=0},
-      onError:()=>{if(++fails>=CLUB_TRACKS.length){try{DJ.player.destroy()}catch(x){}DJ.player=null;djBeatMode()}else djNext()}}})}
+function djYT(){DJ.mode='yt';const now=djAt(djNowMs());DJ.slot=now.slot;djMeta(now.i);const host=$('djYT');if(!host)return;
+  DJ.player=new YT.Player(host,{width:200,height:200,videoId:CLUB_TRACKS[now.i].id,host:'https://www.youtube-nocookie.com',
+    playerVars:{autoplay:1,playsinline:1,rel:0,modestbranding:1,controls:0,disablekb:1,fs:0,iv_load_policy:3,start:Math.floor(now.off)},
+    events:{onReady:e=>{try{djVol();e.target.seekTo(djAt(djNowMs()).off,true);e.target.playVideo()}catch(x){}},
+      onStateChange:e=>{const sc=$('djScreen');if(sc)sc.classList.toggle('live',e.data===1);if(e.data===1){beatStop();if(sc)sc.classList.remove('beat')}},
+      onError:()=>{const i=djAt(djNowMs()).i;DJ.bad[i]=1;djBeatOn()}}})}
 
-/* ---- the DJ's own beat (original, made in the browser) ---- */
-const BEAT={t:null,next:0,step:0,bus:null};
-function djBeatMode(){DJ.mode='beat';djMeta();const sc=$('djScreen');if(sc)sc.classList.add('beat','live');beatStart()}
+/* ---- the DJ's own beat (original, made in the browser), locked to the clock so it's in sync too ---- */
+const BEAT={t:null,bus:null,last:-1};const BEAT_STEP=60/112/4;
+function djBeatMode(){DJ.mode='beat';djMeta(0);djBeatOn()}
+function djBeatOn(){const sc=$('djScreen');if(sc)sc.classList.add('beat','live');beatStart()}
 function beatStart(){try{ACX=ACX||new (window.AudioContext||window.webkitAudioContext)();ACX.resume&&ACX.resume()}catch(e){return}if(BEAT.t)return;
-  BEAT.bus=ACX.createGain();BEAT.bus.gain.value=.32;BEAT.bus.connect(ACX.destination);BEAT.next=ACX.currentTime+.08;BEAT.step=0;
-  const len=ACX.sampleRate*.4,nb=ACX.createBuffer(1,len,ACX.sampleRate),d=nb.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;BEAT.noise=nb;
+  BEAT.bus=ACX.createGain();BEAT.bus.gain.value=DJ.muted?0:.32;BEAT.bus.connect(ACX.destination);BEAT.last=-1;
+  if(!BEAT.noise){const len=ACX.sampleRate*.4,nb=ACX.createBuffer(1,len,ACX.sampleRate),d=nb.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;BEAT.noise=nb}
   BEAT.t=setInterval(beatSched,40)}
 function beatStop(){if(BEAT.t){clearInterval(BEAT.t);BEAT.t=null}if(BEAT.bus){try{BEAT.bus.gain.setTargetAtTime(0,ACX.currentTime,.05);const b=BEAT.bus;setTimeout(()=>b.disconnect(),400)}catch(e){}BEAT.bus=null}}
-function beatSched(){const spb=60/112/4;while(BEAT.next<ACX.currentTime+.18){beatStep(BEAT.step,BEAT.next);BEAT.next+=spb;BEAT.step=(BEAT.step+1)%32}}
+/* step numbers come from the shared clock, so two phones play the same step at the same time */
+function beatSched(){const ahead=.18,nowS=djNowMs()/1000,ctx=ACX.currentTime;
+  for(let k=Math.floor(nowS/BEAT_STEP);k*BEAT_STEP<nowS+ahead;k++){if(k<=BEAT.last)continue;BEAT.last=k;const at=ctx+(k*BEAT_STEP-nowS);if(at>=ctx-.01)beatStep(k%32,Math.max(at,ctx))}}
 function beatStep(s,t){const k=s%16,bar=Math.floor(s/16);
   if(k===0||k===7||k===10)drum(t,'kick');if(k===4||k===12)drum(t,'clap');drum(t,'shk',k%2?1:.45);
   if(k===3||k===11||k===14)drum(t,'conga');
