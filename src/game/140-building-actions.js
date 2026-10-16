@@ -24,6 +24,7 @@ function placeActions(b,inside){
     if(p.home==='lodge')a.push(['Bucket bath with poly tank water (30m)',()=>doAct('Bucket bath with water from the poly tank',30,{hygiene:90,energy:-3})]);
     if(IS&&IS.spots.tub)a.push(['Soak in the bathtub (45m)',()=>doAct('Relaxing in the bathtub',45,{hygiene:100,fun:15,energy:10})]);
     a.push(['Brush & freshen up (10m)',()=>doAct('Brushing and freshening up',10,{hygiene:20})])}
+  if(b.id==='club'&&inside)a.push(['🎧 Ask the DJ for a song',()=>djSongs()]);
   if(b.id==='club'&&inside){a.push(['💃 Dance (1h)',()=>{S.clubDay=clubNight();doAct('Dancing at the club',60,{fun:30,social:15,energy:-15,hygiene:-10});meetRandom('club')},null,'b']);
     a.push(['Buy a drink at the bar · GH₵20',()=>{if(spend(20))doAct('Having a drink at the bar',20,{fun:8,hunger:3})}]);
     a.push(['Chill in the lounge (30m)',()=>doAct('Chilling in the lounge',30,{energy:6,social:6,fun:5})]);
