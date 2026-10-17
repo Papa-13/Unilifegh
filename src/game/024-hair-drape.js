@@ -33,8 +33,11 @@ function drapeGeo(key,o){if(GC[key])return GC[key];const L=[],ends=[],down=new T
     for(let s=0;s<nS;s++){const g=down.clone().add(flow.clone().multiplyScalar(Math.max(0,.5-s*.08)));
       if(o.wave){const w=Math.sin(s*.9+i*1.7)*o.wave*SS(.02,-.08,p.y);g.x+=w*Math.cos(i);g.z+=w*Math.sin(i)}
       if(p.y<-.12&&Math.abs(p.z)<.07&&Math.abs(p.x)>.1)g.z-=.6;                        // side strands go behind the shoulders
-      d.multiplyScalar(o.stiff??.55).addScaledVector(g.normalize(),1-(o.stiff??.55)).normalize();p.addScaledVector(d,step);const q0=p.clone();drapeFix(p,o);if(q0.distanceToSquared(p)>1e-8&&p.y<-.12){d.x*=.25;d.z*=.25;d.y=Math.min(d.y,-.5);d.normalize()}pts.push(p.clone())}
-    const curve=new THREE.CatmullRomCurve3(pts),seg=pts.length,rad=5,r0=o.r*(.85+HH(i,9)*.3),tube=new THREE.TubeGeometry(curve,seg,r0,rad,false);
+      d.multiplyScalar(o.stiff??.45).addScaledVector(g.normalize(),1-(o.stiff??.45)).normalize();p.addScaledVector(d,step);const q0=p.clone();drapeFix(p,o);if(q0.distanceToSquared(p)>1e-8&&p.y<-.12){d.x*=.6;d.z*=.6;d.y=Math.min(d.y,-.35);d.normalize()}pts.push(p.clone())}
+    /* relax the path so it curves softly instead of kinking, then keep it out of the head/body */
+    for(let it=0;it<4;it++)for(let j=1;j<pts.length-1;j++){const m=pts[j-1].clone().add(pts[j+1]).multiplyScalar(.5);pts[j].lerp(m,j<3?.25:.55);drapeFix(pts[j],o)}
+    if(pts.length>4){const e=pts.length-1,sw=(HH(i,11)-.5)*.03,sz=(HH(i,12)-.5)*.02;for(let j=2;j<=e;j++){const k=Math.pow(j/e,1.6);pts[j].x+=sw*k;pts[j].z+=sz*k;drapeFix(pts[j],o)}}
+    const curve=new THREE.CatmullRomCurve3(pts,false,'centripetal'),seg=Math.round(pts.length*1.4),rad=5,r0=o.r*(.85+HH(i,9)*.3),tube=new THREE.TubeGeometry(curve,seg,r0,rad,false);
     /* taper the ends, lumps for locs, uv along the strand scaled to its real length */
     const P=tube.attributes.position,UV=tube.attributes.uv,cv=new THREE.Vector3(),tmp=new THREE.Vector3();
     for(let a=0;a<=seg;a++){const t=a/seg;curve.getPointAt(t,cv);let s=1;if(t>.86)s*=1-(t-.86)/.14*(o.taper??.55);if(t<.04)s*=.75;if(o.lumps)s*=1+o.lumps*Math.sin(t*len*90+i);
@@ -55,8 +58,22 @@ const DRAPE={
  locbunm:{n:45,r:.016,len:.28,flow:'crown',kind:'loc',lumps:.12,skip:u=>u.y>.45},
  twists:{n:85,r:.0125,len:.12,flow:'crown',kind:'twist',lift:.9,stiff:.8,bang:.06,ymin:.02,taper:.3},
  twists2:{n:120,r:.0105,len:.14,flow:'crown',kind:'twist',lift:.85,stiff:.78,bang:.06,ymin:.0,taper:.3}};
+/* soft movement: every hair mesh gets its own copy of the material with a tiny vertex shader.
+   Points further down a braid/loc move more: a gentle idle sway, and a springy swing that trails
+   behind when the character walks, runs or turns, then settles. */
+function hairSwayMat(base,K){const m=base.clone(),u={uT:{value:0},uS:{value:new THREE.Vector3()},uK:{value:K},uPh:{value:Math.random()*6.3}};m.userData.u=u;
+  m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,m.userData.u);sh.vertexShader='uniform float uT;uniform vec3 uS;uniform float uK;uniform float uPh;\n'+sh.vertexShader.replace('#include <begin_vertex>',
+    '#include <begin_vertex>\nfloat hs=uv.x*uK;float hw=smoothstep(.04,.42,hs)*min(hs,.7);\ntransformed+=uS*hw*1.6+vec3(sin(uT*1.6+position.y*11.+uPh+position.x*5.),sin(uT*2.3+position.z*9.)*.3,cos(uT*1.2+position.x*8.+uPh))*.022*hw;')};
+  return m}
+function hairSwayHook(mh){const u=mh.material.userData.u,prev=new THREE.Vector3(),cur=new THREE.Vector3(),q=new THREE.Quaternion(),vel=new THREE.Vector3(),sw=new THREE.Vector3(),sv=new THREE.Vector3(),tgt=new THREE.Vector3();let last=0,pq=null;
+  mh.onBeforeRender=function(){const now=performance.now()/1000,dt=Math.min(.05,last?now-last:0);last=now;u.uT.value=now;if(!dt)return void this.getWorldPosition(prev);
+    this.getWorldPosition(cur);vel.subVectors(cur,prev).divideScalar(dt);prev.copy(cur);if(vel.lengthSq()>400)vel.set(0,0,0);
+    this.getWorldQuaternion(q);let turn=0;if(pq){turn=2*Math.atan2(q.y*pq.w-q.w*pq.y,q.w*pq.w+q.y*pq.y)/dt}pq=pq||new THREE.Quaternion();pq.copy(q);
+    tgt.copy(vel).multiplyScalar(-.022).applyQuaternion(q.clone().invert());tgt.x+=Math.max(-1,Math.min(1,turn))*.03;tgt.y=Math.max(-.02,Math.min(.03,tgt.y))+Math.abs(Math.sin(now*9))*Math.min(.012,vel.length()*.004);
+    if(tgt.length()>.07)tgt.setLength(.07);
+    /* damped spring so the hair swings and settles */sv.addScaledVector(tgt.sub(sw),dt*55).multiplyScalar(Math.max(0,1-dt*7));sw.addScaledVector(sv,dt);u.uS.value.copy(sw)}}
 function drapeHair(H,L,f,head,grey){const k=(H==='locs'||H==='locbun')?H+(f?'f':'m'):H,o=DRAPE[k];if(!o)return null;
-  const G=drapeGeo('dr'+k+f,Object.assign({f},o));const m=mesh(G,plaitM(o.kind,grey),0,0,0,head);m.castShadow=false;return G}
+  const G=drapeGeo('dr'+k+f,Object.assign({f},o));const m=mesh(G,hairSwayMat(plaitM(o.kind,grey),o.r*2.6),0,0,0,head);m.castShadow=false;m.frustumCulled=false;hairSwayHook(m);return G}
 /* cornrows: real plaited rows lying flat on the scalp from the front hairline back to the nape.
    o.rows rows, o.sp spacing, o.zig (braided designs: curved rows), o.tEnd (stop part-way, for Fulani) */
 function cornrowTubes(key,o){if(GC[key])return GC[key];const L=[],c=DR.headC,rx=DR.hr[0]-.004,ry=DR.hr[1]-.004,n=o.rows||9;
