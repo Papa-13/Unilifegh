@@ -341,7 +341,7 @@ function hairBlock(L,f,head,hair,cloth,gold){
   if(H==='afro'&&!hatOn(L))mesh(afroGeo('afro'+(f?'f':'m'),f?.205:.19,0,f?.075:.07,f?-.04:-.035,f?.085:.08),hair,0,f?.075:.07,f?-.04:-.035,head);
   if(H==='bun')mesh(bumpySphere(.072,'bun'),hair,0,.135,-.06,head);
   if(H==='braids')mesh(braidsGeo(),hair,0,0,0,head);
-  if(H==='cornrows'){const cr=mesh(cornrowGeo(),hair,0,.02,-.012,head);cr.scale.set(1,1.1,1.06);cr.rotation.x=-.52}
+  if(H==='cornrows'){cornrowMesh(head,f?{rows:11,sp:.022,fan:.5,r:.0088}:{rows:11,sp:.0235},'crw'+f,!!L.grey);if(f)drapeHair('cornrowsf',L,f,head,!!L.grey)}
   if(H==='puffs'&&!hatOn(L))[-1,1].forEach(s=>mesh(bumpySphere(.085,'puff'),hair,s*.1,.1,-.03,head));
   if(H==='puffs')scalpMesh(head,f,hair,{t:.01});
   if(H==='locs'){for(let i=0;i<16;i++){const a=Math.PI*(.08+i*.054);mesh(tcap(.021,.017,f?.36:.24,7),hair,Math.cos(a)*.125,.0,-Math.sin(a)*.11,head)}}

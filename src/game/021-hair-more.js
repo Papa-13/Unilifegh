@@ -9,8 +9,7 @@ function hairMore(H,L,f,head,hair,gold){const capG=new THREE.SphereGeometry(.134
   const capOK=!hatOn(L);
   if(H==='hightop'){fade();if(capOK){/* flat-top block of tight coils, slightly wider at the top, rounded edges */const ht=mesh(lathe('htop2',[[.12,.06],[.126,.09],[.13,.13],[.131,.17],[.124,.2],[.105,.212],[.06,.216],[.001,.215]],28),hair,0,0,-.014,head);ht.scale.set(1,1,1.02);
     const tex=mesh(bumpySphere(.12,'htopB'),hair,0,.185,-.014,head);tex.scale.set(1.04,.26,1.06)}}
-  if(H==='mdesign'){fade();const cr=mesh(cornrowGeo(),hair,0,.02,-.012,head);cr.scale.set(1,1.1,1.06);cr.rotation.x=-.52;cr.rotation.z=.28;
-    for(let i=0;i<3;i++){const z=mesh(new THREE.TorusGeometry(.13,.0035,4,24,.9),stdM(0x15100c,.9),0,.03+i*.03,-.01,head);z.rotation.set(Math.PI/2,0,1.9+i*.3)}}
+  if(H==='mdesign'){fade();cornrowMesh(head,{rows:7,sp:.03,zig:.022,r:.0095},'crwd',!!L.grey)}
   if(H==='twists2'){cap(hair,1.08);if(capOK)for(let i=0;i<46;i++){const a=i*2.399,r=.03+Math.sqrt(i/46)*.09;const t=mesh(tcap(.017,.012,.1+((i*7)%3)*.015,6),hair,Math.cos(a)*r,.16-r*.5,Math.sin(a)*r-.01,head);t.rotation.z=-Math.cos(a)*r*9;t.rotation.x=Math.sin(a)*r*9}}
   if(H==='locbun'){cap(hair,1.08);mesh(bumpySphere(.07,'locbun'),hair,0,.19,-.06,head);for(let i=0;i<14;i++){const a=Math.PI*(.2+i*.045);mesh(tcap(.02,.016,f?.3:.2,7),hair,Math.cos(a)*.122,.01,-Math.sin(a)*.11,head)}}
   if(H==='puff'){cap(hair,1.06);if(capOK){const pf=mesh(bumpySphere(.105,'puffhi'),hair,0,.2,-.07,head);pf.scale.set(1,.9,1);mesh(new THREE.TorusGeometry(.06,.01,6,16),stdM(0x1a1a1a,.6),0,.14,-.06,head).rotation.x=1.1}}

@@ -40,15 +40,15 @@ const LONGHAIR={braids:{n:30,r:.0105,len:.52},knotless:{n:28,r:.011,len:.36},bob
 function longHair(H,L,f,head,hair,gold){let k=H==='locs'||H==='locbun'?H+(f?'f':'m'):H;const o=LONGHAIR[k];if(!o)return false;
   const capM=['locs','locbun','passion','goddess'].includes(H)?hair:braidCapM();
   scalpMesh(head,f,capM,{t:.01});
-  const G=strandsGeo('st'+k,o);mesh(G,hair,0,0,0,head);
-  if(H==='fulani'){const cr=mesh(cornrowGeo(),hair,0,.02,-.012,head);cr.scale.set(1,1.12,1.07);cr.rotation.x=-.52;G.userData.ends.forEach((e,i)=>{if(i%2)return;const b=mesh(cyl(.014,.014,.028,8),gold,e.x,e.y+.05,e.z,head);void b})}
-  if(H==='goddess'||H==='passion')G.userData.ends.forEach((e,i)=>{if(i%3)return;mesh(sph(.02,7,6),hair,e.x,e.y,e.z,head)});
+  const G=drapeHair(H,L,f,head,!!L.grey)||strandsGeo('st'+k,o);if(!G.userData.ends||!DRAPE[(H==='locs'||H==='locbun')?H+(f?'f':'m'):H])mesh(G,hair,0,0,0,head);
+  if(H==='fulani'){cornrowMesh(head,{rows:7,sp:.024,tEnd:.42,r:.009},'crwf',!!L.grey);G.userData.ends.forEach((e,i)=>{if(i%3)return;mesh(cyl(.012,.012,.024,8),gold,e.x,e.y+.06,e.z,head);if(i%2)mesh(cyl(.012,.012,.02,8),gold,e.x,e.y+.16,e.z,head)})}
+  if(H==='goddess')G.userData.ends.forEach((e,i)=>{if(i%4)return;const cu=mesh(new THREE.TorusGeometry(.012,.006,5,10),plaitM('loc',!!L.grey),e.x,e.y+.008,e.z,head);cu.rotation.y=i});
   if(H==='halfup')mesh(bumpySphere(.065,'hbun'),hair,0,.19,-.05,head);
   if(H==='locbun'){mesh(bumpySphere(.07,'locbun'),hair,0,.19,-.06,head);if(!hatOn(L))for(let i=0;i<8;i++){const a=i/8*Math.PI*2;const t=mesh(tcap(.018,.015,.1,6),hair,Math.cos(a)*.045,.24,-.06+Math.sin(a)*.045,head);t.rotation.set(Math.sin(a)*2.4,0,-Math.cos(a)*2.4)}}
   return true}
 function coilHair(H,L,f,head,hair){const k={twists:{n:80,len:.055,r:.017,lift:.2},twists2:{n:120,len:.07,r:.0135,lift:.15},burst:{n:95,ball:1,r:.024,lift:.1,ymin:.05}}[H];if(!k)return false;
   scalpMesh(head,f,scalpM(shortKind(L),1),{t:.007,fade:1});
-  if(!hatOn(L))mesh(coilsGeo('co'+H,k),hair,0,0,0,head);return true}
+  if(!hatOn(L)){if(!drapeHair(H,L,f,head,!!L.grey))mesh(coilsGeo('co'+H,k),hair,0,0,0,head)}return true}
 /* ---------- the scalp: hair that covers the whole head like real hair ----------
    Built from the head itself, pushed out a little, and cut along a real hairline: straight across the
    forehead, a soft corner at the temples, sideburns in front of the ears, round the ears and down to
