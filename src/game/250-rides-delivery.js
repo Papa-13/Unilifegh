@@ -8,11 +8,15 @@ function makeCar_old(col,taxi){const g=new THREE.Group();box(1.9,.45,.9,col,0,.4
 function makeBike(){const g=new THREE.Group();box(.9,.25,.2,0xc8322b,0,.45,0,g);[-.38,.38].forEach(x=>{const w=mesh(cyl(.2,.2,.08,12),lam(0x111111),x,.2,0,g);w.rotation.x=Math.PI/2});
   mesh(cyl(.13,.15,.5,10),lam(0x2f7a4a),-.05,.85,0,g);mesh(sph(.13,10,8),lam(0x2f7a4a),-.05,1.22,0,g);box(.4,.4,.4,0x2f7a4a,-.42,.85,0,g);scene.add(g);return g}
 function placeCar(g,x,y,dx,dy){g.position.set(wx(x),0,wz(y));g.rotation.y=Math.atan2(dx,dy)-Math.PI/2}
+/* the public ring road around campus: Accra–Kumasi Road, Ayeduase road, Kotei road, Tech Junction road */
+const PERIM_RT=[[600,330],[4400,330],[4400,2800],[600,2800]];
 /* traffic loops: every block of the grid that has roads on all four sides */
-const ROUTES=(()=>{const R=[];for(let i=0;i<HROADS.length-1;i++){const [y0,a0,b0]=HROADS[i],[y1,a1,b1]=HROADS[i+1];for(let k=0;k<VX.length-1;k++){const x0=VX[k],x1=VX[k+1];if(x0>=a0&&x1<=b0&&x0>=a1&&x1<=b1)R.push([[x0,y0],[x1,y0],[x1,y1],[x0,y1]])}}return R})();
+const ROUTES=(()=>{const R=[];for(let i=0;i<HROADS.length-1;i++){const [y0,a0,b0]=HROADS[i],[y1,a1,b1]=HROADS[i+1];for(let k=0;k<VX.length-1;k++){const x0=VX[k],x1=VX[k+1];if(x0>=a0&&x1<=b0&&x0>=a1&&x1<=b1)R.push([[x0,y0],[x1,y0],[x1,y1],[x0,y1]])}}R.push(PERIM_RT);return R})();
+/* taxis, trotros and okadas stay on public roads (the roads around campus and the town roads); only shuttles, Ryde/Dash and private cars drive inside campus */
+const PUB_R=ROUTES.map((r,i)=>i).filter(i=>ROUTES[i]===PERIM_RT||ROUTES[i].every(([x,y])=>y>=2800||y<=330)),CAMP_R=ROUTES.map((r,i)=>i).filter(i=>!PUB_R.includes(i));
 const perim=rt=>{let s=0;for(let i=0;i<rt.length;i++){const a=rt[i],b=rt[(i+1)%rt.length];s+=Math.hypot(b[0]-a[0],b[1]-a[1])}return s};
 function along(rt,d){d=((d%perim(rt))+perim(rt))%perim(rt);for(let i=0;i<rt.length;i++){const a=rt[i],b=rt[(i+1)%rt.length],L=Math.hypot(b[0]-a[0],b[1]-a[1]);if(d<=L){const t=d/L;return{x:a[0]+(b[0]-a[0])*t,y:a[1]+(b[1]-a[1])*t,dx:(b[0]-a[0])/L,dy:(b[1]-a[1])/L}}d-=L}return{x:rt[0][0],y:rt[0][1],dx:1,dy:0}}
-const TRAFFIC=[[0,0,0xf4c430,1],[0,.5,0x2f6bb5,0],[1,.3,0xd8d8d8,2],[2,.1,0xf4c430,1],[2,.6,0x8e2a3a,3],[3,.2,0x222222,0],[4,.7,0xf4c430,1],[5,.4,0x2fa84f,3],[6,.1,0xf4c430,1],[7,.6,0xd8d8d8,2],[8,.3,0x2f6bb5,0],[9,.2,0xd8d8d8,2],[10,.5,0xf4c430,1],[11,.75,0xd8d8d8,3],[9,.7,0x8e2a3a,2],[11,.25,0xf4c430,1]].map(([r,o,c,t])=>({route:ROUTES[r],d:o*perim(ROUTES[r]),g:makeCar(c,t),sp:R(110,150)}));
+const TRAFFIC=[[0,0,0xf4c430,1],[0,.5,0x2f6bb5,0],[1,.3,0xd8d8d8,2],[2,.1,0xf4c430,1],[2,.6,0x8e2a3a,3],[3,.2,0x222222,0],[4,.7,0xf4c430,1],[5,.4,0x2fa84f,3],[6,.1,0xf4c430,1],[7,.6,0xd8d8d8,2],[8,.3,0x2f6bb5,0],[9,.2,0xd8d8d8,2],[10,.5,0xf4c430,1],[11,.75,0xd8d8d8,3],[9,.7,0x8e2a3a,2],[11,.25,0xf4c430,1]].map(([r,o,c,t])=>{const rt=ROUTES[t?PUB_R[r%PUB_R.length]:CAMP_R[r%CAMP_R.length]];return{route:rt,d:o*perim(rt),g:makeCar(c,t),sp:R(110,150)}});
 function blockedAhead(x,y,dx,dy,look,self){const ax=x+dx*look,ay=y+dy*look,p=P();if(self){self.byCar=false;self.byP=null}
   if(!p.inCar&&!IS&&Math.hypot(p.x-ax,p.y-ay)<30){if(self)self.byP=p;return 'p'}
   for(const n of S.npcs)if(!n.hidden&&Math.hypot(n.x-ax,n.y-ay)<26){if(self)self.byP=n;return 'p'}

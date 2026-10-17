@@ -70,7 +70,7 @@ function updTraffic(dt){if(!updTraffic.sp){updTraffic.sp=1;spreadSpawn()}vehPush
     const step=driveSpeed(c,c.ov===1&&Math.abs(c.lo+LANE)>10?Math.min(c.sp,60):c.sp,free,red||pb,dt);c.d+=step;rageTick(c,free<24&&!red&&!pb,pb,dt);
     const q=lanePt(c.route,c.d,c.lo);c.px=q.x;c.py=q.y;c.dx=q.dx;c.dy=q.dy;if(me){me.x=c.px;me.y=c.py;me.dx=q.dx;me.dy=q.dy;me.v=c.v}placeCar(c.g,c.px,c.py,q.dx,q.dy)})}
 const hr=y=>HROADS.find(r=>r[0]===y),nearH=(y,x)=>HROADS.filter(r=>x==null||(x>=r[1]-1&&x<=r[2]+1)).reduce((a,r)=>Math.abs(r[0]-y)<Math.abs(a-y)?r[0]:a,1e9),nearV=x=>VX.reduce((a,b)=>Math.abs(b-x)<Math.abs(a-x)?b:a);
-function roadPath(f,t){const h1=nearH(f.y,f.x),h2=nearH(t.y,t.x),r1=hr(h1),r2=hr(h2),m=(f.x+t.x)/2,v=VX.filter(x=>x>=Math.max(r1[1],r2[1])&&x<=Math.min(r1[2],r2[2])).reduce((a,b)=>Math.abs(b-m)<Math.abs(a-m)?b:a,1600);return h1===h2?[{x:f.x,y:h1},{x:t.x,y:h2}]:[{x:f.x,y:h1},{x:v,y:h1},{x:v,y:h2},{x:t.x,y:h2}]}
+function roadPath(f,t){const h1=nearH(f.y,f.x),h2=nearH(t.y,t.x),r1=hr(h1),r2=hr(h2),m=(f.x+t.x)/2,v=VX.filter(x=>x>=Math.max(r1[1],r2[1])&&x<=Math.min(r1[2],r2[2])).reduce((a,b)=>Math.abs(b-m)<Math.abs(a-m)?b:a,nearV(m));return h1===h2?[{x:f.x,y:h1},{x:t.x,y:h2}]:[{x:f.x,y:h1},{x:v,y:h1},{x:v,y:h2},{x:t.x,y:h2}]}
 const pathLen=pts=>pts.slice(1).reduce((s,q,i)=>s+Math.hypot(q.x-pts[i].x,q.y-pts[i].y),0);
 function rideQuote(dest){const p=P(),b=BID[dest],to={x:b.door[0],y:b.door[1]},from=IS?doorOfInside():{x:p.x,y:p.y};const len=pathLen([from,...roadPath(from,to),to]);
   return{len,ryde:Math.round(15+len*.012),dash:Math.round(10+len*.009),mins:Math.round(4+len/80)}}
@@ -88,10 +88,16 @@ function callRide(dest,app){if(P().onBus)return toast('You are on the shuttle. G
   const start=pick.ax==='h'?{x:clamp(p.x+(p.x<MW/2?700:-700),20,MW-20),y:pick.y}:{x:pick.x,y:clamp(p.y+(p.y<MH/2?600:-600),20,MH-20)};
   S.ride={app,dest,price,mins:q.mins,phase:'pickup',pts:[start,pick],i:0,pos:{...start},dir:{x:Math.sign(pick.x-start.x)||0,y:Math.sign(pick.y-start.y)||0},g:makeCar(app==='ryde'?0x161616:0x2fa84f,false),sp:app==='ryde'?360:290,drive:[pick,...roadPath(pick,drop),drop],door,t:0,side:0};
   P().target=null;toast(`${app==='ryde'?'Ryde':'Dash'}: your driver is coming in a ${carDesc(app)}. ${cedi(price)} 🚗`);closeSheet();acts(true)}
+/* taxis drive the public ring road only: they drop you at the nearest point outside campus */
+function ringPath(a,b){const R=PERIM_RT,P=perim(R),da=projD(R,a.x,a.y),db=projD(R,b.x,b.y);let fwd=((db-da)%P+P)%P;const dir=fwd<=P/2?1:-1,len=dir>0?fwd:P-fwd,pts=[];
+  let acc=0;const cs=R.map((c,i)=>{let s=0;for(let k=0;k<i;k++)s+=Math.hypot(R[k+1][0]-R[k][0],R[k+1][1]-R[k][1]);return{x:c[0],y:c[1],d:s}});
+  cs.forEach(c=>{const off=dir>0?((c.d-da)%P+P)%P:((da-c.d)%P+P)%P;if(off>1&&off<len-1)pts.push({x:c.x,y:c.y,off})});pts.sort((p,q)=>p.off-q.off);void acc;
+  const A=along(R,da),Bp=along(R,db);return{from:{x:A.x,y:A.y,ax:Math.abs(A.dx)>.5?'h':'v'},to:{x:Bp.x,y:Bp.y},mid:pts.map(({x,y})=>({x,y}))}}
 function taxiRide(dest,shared){if(S.ride)return toast('You already have a ride.');
-  const b=BID[dest],door={x:b.door[0],y:b.door[1]+(b.door[1]>b.y?22:-22)},start=roadPoint(BID.taxi.door[0],BID.taxi.door[1]),drop=roadPoint(door.x,door.y),len=pathLen([start,...roadPath(start,drop),drop]);
+  const b=BID[dest],door={x:b.door[0],y:b.door[1]+(b.door[1]>b.y?22:-22)},RP=ringPath({x:BID.taxi.door[0],y:BID.taxi.door[1]},door),start=RP.from,drop=RP.to,len=pathLen([start,...RP.mid,drop]);
+  const walk=Math.hypot(drop.x-door.x,drop.y-door.y);if(walk>260)setTimeout(()=>toast(`🚕 Taxis can't enter the campus. The driver will drop you at the nearest gate road. Walk or take the free shuttle from there.`),1200);
   const price=shared?8:Math.round(20+len*.01);if(!spend(price))return;
-  S.ride={app:'taxi',dest,price:0,mins:Math.round(3+len/90),phase:'wait',waitUntil:S.min+45,pts:[],i:0,pos:{...start},dir:{x:1,y:0},g:makeCar(0xf4c430,true),sp:shared?300:360,drive:[start,...roadPath(start,drop),drop],door,shared,t:0,side:0};
+  S.ride={app:'taxi',dest,price:0,mins:Math.round(3+len/90),phase:'wait',waitUntil:S.min+45,pts:[],i:0,pos:{...start},dir:{x:1,y:0},g:makeCar(0xf4c430,true),sp:shared?300:360,drive:[start,...RP.mid,drop],door,shared,t:0,side:0};
   placeCar(S.ride.g,start.x,start.y,start.ax==='v'?0:1,start.ax==='v'?1:0);S.ride.dir={x:start.ax==='v'?0:1,y:start.ax==='v'?1:0};toast(`Paid ${cedi(price)}. Your ${shared?'shared ':''}taxi is parked on the road by the station. Walk up to it and get in 🚕`);acts(true)}
 function boardRide(){const r=S.ride,p=P();if(!r)return;r.phase='board';r.side=rideSide(r,p.x,p.y);r.atDoor=false;r.t=0;p.target=rideDoorPt(r,r.side);S.shuttleWait=null;acts(true)}
 function cancelRide(timeout){const r=S.ride;if(!r)return;const who=r.app==='taxi'?'Taxi driver':(r.app==='ryde'?'Ryde':'Dash')+' driver';
@@ -127,7 +133,7 @@ function updRide(dt){const r=S.ride;if(!r)return;const p=P();
     if(r.t>1.1){setDoor(r,0);if(r.shared&&!r.filled){r.phase='fill';r.t=0;toast('Waiting for the taxi to fill up with passengers… 🚕');acts(true);return}r.phase='drive';r.pts=r.drive;r.i=0;acts(true)}return}
   if(r.phase==='fill'){if(r.t>3.2){r.filled=true;r.phase='drive';r.pts=r.drive;r.i=0;toast('The taxi is full. Off we go! 🚕')}return}
   if(r.phase==='drop'){const dp=rideDoorPt(r,r.side);setDoor(r,Math.min(1,r.t/.4));
-    if(r.t>.45&&p.inCar){p.inCar=false;p.pose=null;p.x=dp.x;p.y=dp.y;unstick(p);p.money-=r.price;advance(r.mins);toast(r.app==='taxi'?`Arrived at ${BID[r.dest].name}. "Medaase, driver!" 🚕`:`Arrived at ${BID[r.dest].name}. Paid ${cedi(r.price)} on MoMo. ⭐⭐⭐⭐⭐`);p.target={...r.door}}
+    if(r.t>.45&&p.inCar){p.inCar=false;p.pose=null;p.x=dp.x;p.y=dp.y;unstick(p);p.money-=r.price;advance(r.mins);toast(r.app==='taxi'?(Math.hypot(r.door.x-p.x,r.door.y-p.y)>260?`🚕 Dropped at the road outside campus. Walking to ${BID[r.dest].name}… "Medaase, driver!"`:`Arrived at ${BID[r.dest].name}. "Medaase, driver!" 🚕`):`Arrived at ${BID[r.dest].name}. Paid ${cedi(r.price)} on MoMo. ⭐⭐⭐⭐⭐`);p.target={...r.door}}
     if(r.t>.9)setDoor(r,Math.max(0,1-(r.t-.9)/.4));
     if(r.t>1.4){setDoor(r,0);r.phase='leave';r.pts=[{...r.pos},farAhead(r)];r.i=0;acts(true)}}}
 const FOOD=[['Jollof & chicken',60,65],['Waakye special',40,55],['Shawarma',55,50],['Fried yam & chicken',45,50],['Pizza (shared)',120,70]];
