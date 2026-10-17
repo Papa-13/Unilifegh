@@ -66,7 +66,7 @@ function tcap(r1,r2,len,seg=14){const key=`tc${r1}_${r2}_${len}_${seg}`;if(GC[ke
   for(let i=0;i<=6;i++){const a=-Math.PI/2+i/6*Math.PI/2;pts.push([Math.max(.0005,r2*Math.cos(a)),-len+r2+r2*Math.sin(a)])}
   for(let i=0;i<=6;i++){const a=i/6*Math.PI/2;pts.push([Math.max(.0005,r1*Math.cos(a)),-r1+r1*Math.sin(a)])}
   return GC[key]=new THREE.LatheGeometry(pts.map(([r,y])=>new THREE.Vector2(r,y)),seg)}
-function headGeo(f){const key='head'+f;if(GC[key])return GC[key];const R0=f?.121:.126,g=new THREE.SphereGeometry(R0,36,28),p=g.attributes.position;
+function headGeo(f,hi){const key='head'+f+(hi?'h':'');if(GC[key])return GC[key];const R0=f?.121:.126,g=new THREE.SphereGeometry(R0,hi?96:36,hi?76:28),p=g.attributes.position;
   for(let i=0;i<p.count;i++){let x=p.getX(i),y=p.getY(i),z=p.getZ(i);
     if(y<0){const t=-y/R0;x*=1-(f?.28:.32)*t*t;z*=1-.06*t;if(z>0)z*=1+.06*t}
     if(z>0){z*=.92;const cheek=Math.exp(-((y+.005)**2)/.0012)*Math.exp(-((Math.abs(x)-.055)**2)/.0015);x*=1+cheek*.06}else z*=1.07;
@@ -337,18 +337,18 @@ function hairBlock(L,f,head,hair,cloth,gold){
   let H=L.hair;const capG=new THREE.SphereGeometry(.134,30,18,0,Math.PI*2,0,Math.PI*.54);
   try{if(longHair(H,L,f,head,hair,gold)||coilHair(H,L,f,head,hair))H='_'}catch(e){console.error(e)}
   const capOn=['short','braids','bun','locs','twists','wig','fade','waves','cornrows'].includes(H)&&!(H==='afro');
-  if(capOn&&!(hatOn(L)&&['short','fade'].includes(H))){const c=mesh(capG,H==='fade'||H==='waves'?(H==='waves'?wavesM():fadeM(!!L.grey)):hair,0,.02,-.012,head);c.scale.set(H==='fade'?.985:1,H==='fade'?1.06:1.1,H==='fade'?1.02:1.06);c.rotation.x=-.52}
+  if(capOn&&!(hatOn(L)&&['short','fade'].includes(H))){if(H==='fade'||H==='short'||H==='waves')scalpMesh(head,f,scalpM(H==='waves'?'waves':shortKind(L),H==='fade'),{t:H==='short'?.009:.006,fade:H==='fade'});else scalpMesh(head,f,H==='braids'?braidCapM():hair,{t:.01})}
   if(H==='afro'&&!hatOn(L))mesh(afroGeo('afro'+(f?'f':'m'),f?.205:.19,0,f?.075:.07,f?-.04:-.035,f?.085:.08),hair,0,f?.075:.07,f?-.04:-.035,head);
   if(H==='bun')mesh(bumpySphere(.072,'bun'),hair,0,.135,-.06,head);
   if(H==='braids')mesh(braidsGeo(),hair,0,0,0,head);
   if(H==='cornrows'){const cr=mesh(cornrowGeo(),hair,0,.02,-.012,head);cr.scale.set(1,1.1,1.06);cr.rotation.x=-.52}
   if(H==='puffs'&&!hatOn(L))[-1,1].forEach(s=>mesh(bumpySphere(.085,'puff'),hair,s*.1,.1,-.03,head));
-  if(H==='puffs'){const pc=mesh(new THREE.SphereGeometry(.134,30,18,0,Math.PI*2,0,Math.PI*.54),hair,0,.02,-.012,head);pc.scale.set(1,1.08,1.05);pc.rotation.x=-.42}
+  if(H==='puffs')scalpMesh(head,f,hair,{t:.01});
   if(H==='locs'){for(let i=0;i<16;i++){const a=Math.PI*(.08+i*.054);mesh(tcap(.021,.017,f?.36:.24,7),hair,Math.cos(a)*.125,.0,-Math.sin(a)*.11,head)}}
   if(H==='twists'){for(let i=0;i<22;i++){const a=i/22*Math.PI*2,r=i%2?.09:.06;const t=mesh(tcap(.02,.014,.085,6),hair,Math.cos(a)*r,.13,Math.sin(a)*r-.015,head);t.rotation.z=-Math.cos(a)*.6;t.rotation.x=Math.sin(a)*.6;t.position.y=.2}}
   if(H==='wig'){mesh(new THREE.CylinderGeometry(.143,.17,.42,24,1,true,Math.PI*.56,Math.PI*.88),hair,0,-.14,-.01,head);const fr=mesh(new THREE.SphereGeometry(.142,24,12,0,Math.PI*2,0,Math.PI*.3),hair,0,.03,.012,head);fr.rotation.x=.35}
   if(H==='duku'){const d=mesh(new THREE.SphereGeometry(.142,26,16,0,Math.PI*2,0,Math.PI*.56),cloth,0,.03,-.01,head);d.scale.set(1.06,1.35,1.1);d.rotation.x=-.32;const top=mesh(sph(.1,16,12),cloth,0,.17,-.05,head);top.scale.set(1.3,.75,1.15);const k=mesh(sph(.05,14,10),cloth,.06,.22,.03,head);k.scale.set(1.4,.8,1)}
-  if(['dyed','frohawk','burst','lowcut','bantu','ponytail'].includes(H)&&!(hatOn(L)&&H!=='ponytail')){const blond=H==='dyed',c=mesh(capG,blond?fadeM(0,1):H==='bantu'||H==='ponytail'?hair:fadeM(!!L.grey),0,.02,-.012,head);c.scale.set(.99,H==='lowcut'||blond?1.05:1.09,1.03);c.rotation.x=-.52}
+  if(['dyed','frohawk','burst','lowcut','bantu','ponytail'].includes(H)&&!(hatOn(L)&&H!=='ponytail')){if(H==='bantu'||H==='ponytail')scalpMesh(head,f,hair,{t:.01});else scalpMesh(head,f,scalpM(shortKind(L),H!=='lowcut'),{t:.007,fade:H!=='lowcut'})}
   if(H==='frohawk'&&!hatOn(L)){const m=mesh(bumpySphere(.07,'froh'),hair,0,.14,-.02,head);m.scale.set(.75,.9,1.9)}
   if(H==='burst'&&!hatOn(L))for(let i=0;i<26;i++){const a=i*2.4,r=.02+(i%5)*.015;mesh(sph(.024,7,6),hair,Math.cos(a)*r,.15+Math.random()*.02,Math.sin(a)*r-.01,head)}
   if(H==='bantu')[[0,.16,-.02],[-.075,.13,.04],[.075,.13,.04],[-.09,.11,-.07],[.09,.11,-.07],[0,.1,-.12]].forEach(([x,y,z])=>{const k=mesh(bumpySphere(.042,'bantu'),hair,x,y,z,head);k.scale.y=.85});

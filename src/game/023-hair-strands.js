@@ -39,7 +39,7 @@ const LONGHAIR={braids:{n:30,r:.0105,len:.52},knotless:{n:28,r:.011,len:.36},bob
   passion:{n:24,r:.016,len:.46,wave:.012},goddess:{n:22,r:.015,len:.46,wave:.016},locsf:{n:20,r:.019,len:.42},locsm:{n:17,r:.019,len:.22},halfup:{n:24,r:.011,len:.42,rows:[.0]},locbunf:{n:18,r:.018,len:.3,rows:[.0]},locbunm:{n:16,r:.018,len:.2,rows:[.0]}};
 function longHair(H,L,f,head,hair,gold){let k=H==='locs'||H==='locbun'?H+(f?'f':'m'):H;const o=LONGHAIR[k];if(!o)return false;
   const capM=['locs','locbun','passion','goddess'].includes(H)?hair:braidCapM();
-  const cap=mesh(new THREE.SphereGeometry(.134,30,18,0,Math.PI*2,0,Math.PI*.54),capM,0,.02,-.012,head);cap.scale.set(1,1.1,1.06);cap.rotation.x=-.52;
+  scalpMesh(head,f,capM,{t:.01});
   const G=strandsGeo('st'+k,o);mesh(G,hair,0,0,0,head);
   if(H==='fulani'){const cr=mesh(cornrowGeo(),hair,0,.02,-.012,head);cr.scale.set(1,1.12,1.07);cr.rotation.x=-.52;G.userData.ends.forEach((e,i)=>{if(i%2)return;const b=mesh(cyl(.014,.014,.028,8),gold,e.x,e.y+.05,e.z,head);void b})}
   if(H==='goddess'||H==='passion')G.userData.ends.forEach((e,i)=>{if(i%3)return;mesh(sph(.02,7,6),hair,e.x,e.y,e.z,head)});
@@ -47,5 +47,31 @@ function longHair(H,L,f,head,hair,gold){let k=H==='locs'||H==='locbun'?H+(f?'f':
   if(H==='locbun'){mesh(bumpySphere(.07,'locbun'),hair,0,.19,-.06,head);if(!hatOn(L))for(let i=0;i<8;i++){const a=i/8*Math.PI*2;const t=mesh(tcap(.018,.015,.1,6),hair,Math.cos(a)*.045,.24,-.06+Math.sin(a)*.045,head);t.rotation.set(Math.sin(a)*2.4,0,-Math.cos(a)*2.4)}}
   return true}
 function coilHair(H,L,f,head,hair){const k={twists:{n:80,len:.055,r:.017,lift:.2},twists2:{n:120,len:.07,r:.0135,lift:.15},burst:{n:95,ball:1,r:.024,lift:.1,ymin:.05}}[H];if(!k)return false;
-  const cap=mesh(new THREE.SphereGeometry(.134,30,18,0,Math.PI*2,0,Math.PI*.54),H==='burst'?hair:fadeM(!!L.grey),0,.02,-.012,head);cap.scale.set(.99,1.06,1.03);cap.rotation.x=-.52;
+  scalpMesh(head,f,scalpM(shortKind(L),1),{t:.007,fade:1});
   if(!hatOn(L))mesh(coilsGeo('co'+H,k),hair,0,0,0,head);return true}
+/* ---------- the scalp: hair that covers the whole head like real hair ----------
+   Built from the head itself, pushed out a little, and cut along a real hairline: straight across the
+   forehead, a soft corner at the temples, sideburns in front of the ears, round the ears and down to
+   the nape. Fade styles thin out towards the bottom (a stippled taper) the way a barber's fade does. */
+const SS=(a,b,x)=>{const t=Math.min(1,Math.max(0,(x-a)/(b-a)));return t*t*(3-2*t)};
+function hairlineOK(x,y,z,f){const th=Math.atan2(Math.abs(x),z);
+  const H=(f?.074:.08)-.016*SS(.3,.55,th)-.074*SS(.8,1.35,th)-.088*SS(1.75,2.6,th);
+  if(y<H)return false;if(Math.abs(x)>.08&&Math.hypot(y-.002,z+.004)<.043)return false;return true}
+function scalpGeo(f,t,fade){const key='scalp'+f+t+fade;if(GC[key])return GC[key];const B=headGeo(f,1),P=B.attributes.position,N=B.attributes.normal,UV=B.attributes.uv,ix=B.index.array;
+  const pos=new Float32Array(P.count*3);for(let i=0;i<P.count;i++){const y=P.getY(i),tt=fade?t*(.35+.65*SS(-.06,.05,y)):t;pos[i*3]=P.getX(i)+N.getX(i)*tt;pos[i*3+1]=y+N.getY(i)*tt;pos[i*3+2]=P.getZ(i)+N.getZ(i)*tt}
+  const ok=[];for(let i=0;i<P.count;i++)ok.push(hairlineOK(P.getX(i),P.getY(i),P.getZ(i),f));
+  const idx=[];for(let k=0;k<ix.length;k+=3){const a=ix[k],b=ix[k+1],c=ix[k+2];if(ok[a]+ok[b]+ok[c]>=2)idx.push(a,b,c)}
+  const G=new THREE.BufferGeometry();G.setAttribute('position',new THREE.BufferAttribute(pos,3));G.setAttribute('normal',N.clone());G.setAttribute('uv',UV.clone());G.setIndex(idx);G.computeBoundingSphere();return GC[key]=G}
+/* short hair material on the scalp: stippled coils; with fade, the stipple thins out lower down */
+function scalpM(kind,fade){const k='scm'+kind+fade;if(SM[k])return SM[k];const c=document.createElement('canvas');c.width=512;c.height=256;const g=c.getContext('2d');
+  const base={black:'#16110d',grey:'#8f8a82',blond:'#b98a3c'}[kind]||'#16110d';g.fillStyle=base;g.fillRect(0,0,512,256);
+  if(kind==='waves'){for(let y=0;y<256;y+=7){g.strokeStyle='rgba(95,75,60,.6)';g.lineWidth=2.4;g.beginPath();for(let x=0;x<=512;x+=4)g.lineTo(x,y+Math.sin(x/512*Math.PI*18)*2.2);g.stroke()}}
+  else for(let i=0;i<9000;i++){const v=Math.random();g.fillStyle=kind==='blond'?`rgba(240,200,120,${v*.4})`:kind==='grey'?`rgba(230,225,215,${v*.35})`:`rgba(${60+v*40},${45+v*25},${35+v*15},${v*.4})`;g.fillRect(Math.random()*512,Math.random()*256,1.6,1.6)}
+  const map=new THREE.CanvasTexture(c);map.wrapS=THREE.RepeatWrapping;const o={map,roughness:kind==='waves'?.6:.95};
+  if(fade){const a=document.createElement('canvas');a.width=512;a.height=256;const h=a.getContext('2d');h.fillStyle='#000';h.fillRect(0,0,512,256);
+    /* v=1 at the crown (canvas top) down to v=0 under the chin (canvas bottom); the taper sits around the ears */
+    for(let y=0;y<256;y++){const v=1-y/256,dens=SS(.27,.46,v);for(let x=0;x<512;x+=2)if(Math.random()<dens){h.fillStyle='#fff';h.fillRect(x,y,2,1)}}
+    o.alphaMap=new THREE.CanvasTexture(a);o.alphaTest=.5}
+  return SM[k]=new THREE.MeshStandardMaterial(o)}
+function scalpMesh(head,f,mat,o={}){const m=mesh(scalpGeo(f,o.t||.007,!!o.fade),mat,0,0,0,head);m.castShadow=false;return m}
+const shortKind=L=>L.hair==='dyed'?'blond':L.grey?'grey':'black';

@@ -4,8 +4,8 @@
    Ladies: high puff, knotless (medium), Fulani braids with gold beads, passion twists, goddess locs,
    bob braids, half up half down, curly wig. Also beards for guys. */
 function hairMore(H,L,f,head,hair,gold){const capG=new THREE.SphereGeometry(.134,30,18,0,Math.PI*2,0,Math.PI*.54);
-  const cap=(m,sy=1.07)=>{const c=mesh(capG,m||hair,0,.02,-.012,head);c.scale.set(.99,sy,1.03);c.rotation.x=-.52;return c};
-  const fade=()=>cap(fadeM(!!L.grey),1.04);
+  const cap=(m)=>scalpMesh(head,f,m||hair,{t:.01});
+  const fade=()=>scalpMesh(head,f,scalpM(shortKind(L),1),{t:.007,fade:1});
   const capOK=!hatOn(L);
   if(H==='hightop'){fade();if(capOK){/* flat-top block of tight coils, slightly wider at the top, rounded edges */const ht=mesh(lathe('htop2',[[.12,.06],[.126,.09],[.13,.13],[.131,.17],[.124,.2],[.105,.212],[.06,.216],[.001,.215]],28),hair,0,0,-.014,head);ht.scale.set(1,1,1.02);
     const tex=mesh(bumpySphere(.12,'htopB'),hair,0,.185,-.014,head);tex.scale.set(1.04,.26,1.06)}}
