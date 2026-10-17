@@ -18,12 +18,18 @@ const ZONES={c:{name:'Commercial Area',col:'#c8a57e',mini:'rgba(230,150,70,.55)'
   g:{name:'Gyinyaase',col:'#a89170',mini:'rgba(220,160,110,.45)',town:1,rects:[[0,1000,600,1800],[0,2800,2000,MH-2800]]}};
 function zoneOf(x,y){for(const k in ZONES)if(ZONES[k].rects.some(([a,b,w,h])=>x>=a&&x<a+w&&y>=b&&y<b+h))return ZONES[k].name;return 'Campus'}
 (function buildZones(){
-  const pat=(k)=>{const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.fillStyle=ZONES[k].col;g.fillRect(0,0,64,64);
-    if(k==='f'){g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=2;for(let i=0;i<=64;i+=32){g.beginPath();g.moveTo(i,0);g.lineTo(i,64);g.moveTo(0,i);g.lineTo(64,i);g.stroke()}}
-    if(k==='c'){g.strokeStyle='rgba(90,50,20,.25)';g.lineWidth=2;for(let y=0;y<64;y+=16){g.beginPath();g.moveTo(0,y);g.lineTo(64,y);g.stroke();for(let x=(y/16%2)*16;x<64;x+=32){g.beginPath();g.moveTo(x,y);g.lineTo(x,y+16);g.stroke()}}}
-    if(k==='s'||k==='r'){g.fillStyle='rgba(255,255,255,.06)';for(let y=0;y<64;y+=16)g.fillRect(0,y,64,8)}
-    if(ZONES[k].town){for(let i=0;i<70;i++){g.fillStyle=`rgba(${Math.random()<.5?'90,60,30':'255,240,210'},${.05+Math.random()*.08})`;g.fillRect(Math.random()*64,Math.random()*64,1+Math.random()*3,1+Math.random()*3)}}return c};
-  Object.keys(ZONES).forEach(k=>{const cv2=pat(k);ZONES[k].rects.forEach(([x,y,w,h])=>{const t=new THREE.CanvasTexture(cv2);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(w/70,h/70);
+  /* ground: lawns on campus (with mowing stripes), interlocking pavers in the Commercial Area,
+     red laterite earth with grass tufts in the towns */
+  const pat=(k)=>{const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d'),Z=ZONES[k],R=Math.random;
+    if(Z.town){g.fillStyle='#a8724a';g.fillRect(0,0,128,128);for(let i=0;i<500;i++){g.fillStyle=`rgba(${R()<.5?'120,70,40':'215,160,110'},${.08+R()*.14})`;g.fillRect(R()*128,R()*128,1+R()*4,1+R()*3)}
+      for(let i=0;i<26;i++){const x=R()*128,y=R()*128;g.fillStyle=`rgba(${80+R()*30},${120+R()*30},50,.55)`;for(let k2=0;k2<9;k2++)g.fillRect(x+R()*10-5,y+R()*8-4,1.2,3)}}
+    else if(k==='c'){g.fillStyle='#b3aca0';g.fillRect(0,0,128,128);for(let y=0;y<128;y+=16)for(let x=0;x<128;x+=32){const o=(y/16)%2*16;const v=R()<.07?'#a8705e':R()<.5?'#bdb6aa':'#b2aca1';g.fillStyle=v;g.fillRect(x+o+1,y+1,30,14);g.fillStyle='rgba(0,0,0,.16)';g.fillRect(x+o+16,y+1,1,14)}
+      g.fillStyle='rgba(60,50,40,.35)';for(let y=0;y<128;y+=16)g.fillRect(0,y,128,1)}
+    else{const base=k==='s'?'#5c9a42':k==='r'?'#5e9442':'#649c46';g.fillStyle=base;g.fillRect(0,0,128,128);g.fillStyle='rgba(255,255,255,.05)';g.fillRect(0,0,128,64);
+      for(let i=0;i<1400;i++){const v=R();g.fillStyle=v<.5?`rgba(40,80,25,${.12+R()*.2})`:`rgba(170,210,110,${.08+R()*.14})`;g.fillRect(R()*128,R()*128,1,2+R()*3)}
+      for(let i=0;i<10;i++){g.fillStyle=`rgba(120,95,55,${.06+R()*.06})`;g.beginPath();g.ellipse(R()*128,R()*128,3+R()*6,2+R()*4,R()*3,0,7);g.fill()}}
+    return c};
+  Object.keys(ZONES).forEach(k=>{const cv2=pat(k);ZONES[k].rects.forEach(([x,y,w,h])=>{const t=new THREE.CanvasTexture(cv2);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(w/(ZONES[k].town?110:k==='c'?60:140),h/(ZONES[k].town?110:k==='c'?60:140));t.anisotropy=4;
     const m=mesh(new THREE.PlaneGeometry(w*U,h*U),new THREE.MeshLambertMaterial({map:t}),wx(x+w/2),-.012,wz(y+h/2),scene);m.rotation.x=-Math.PI/2})});
   const arch=(x,y,hw,text,col)=>{[-1,1].forEach(sd=>{solidC(x+sd*(hw+9),y,7);mesh(cyl(.16,.2,4,10),lam(0xe8e2d4),wx(x+sd*(hw+9)),2,wz(y),scene);mesh(sph(.24,10,8),lam(col),wx(x+sd*(hw+9)),4.1,wz(y),scene)});
     const w=(hw*2+18)*U+.6;box(w,.5,.3,col,wx(x),3.7,wz(y),scene);[1,-1].forEach(f=>{const p=mesh(new THREE.PlaneGeometry(w-.2,.42),new THREE.MeshBasicMaterial({map:textTex(text,{w:1024,h:90,font:'900 50px system-ui, sans-serif',color:'#ffffff',stroke:false,bg:'#'+col.toString(16).padStart(6,'0')})}),wx(x),3.7,wz(y)+f*.16,scene);if(f<0)p.rotation.y=Math.PI})};

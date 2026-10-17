@@ -62,7 +62,7 @@ function enterBuilding(id,back){fadeIn();S.shuttleWait=null;const BD=IS?(IS.budd
   /* ---- interiors for the registry, Great Hall, sports hall and the little shops ---- */
   if(id==='senate'){B_(W-2.6,1.05,.6,0x5a3e28,.5,.53,-D/2+1.2,true);box(W-2.6,.9,.03,new THREE.MeshLambertMaterial({color:0xcfe8f0,transparent:true,opacity:.35}),.5,1.5,-D/2+1.2,s);
     [['ADMISSIONS',-2.4,'#2f4e6b'],['REGISTRATION',.5,'#8e2a3a'],['TRANSCRIPTS',3.1,'#3c6e58']].forEach(([t,x,c],i)=>{sign(t,x,2.25,-D/2+.1,2.2,c);addInPerson(staffLook(i%2?'m':'f',{outfit:i%2?'shirt':'kaba',extra:'specs'}),['Mrs. Owusu','Mr. Tetteh','Ms. Badu'][i],x,-D/2+.6,0,'type')});
-    sign('SENATE & REGISTRY · ACADEMIC AFFAIRS',.5,2.75,-D/2+.1,5.4,'#2f4e6b');
+    sign('ADMINISTRATION & REGISTRY · ACADEMIC AFFAIRS',.5,2.75,-D/2+.1,5.4,'#2f4e6b');
     box(.05,1.2,1.8,0x8a6a4a,-W/2+.1,1.5,0,s);for(let i=0;i<6;i++)box(.02,.28,.22,[0xf4f1ea,0xe8b24a,0xf4f1ea,0x9fd3f0,0xf4f1ea,0xf3c6c6][i],-W/2+.14,1.25+(i%2)*.4,-.6+Math.floor(i/2)*.55,s);
     [[-1,0xce1126],[0,0xfcd116],[1,0x006b3f]].forEach(([k,c])=>box(.42,.14,.02,c,W/2-1.1,2.3-k*.14,-D/2+.1,s));box(.06,.06,.03,0x111111,W/2-1.1,2.3,-D/2+.11,s);
     for(let r=0;r<2;r++)for(let i=0;i<5;i++){const x=-2.4+i*1.2,z=.9+r*1.3;B_(.48,.05,.45,0x2b2b2b,x,.47,z,true);box(.48,.45,.05,0x2b2b2b,x,.72,z+.22,s);seats.push({x,z,ry:Math.PI})}

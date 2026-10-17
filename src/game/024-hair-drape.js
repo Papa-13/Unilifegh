@@ -3,7 +3,7 @@
    partings), lies over the head, then falls with gravity: it slides over the skull, frames the face,
    rests on the shoulders, chest and back. Braids get a plaited texture, twists a spiral, locs are
    lumpy and matte; ends taper. Built once per style and shared by everyone with that style. */
-const DR={headC:new THREE.Vector3(0,.0,-.006),hr:[.137,.158,.138]},drZ=z=>z>DR.headC.z?.128:.147;
+const DR={headC:new THREE.Vector3(0,.0,-.006),hr:[.132,.153,.138]},drZ=z=>z>DR.headC.z?.124:.142;
 function plaitM(kind,grey){const k='plait'+kind+grey;if(SM[k])return SM[k];const c=document.createElement('canvas');c.width=64;c.height=32;const g=c.getContext('2d');
   g.fillStyle=grey?'#6f6a63':'#120d0a';g.fillRect(0,0,64,32);const hi=grey?'rgba(220,215,205,':'rgba(120,92,70,';
   if(kind==='braid'){/* two offset rows of slanted lobes = a three-strand plait */for(let x=0;x<64;x+=16){[[0,1],[16,-1]].forEach(([y0,s])=>{const gr=g.createLinearGradient(x,y0,x+16,y0+16);gr.addColorStop(0,hi+'.05)');gr.addColorStop(.5,hi+'.55)');gr.addColorStop(1,hi+'.05)');g.fillStyle=gr;g.beginPath();g.ellipse(x+8+(y0?8:0),y0+8,9,5.5,s*.6,0,7);g.fill()})}
@@ -18,7 +18,7 @@ function drapeFix(p,o){const c=DR.headC,[ax,ay,az]=DR.hr,rr=o.r||.01;
   /* face window: in front, below the bang line, strands slide to the side of the face */
   const bang=o.bang??.075;if(p.z>.02&&p.y<bang&&p.y>-.15&&Math.abs(p.x)<.118){const s=Math.sign(p.x)||1;p.x=s*(.118+rr)}
   if(p.y<-.12&&p.y>=-.2){const nr=Math.hypot(p.x,p.z+.01),need=.075+rr;if(nr<need){const k=need/(nr||1e-4);p.x*=k;p.z=(p.z+.01)*k-.01}}
-  if(p.y<-.2){const ex=(p.y>-.3?(o.f?.215:.235):(o.f?.19:.2))+rr,ez=(o.f?.165:.15)+rr,e=(p.x/ex)**2+(p.z/ez)**2;if(e<1){const k=1/Math.sqrt(e||1e-4);p.x*=k;p.z*=k}}
+  if(p.y<-.2){const ex=(p.y>-.3?(o.f?.215:.235):(o.f?.19:.2))+rr,ez=(o.f?.165:.15)+rr,e=(p.x/ex)**2+(p.z/ez)**2;if(e<1){const zz=ez*Math.sqrt(Math.max(0,1-(p.x/ex)**2));p.z=p.z>.02?zz:-zz}}
   if(p.y<-.1&&Math.abs(p.x)>.25)p.x=Math.sign(p.x)*.25;
   return p}
 /* roots spread over the scalp inside the hairline (golden-angle spiral) */
@@ -28,11 +28,17 @@ function drapeGeo(key,o){if(GC[key])return GC[key];const L=[],ends=[],down=new T
   drapeRoots(o).forEach((u,i)=>{const n=u.clone(),p=new THREE.Vector3(c.x+u.x*DR.hr[0],c.y+u.y*DR.hr[1],c.z+u.z*drZ(u.z));
     /* which way it flows from the top: centre part (to the sides) or all round from the crown */
     const flow=o.flow==='part'?(u.z>-.25?new THREE.Vector3(Math.sign(u.x||.01),0,-.25):new THREE.Vector3(u.x*.4,0,-1).normalize()):new THREE.Vector3(u.x,0,u.z).normalize();
-    let d=n.clone().multiplyScalar(o.lift??.35).add(flow.clone().multiplyScalar(.6)).add(down.clone().multiplyScalar(.3)).normalize();
-    const len=o.len*(.85+HH(i,5)*.3)*(o.lenF?o.lenF(u):1),step=.016,pts=[p.clone()],nS=Math.max(3,Math.round(len/step));
+    let d=n.clone().multiplyScalar(o.lift??.1).add(flow.clone().multiplyScalar(.6)).add(down.clone().multiplyScalar(.3)).normalize();
+    const len=o.len*(.78+HH(i,5)*.42)*(o.lenF?o.lenF(u):1),step=.016,pts=[p.clone()],nS=Math.max(3,Math.round(len/step));
     for(let s=0;s<nS;s++){const g=down.clone().add(flow.clone().multiplyScalar(Math.max(0,.5-s*.08)));
+      /* below the ears long hair relaxes in towards the neck and shoulders instead of hanging like a curtain */
+      if(p.y<-.04&&!o.stiffHang){const pull=(o.pull??1.1)*SS(-.04,-.2,p.y);g.x-=p.x*pull*2.2;g.z-=(p.z+.03)*pull*1.6}
+      {const lw=(o.softWave??.18)*SS(.0,-.12,p.y);g.x+=Math.sin(s*.45+i*2.3)*lw;g.z+=Math.cos(s*.38+i*1.9)*lw}
       if(o.wave){const w=Math.sin(s*.9+i*1.7)*o.wave*SS(.02,-.08,p.y);g.x+=w*Math.cos(i);g.z+=w*Math.sin(i)}
-      if(p.y<-.12&&Math.abs(p.z)<.07&&Math.abs(p.x)>.1)g.z-=.6;                        // side strands go behind the shoulders
+      if(p.y<-.12&&Math.abs(p.z)<.07&&Math.abs(p.x)>.1)g.z-=.6;
+      if(o.len>.25){const k=SS(-.04,-.2,p.y);g.x-=p.x*2.4*k;g.z-=(p.z+.01)*1.4*k;                 // relax in towards the neck and shoulders
+        if(u.z>0&&HH(i,21)<.45)g.z-=.9*k;                                                        // some front pieces fall behind the shoulder
+        g.x+=Math.sin(s*.45+i*3.1)*.12;g.z+=Math.cos(s*.38+i*2.3)*.1}                            // a little natural wander                        // side strands go behind the shoulders
       d.multiplyScalar(o.stiff??.45).addScaledVector(g.normalize(),1-(o.stiff??.45)).normalize();p.addScaledVector(d,step);const q0=p.clone();drapeFix(p,o);if(q0.distanceToSquared(p)>1e-8&&p.y<-.12){d.x*=.6;d.z*=.6;d.y=Math.min(d.y,-.35);d.normalize()}pts.push(p.clone())}
     /* relax the path so it curves softly instead of kinking, then keep it out of the head/body */
     for(let it=0;it<4;it++)for(let j=1;j<pts.length-1;j++){const m=pts[j-1].clone().add(pts[j+1]).multiplyScalar(.5);pts[j].lerp(m,j<3?.25:.55);drapeFix(pts[j],o)}
@@ -56,8 +62,8 @@ const DRAPE={
  halfup:{n:85,r:.0088,len:.55,flow:'crown',kind:'braid',skip:u=>u.y>.5},
  locbunf:{n:50,r:.016,len:.42,flow:'crown',kind:'loc',lumps:.12,skip:u=>u.y>.45},
  locbunm:{n:45,r:.016,len:.28,flow:'crown',kind:'loc',lumps:.12,skip:u=>u.y>.45},
- twists:{n:85,r:.0125,len:.12,flow:'crown',kind:'twist',lift:.9,stiff:.8,bang:.06,ymin:.02,taper:.3},
- twists2:{n:120,r:.0105,len:.14,flow:'crown',kind:'twist',lift:.85,stiff:.78,bang:.06,ymin:.0,taper:.3}};
+ twists:{n:95,r:.0125,len:.12,flow:'crown',kind:'twist',lift:.45,stiff:.6,pull:0,softWave:.05,bang:.06,ymin:.02,taper:.3},
+ twists2:{n:130,r:.0105,len:.14,flow:'crown',kind:'twist',lift:.4,stiff:.58,pull:0,softWave:.05,bang:.06,ymin:.0,taper:.3}};
 /* soft movement: every hair mesh gets its own copy of the material with a tiny vertex shader.
    Points further down a braid/loc move more: a gentle idle sway, and a springy swing that trails
    behind when the character walks, runs or turns, then settles. */

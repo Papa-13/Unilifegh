@@ -19,7 +19,7 @@ const B=[
  {id:'shawarma',name:'Shawarma & Pizza Spot',x:1410,y:1145,w:260,h:150,ht:2.4,c:0xf0e2c8,roof:0xc2572e,door:[1540,1127],zone:'c',deco:1},
  {id:'market',name:'Campus Market',x:700,y:1450,w:320,h:150,open:1,c:0x8a7458,door:[860,1540],zone:'c'},
  {id:'club',name:'Club Vibes',x:700,y:1855,w:240,h:150,ht:3.4,c:0x221d2e,roof:0x7a2ea0,door:[820,2023],zone:'c'},
- {id:'senate',name:'Senate & Registry',x:2100,y:475,w:300,h:170,ht:3.6,c:0xe6dcc6,roof:0x2f4e6b,door:[2250,457],zone:'f',deco:1},
+ {id:'senate',name:'Administration',x:2100,y:475,w:300,h:170,ht:3.6,c:0xe6dcc6,roof:0x2f4e6b,door:[2250,457],zone:'f',deco:1},
  {id:'greathall',name:'Great Hall',x:2450,y:475,w:300,h:180,ht:4.2,c:0xe9dfc9,roof:0x8e2a3a,door:[2600,457],zone:'f',deco:1},
  {id:'lib',name:'University Library',x:2100,y:685,w:280,h:170,ht:3.6,c:0xcfc3a5,roof:0x5b4636,door:[2240,873],zone:'f'},
  {id:'office',name:'Student Affairs & SRC',x:2420,y:705,w:220,h:150,ht:2.4,c:0xe9e3d6,roof:0x3c6e58,door:[2530,873],zone:'f'},
@@ -34,11 +34,11 @@ const B=[
  {id:'canteen',name:'Bush Canteen',x:3720,y:1145,w:180,h:150,ht:2.2,c:0xc9a27a,roof:0x7a5a2a,door:[3810,1127],zone:'f'},
  {id:'print',name:'Print & Type',x:3940,y:1145,w:160,h:150,ht:2.2,c:0xd8e1e6,roof:0x2a6f9b,door:[4020,1127],zone:'f'},
  {id:'lake',name:'Campus Lake',x:3480,y:1450,w:290,h:200,open:1,c:0x6f9a4c,door:[3620,1550],zone:'p'},
- {id:'parade',name:'Parade Grounds',x:2050,y:1135,w:280,h:870,open:1,c:0x6f9e4f,door:[2190,1365],zone:'p'},
+ {id:'parade',name:'Parade Grounds',x:2075,y:1135,w:255,h:870,open:1,c:0x6f9e4f,door:[2190,1365],zone:'p'},
  {id:'garden',name:'Botanical Garden',x:700,y:2300,w:260,h:200,open:1,c:0x4f8a3e,door:[830,2400],zone:'p'},
  {id:'night',name:'Night Market',x:1050,y:2300,w:320,h:200,open:1,c:0x6b5a46,door:[1210,2400],zone:'c'},
  {id:'square',name:'Akwaaba Square',x:1450,y:2300,w:320,h:200,open:1,c:0xbfae90,door:[1610,2400],zone:'c'},
- {id:'field',name:'Sports Field',x:2050,y:2250,w:360,h:240,open:1,c:0x3f8a3a,door:[2230,2370],zone:'s'},
+ {id:'field',name:'Sports Field',x:2075,y:2250,w:335,h:240,open:1,c:0x3f8a3a,door:[2230,2370],zone:'s'},
  {id:'court',name:'Basketball Court',x:2450,y:2250,w:240,h:200,open:1,c:0xb5653a,door:[2570,2350],zone:'s'},
  {id:'pool',name:'Swimming Pool',x:2750,y:2250,w:240,h:150,open:1,c:0xd9d4c7,door:[2870,2258],zone:'s'},
  {id:'pavilion',name:'Sports Pavilion',x:2050,y:2515,w:170,h:140,ht:2.6,c:0xe9e3d6,roof:0x8e2a3a,door:[2135,2673],zone:'s',deco:1},
@@ -118,7 +118,7 @@ const PAL={
  wax:{name:'Wax print swirl',a:'#c43d2b',b:'#f2b134',pat:'wax'},
  adinkra:{name:'Adinkra print',a:'#f1e2c4',b:'#2a1a12',pat:'adinkra'},
  mudcloth:{name:'Mud cloth',a:'#3a2c22',b:'#e9dcc4',pat:'mud'}};
-const HAIR={m:{short:'Short',fade:'Low cut',waves:'360 waves',afro:'Afro',locs:'Locs',twists:'Twists',cornrows:'Cornrows',dyed:'Blonde low cut',frohawk:'Frohawk',burst:'Twist sponge curls',hightop:'High top fade',mdesign:'Braided designs',twists2:'Two-strand twists',locbun:'Half-up tied locs'},f:{braids:'Knotless braids',afro:'Afro',puffs:'Afro puffs',bun:'Bun',locs:'Locs',cornrows:'Cornrows',wig:'Straight wig',duku:'Headwrap',bantu:'Bantu knots',ponytail:'Sleek ponytail',bob:'Bob wig',lowcut:'Low cut',blonde:'Blonde wig',puff:'High puff',knotless:'Knotless braids (medium)',fulani:'Fulani braids',passion:'Passion twists',goddess:'Goddess locs',bobbraids:'Bob braids',halfup:'Half up half down',curlywig:'Curly wig',locbun:'Half-up tied locs'}};
+const HAIR={m:{short:'Short',fade:'Low cut',waves:'360 waves',afro:'Afro',locs:'Locs',twists:'Twists',cornrows:'Cornrows',dyed:'Blonde low cut',frohawk:'Frohawk',burst:'Twist sponge curls',hightop:'High top fade',mdesign:'Braided designs',twists2:'Two-strand twists',locbun:'Half-up tied locs'},f:{braids:'Knotless braids',afro:'Afro',puffs:'Afro puffs',bun:'Bun',locs:'Locs',cornrows:'Cornrows',wig:'Straight wig',duku:'Headwrap',bantu:'Bantu knots',ponytail:'Sleek ponytail',bob:'Bob wig',lowcut:'Low cut',blonde:'Blonde wig',puff:'High puff',knotless:'Knotless braids (medium)',fulani:'Fulani braids',passion:'Passion twists',goddess:'Goddess locs',bobbraids:'Bob braids',curlywig:'Curly wig',locbun:'Half-up tied locs'}};
 const HAIRPRICE={short:20,fade:25,waves:30,afro:30,puffs:40,cornrows:90,locs:180,twists:120,braids:150,bun:40,wig:250,duku:30,dyed:60,frohawk:45,burst:70,bantu:80,ponytail:90,bob:200,lowcut:20,blonde:280,hightop:35,mdesign:110,twists2:90,locbun:200,puff:40,knotless:130,fulani:170,passion:160,goddess:220,bobbraids:120,halfup:150,curlywig:260};
 const OUTFIT={m:{tee:'Oversized tee & cargos',hoodie:'Hoodie & joggers',polo:'Polo & chinos',shirt:'Shirt & jeans',jacket:'Denim jacket & jeans',varsity:'Varsity jacket',track:'Tracksuit',kaftan:'Kaftan set',jersey:'Jersey & shorts',smock:'Fugu smock',unitee:'AKWAABA U campus tee',rugby:'Rugby stripe shirt & jeans',cargo2:'Tee & black cargos',suit:'Suit (presentations)',faculty:'Department shirt & black trousers',friday:'Friday wear: print shirt & trousers',baggy:'Oversized tee & baggy jeans',jorts:'Tee & jorts',halltee:'Hall Week tee & joggers'},
   f:{jeans:'Crop top & jeans',hoodie:'Hoodie & leggings',bodycon:'Bodycon dress',tank:'Tank top & cargos',skirt:'Tee & mini skirt',twopiece:'Print two-piece',jumpsuit:'Jumpsuit',blazer:'Blazer suit',athleisure:'Athleisure set',kente:'Kente maxi dress',kaba:'Ankara two-piece',dress:'Sundress',unitee:'AKWAABA U campus tee',dskirt:'Crop top & denim maxi skirt',cargo:'Tank & cargo pants',formal:'Shirt & trousers (presentations)',faculty:'Department shirt & black skirt',friday:'Friday wear: print wrap skirt & tee',corset:'Corset top & baggy jeans',halltee:'Hall Week tee & jorts'}};

@@ -236,6 +236,7 @@ function cornrowGeo(){if(GC.corn)return GC.corn;const L=[];for(let i=-3;i<=3;i++
 function makeHuman(L,o){return realOn()?makeRealHuman(L,o):makeHumanProc(L,o)}
 function makeHumanProc(L,{label=null,labelColor='#f6f0e8',ring=false}={}){
   const f=L.gender==='f',g=new THREE.Group(),O=L.outfit;g.rotation.order='YXZ';
+  if(typeof HAIR!=='undefined'&&HAIR[f?'f':'m']&&!HAIR[f?'f':'m'][L.hair])L.hair=f?'knotless':'fade';   // retired styles (e.g. half up half down)
   const skin=skinM(L.skin),cloth=clothStd(L.pal),hair=hairStd(!!L.grey),gold=stdM(0xd9a537,.3,{metalness:.8});
   const sp=ospec(f,O),topM=sp.solid?stdM(hexN(PAL[L.pal].a),.7):cloth;
   const pantsM=sp.legs==='skin'?null:stdM(hexN(sp.pc),sp.legs==='tights'?.55:.9);
@@ -334,7 +335,7 @@ const disposeTree=o=>o.traverse(n=>{if(n.geometry)n.geometry.dispose()});
 /* hair, beards, caps, glasses and headphones, built on a head group (also used for the realistic characters) */
 const hatOn=L=>['cap','durag','bucket'].includes(L.extra);
 function hairBlock(L,f,head,hair,cloth,gold){
-  let H=L.hair;const capG=new THREE.SphereGeometry(.134,30,18,0,Math.PI*2,0,Math.PI*.54);
+  let H=L.hair==='halfup'?'knotless':L.hair;const capG=new THREE.SphereGeometry(.134,30,18,0,Math.PI*2,0,Math.PI*.54);
   try{if(longHair(H,L,f,head,hair,gold)||coilHair(H,L,f,head,hair))H='_'}catch(e){console.error(e)}
   const capOn=['short','braids','bun','locs','twists','wig','fade','waves','cornrows'].includes(H)&&!(H==='afro');
   if(capOn&&!(hatOn(L)&&['short','fade'].includes(H))){if(H==='fade'||H==='short'||H==='waves')scalpMesh(head,f,scalpM(H==='waves'?'waves':shortKind(L),H==='fade'),{t:H==='short'?.009:.006,fade:H==='fade'});else scalpMesh(head,f,H==='braids'?braidCapM():hair,{t:.01})}

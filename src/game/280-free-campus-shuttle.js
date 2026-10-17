@@ -6,27 +6,30 @@ const SH_PER=perim(SH_ROUTE);
 const SH_STOPS=(()=>{const L=[],P=perim(SH_ROUTE),sn=b=>b.name.split(' · ')[0].replace(' (private)','');for(let d=180;d<P-120;d+=520){const q=along(SH_ROUTE,d);
     const near=B.filter(b=>!b.open||['taxi','trotro','terminal','parade','lake','market'].includes(b.id)).map(b=>({b,dd:Math.hypot(b.door[0]-q.x,b.door[1]-q.y)})).filter(o=>o.dd<420).sort((a,b)=>a.dd-b.dd).slice(0,2).map(o=>sn(o.b));
     const z=zoneOf(q.x+(-q.dy)*120,q.y+q.dx*120);L.push([near.length?near.join(' · '):z,q.x,q.y])}return L})().map(([name,x,y],i)=>{
-  const d=projD(SH_ROUTE,x,y),q=along(SH_ROUTE,d),ox=-q.dy,oy=q.dx;return{i,name,d,x:q.x,y:q.y,sx:q.x+ox*(RHW+26),sy:q.y+oy*(RHW+26),ox,oy}});
+  /* keep the shelter on the pavement: slide it along the route until it is clear of every road (junctions, side streets) */
+  const offRoad=(x,y)=>!ROADS.some(([rx,ry,w,h])=>x>rx-26&&x<rx+w+26&&y>ry-26&&y<ry+h+26);
+  let d=projD(SH_ROUTE,x,y),q=along(SH_ROUTE,d);for(let k=0;k<12;k++){const sx=q.x-q.dy*(RHW+26),sy=q.y+q.dx*(RHW+26);if(offRoad(sx,sy))break;d=(d+(k%2?-1:1)*(k+1)*45+SH_PER)%SH_PER;q=along(SH_ROUTE,d)}
+  const ox=-q.dy,oy=q.dx;return{i,name,d,x:q.x,y:q.y,sx:q.x+ox*(RHW+26),sy:q.y+oy*(RHW+26),ox,oy}});
 function makeBus(){return makeBusModel()}
 function makeBus_old(){const g=new THREE.Group();box(3.4,1.05,1.15,0xf4f1ea,0,.85,0,g);box(3.42,.18,1.17,0x8e2a3a,0,.48,0,g);box(3.1,.42,1.17,0x24323f,0,1.08,0,g);box(.04,.55,.95,0x24323f,1.71,1.0,0,g);
   [[-1.1,.58],[1.1,.58],[-1.1,-.58],[1.1,-.58]].forEach(([x,z])=>{const w=mesh(cyl(.24,.24,.14,12),lam(0x111111),x,.25,z,g);w.rotation.x=Math.PI/2});
   box(.04,.12,.8,basic(0xfff3c4),1.72,.55,0,g);g.userData.door=box(.56,.92,.03,0x1b2630,1.2,.8,.59,g);box(.46,.38,.01,0x9fd3f0,0,.2,-.02,g.userData.door);
   [[.59,0],[-.59,Math.PI]].forEach(([z,r])=>{const sg=mesh(new THREE.PlaneGeometry(2.8,.28),new THREE.MeshBasicMaterial({map:textTex('CAMPUS SHUTTLE · FREE',{w:768,h:80,font:'900 46px system-ui',color:'#ffffff',stroke:false,bg:'#8e2a3a'})}),0,.72,z,g);sg.rotation.y=r});
   scene.add(g);return g}
-SH_STOPS.forEach(st=>{const tight=solidAt(st.sx,st.sy,10)||B.some(b=>!b.open&&st.sx>b.x-12&&st.sx<b.x+b.w+12&&st.sy>b.y-12&&st.sy<b.y+b.h+12);
-  if(tight){st.sx=st.x+st.ox*(RHW+9);st.sy=st.y+st.oy*(RHW+9)}const g=new THREE.Group();g.position.set(wx(st.sx),0,wz(st.sy));g.rotation.y=Math.atan2(st.ox,st.oy);
+SH_STOPS.forEach(st=>{let tight=solidAt(st.sx,st.sy,10)||B.some(b=>!b.open&&st.sx>b.x-12&&st.sx<b.x+b.w+12&&st.sy>b.y-12&&st.sy<b.y+b.h+12);
+  if(tight&&!ROADS.some(([rx,ry,w,h])=>st.x+st.ox*(RHW+12)>rx&&st.x+st.ox*(RHW+12)<rx+w&&st.y+st.oy*(RHW+12)>ry&&st.y+st.oy*(RHW+12)<ry+h)){st.sx=st.x+st.ox*(RHW+12);st.sy=st.y+st.oy*(RHW+12)}else tight=false;const g=new THREE.Group();g.position.set(wx(st.sx),0,wz(st.sy));g.rotation.y=Math.atan2(st.ox,st.oy);
   if(tight){mesh(cyl(.035,.035,2.2,6),lam(0x666666),0,1.1,0,g);box(.5,.36,.03,0x8e2a3a,0,2.05,0,g);box(.36,.2,.035,0xffffff,0,2.05,.001,g)}
   else{box(1.6,.08,.7,0x8e2a3a,0,1.9,0,g);[-.7,.7].forEach(x=>mesh(cyl(.04,.04,1.9,6),lam(0x666666),x,.95,-.25,g));box(1.3,.08,.35,0x7a5a3a,0,.45,-.15,g);box(1.4,.9,.04,0x9fd3f0,0,1.2,-.33,g)}
   const t=sprite('🚌 '+st.name,'#ffffff',.7);t.position.set(0,2.5,0);g.add(t);scene.add(g)});
 (function scenery(){let sd=7;const rnd=()=>(sd=(sd*16807)%2147483647)/2147483647;const sc=scene;
-  const tree=(x,y,z)=>{solidC(x,y,11*z);mesh(cyl(.12*z,.18*z,1.6*z,8),lam(0x6b4a2e),wx(x),.8*z,wz(y),sc);mesh(sph(.9*z,12,10),lam([0x2f6a32,0x3a7a3a,0x2b5f2e][Math.floor(rnd()*3)]),wx(x),2*z,wz(y),sc)};
-  const palm=(x,y)=>{solidC(x,y,8);mesh(cyl(.1,.15,2.4,8),lam(0x7a5a3a),wx(x),1.2,wz(y),sc);for(let i=0;i<7;i++){const l=box(1.1,.04,.28,0x3f8a3a,wx(x)+Math.cos(i)*.4,2.4,wz(y)+Math.sin(i)*.4,sc);l.rotation.y=i;l.rotation.z=-.35}};
+  const tree=(x,y,z)=>{solidC(x,y,11*z);niceTree(sc,x,y,z*.95)};
+  const palm=(x,y)=>{solidC(x,y,8);nicePalm(sc,x,y)};
   const onRoad=(x,y,m)=>ROADS.some(([rx,ry,w,h])=>x>rx-m&&x<rx+w+m&&y>ry-m&&y<ry+h+m);
   const nearB=(x,y,m)=>B.some(b=>x>b.x-m&&x<b.x+b.w+m&&y>b.y-m&&y<b.y+b.h+m||Math.hypot(b.door[0]-x,b.door[1]-y)<m+40);
   const nearStop=(x,y)=>SH_STOPS.some(st=>Math.hypot(st.sx-x,st.sy-y)<70);
   // street lamps along every road
   ROADS.forEach(([rx,ry,w,h])=>{const horiz=w>h;for(let t=150;t<(horiz?w:h)-50;t+=300){const side=(Math.round(t/300)%2)?1:-1,x=horiz?rx+t:rx+w/2+side*(w/2+14),y=horiz?ry+h/2+side*(h/2+14):ry+t;
-    if(onRoad(x,y,0)||nearB(x,y,12)||nearStop(x,y)||solidAt(x,y,14)||JUNCS.some(J=>Math.hypot(J.x-x,J.y-y)<70))continue;solidC(x,y,5);mesh(cyl(.04,.05,2.4,6),lam(0x333333),wx(x),1.2,wz(y),sc);mesh(sph(.12,8,8),basic(0xfff1c2),wx(x),2.45,wz(y),sc)}});
+    if(onRoad(x,y,0)||nearB(x,y,12)||nearStop(x,y)||solidAt(x,y,14)||JUNCS.some(J=>Math.hypot(J.x-x,J.y-y)<70))continue;solidC(x,y,5);niceLamp(sc,x,y,horiz?(side>0?Math.PI/2:-Math.PI/2):(side>0?Math.PI:0))}});
   // trees and palms in open grass
   let n=0;for(let y=50;y<MH-40;y+=100)for(let x=50;x<MW-40;x+=100){if(n>230)break;const px=x+(rnd()-.5)*60,py=y+(rnd()-.5)*60;
     if(rnd()<.5&&!onRoad(px,py,26)&&!nearB(px,py,45)&&!nearStop(px,py)&&!solidAt(px,py,30)){rnd()<.3?palm(px,py):tree(px,py,.8+rnd()*.4);n++}}
