@@ -22,17 +22,17 @@ function makeOkada(){const g=new THREE.Group(),bike=new THREE.Group();g.add(bike
 function makeTrotro(){const g=new THREE.Group(),van=new THREE.Group();g.add(van);
   const base=pick([0xe8e3d8,0xf4c430,0xd8d8d8,0x2f6bb5]),stripe=pick([0x8e2a3a,0x2fa84f,0xc8322b,0x111111]),pb=lam(base),ps=lam(stripe);
   box(3.6,1.05,1.55,pb,0,.95,0,van);box(3.6,.18,1.57,ps,0,.72,0,van);                    // body + stripe
-  box(3.4,.45,1.5,pb,-.05,1.66,0,van);                                                   // roof
+  const roof=box(3.4,.45,1.5,pb,-.05,1.66,0,van);                                        // roof
   const glass=lam(0x22323f);[-1,1].forEach(sd=>{for(let x=-1.3;x<1.2;x+=.62)box(.5,.36,.02,glass,x,1.25,sd*.78,van)});
   box(.04,.5,1.4,glass,1.81,1.25,0,van);box(.04,.3,1.3,glass,-1.81,1.3,0,van);           // windscreen, rear glass
   box(.04,.12,1.5,lam(0x111111),1.82,.55,0,van);box(.04,.12,1.5,lam(0x111111),-1.82,.55,0,van);
   [-1,1].forEach(sd=>{box(.04,.1,.22,0xfff2c0,1.82,.78,sd*.55,van);box(.04,.12,.18,0xc8322b,-1.82,.8,sd*.6,van)});
-  box(1.6,.06,1.3,lam(0x5a4a3a),-.2,1.9,0,van);                                         // roof rack with load
-  box(.6,.3,.5,lam(pick([0x2f6bb5,0x8e2a3a,0xd9a537])),-.6,2.08,.2,van);box(.4,.24,.4,lam(0xe8d4a8),.2,2.05,-.25,van);
+  const rack=[box(1.6,.06,1.3,lam(0x5a4a3a),-.2,1.9,0,van),box(.6,.3,.5,lam(pick([0x2f6bb5,0x8e2a3a,0xd9a537])),-.6,2.08,.2,van),box(.4,.24,.4,lam(0xe8d4a8),.2,2.05,-.25,van)];   // roof rack with load
   [[-1.15,.72],[1.15,.72],[-1.15,-.72],[1.15,-.72]].forEach(([x,z])=>wheel(van,x,z,.3,.2));
   const say=pick(TROTRO_SAYINGS),tex=textTex(say,{w:512,h:96,font:'900 54px system-ui',color:'#fff',stroke:false,bg:'#'+stripe.toString(16).padStart(6,'0')});
   const back=new THREE.Mesh(new THREE.PlaneGeometry(1.3,.24),new THREE.MeshBasicMaterial({map:tex}));back.position.set(-1.83,1.66,0);back.rotation.y=-Math.PI/2;van.add(back);
   const front=back.clone();front.position.set(1.83,1.66,0);front.rotation.y=Math.PI/2;van.add(front);
   /* the mate hangs out of the sliding door */
   const mate=makeHuman(Object.assign(randomLook('m'),{outfit:'tee',bag:'none',extra:'none'}),{});mate.g.position.set(.35,.32,.86);mate.g.rotation.y=.4;mate.arms[0].rotation.x=-2.6;van.add(mate.g);
-  van.scale.setScalar(.95);g.userData.trotro=true;g.userData.inner=van;g.userData.roofParts=[];g.userData.seats=[];scene.add(g);return g}
+  van.scale.setScalar(.95);g.userData.trotro=true;g.userData.inner=van;g.userData.roofParts=[roof,...rack];g.userData.seatY=.55;g.userData.scale=.95;
+  g.userData.seats=[[1.2,-.4],[1.2,.35],[.35,-.4],[.35,.35],[-.45,-.4],[-.45,0],[-.45,.4],[-1.25,-.4],[-1.25,.4]];scene.add(g);return g}

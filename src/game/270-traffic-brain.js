@@ -75,7 +75,7 @@ const pathLen=pts=>pts.slice(1).reduce((s,q,i)=>s+Math.hypot(q.x-pts[i].x,q.y-pt
 function rideQuote(dest){const p=P(),b=BID[dest],to={x:b.door[0],y:b.door[1]},from=IS?doorOfInside():{x:p.x,y:p.y};const len=pathLen([from,...roadPath(from,to),to]);
   return{len,ryde:Math.round(15+len*.012),dash:Math.round(10+len*.009),mins:Math.round(4+len/80)}}
 function doorOfInside(){const b=insideB();return{x:b.door[0],y:b.door[1]+(b.door[1]>b.y?22:-22)}}
-const carDesc=app=>app==='ryde'?'black Toyota Corolla · GR 2451-24':app==='dash'?'green Kia Picanto · AS 778-23':'yellow taxi';
+const carDesc=app=>app==='trotro'?'trotro':app==='ryde'?'black Toyota Corolla · GR 2451-24':app==='dash'?'green Kia Picanto · AS 778-23':'yellow taxi';
 function roadPoint(x,y){const h={x,y:nearH(y,x)},v={x:nearV(x),y};return Math.abs(h.y-y)<=Math.abs(v.x-x)?Object.assign(h,{ax:'h'}):Object.assign(v,{ax:'v'})}
 function rideSide(r,px,py){const d=r.dir,c=r.lp||r.pos;return((px-c.x)*(-d.y)+(py-c.y)*d.x)>=0?0:1}
 function rideDoorPt(r,side){const d=r.dir,c=r.lp||r.pos,sx=side?d.y:-d.y,sy=side?-d.x:d.x;return{x:c.x+sx*38+d.x*8,y:c.y+sy*38+d.y*8}}
@@ -88,11 +88,21 @@ function callRide(dest,app){if(P().onBus)return toast('You are on the shuttle. G
   const start=pick.ax==='h'?{x:clamp(p.x+(p.x<MW/2?700:-700),20,MW-20),y:pick.y}:{x:pick.x,y:clamp(p.y+(p.y<MH/2?600:-600),20,MH-20)};
   S.ride={app,dest,price,mins:q.mins,phase:'pickup',pts:[start,pick],i:0,pos:{...start},dir:{x:Math.sign(pick.x-start.x)||0,y:Math.sign(pick.y-start.y)||0},g:makeCar(app==='ryde'?0x161616:0x2fa84f,false),sp:app==='ryde'?360:290,drive:[pick,...roadPath(pick,drop),drop],door,t:0,side:0};
   P().target=null;toast(`${app==='ryde'?'Ryde':'Dash'}: your driver is coming in a ${carDesc(app)}. ${cedi(price)} 🚗`);closeSheet();acts(true)}
-/* taxis drive the public ring road only: they drop you at the nearest point outside campus */
-function ringPath(a,b){const R=PERIM_RT,P=perim(R),da=projD(R,a.x,a.y),db=projD(R,b.x,b.y);let fwd=((db-da)%P+P)%P;const dir=fwd<=P/2?1:-1,len=dir>0?fwd:P-fwd,pts=[];
-  let acc=0;const cs=R.map((c,i)=>{let s=0;for(let k=0;k<i;k++)s+=Math.hypot(R[k+1][0]-R[k][0],R[k+1][1]-R[k][1]);return{x:c[0],y:c[1],d:s}});
-  cs.forEach(c=>{const off=dir>0?((c.d-da)%P+P)%P:((da-c.d)%P+P)%P;if(off>1&&off<len-1)pts.push({x:c.x,y:c.y,off})});pts.sort((p,q)=>p.off-q.off);void acc;
-  const A=along(R,da),Bp=along(R,db);return{from:{x:A.x,y:A.y,ax:Math.abs(A.dx)>.5?'h':'v'},to:{x:Bp.x,y:Bp.y},mid:pts.map(({x,y})=>({x,y}))}}
+/* public roads (taxis, trotros, okadas): the Accra–Kumasi Road, the Kotei and town roads, the Tech Junction and Ayeduase roads,
+   the roads inside Ayeduase, and the bits of road outside campus. Campus roads are for shuttles, rides and private cars. */
+const PUBNET=(()=>{const HYs=HROADS.map(r=>r[0]),isPubH=(y,x1,x2)=>[330,2800,3400].includes(y)||([1000,2150].includes(y)&&x1>=4400-1),isPubV=(x,y1,y2)=>x===600||x===4400||y2<=331||y1>=2799;
+  const segs=[];HROADS.forEach(([y,a,b])=>{const xs=[a,...VX.filter(x=>x>a&&x<b),b];for(let k=0;k<xs.length-1;k++)if(isPubH(y,xs[k],xs[k+1]))segs.push([xs[k],y,xs[k+1],y])});
+  VX.forEach(x=>{const ys=[0,...HYs.filter(y=>{const r=HROADS.find(h=>h[0]===y);return r&&x>=r[1]&&x<=r[2]}).sort((a,b)=>a-b),MH];for(let k=0;k<ys.length-1;k++)if(isPubV(x,ys[k],ys[k+1]))segs.push([x,ys[k],x,ys[k+1]])});
+  return segs})();
+function pubProject(x,y){let best=null;PUBNET.forEach((sg,i)=>{const [x1,y1,x2,y2]=sg,L=Math.hypot(x2-x1,y2-y1),t=clamp(((x-x1)*(x2-x1)+(y-y1)*(y2-y1))/(L*L),0,1),px=x1+(x2-x1)*t,py=y1+(y2-y1)*t,d=Math.hypot(px-x,py-y);if(!best||d<best.d)best={i,x:px,y:py,d,t,sg}});return best}
+/* shortest route along public roads (Dijkstra over junctions) */
+function pubPath(a,b){const A=pubProject(a.x,a.y),Bq=pubProject(b.x,b.y),key=(x,y)=>Math.round(x)+','+Math.round(y),G={},add=(p,q)=>{const k1=key(...p),k2=key(...q),d=Math.hypot(q[0]-p[0],q[1]-p[1]);(G[k1]=G[k1]||[]).push([k2,d,q]);(G[k2]=G[k2]||[]).push([k1,d,p])};
+  PUBNET.forEach((sg,i)=>{const cuts=[[sg[0],sg[1]],[sg[2],sg[3]]];[A,Bq].forEach(P_=>{if(P_.i===i)cuts.push([P_.x,P_.y])});cuts.sort((p,q)=>(p[0]-sg[0])+(p[1]-sg[1])-((q[0]-sg[0])+(q[1]-sg[1])));for(let k=0;k<cuts.length-1;k++)add(cuts[k],cuts[k+1])});
+  const s0=key(A.x,A.y),t0=key(Bq.x,Bq.y),dist={[s0]:0},prev={},pos={[s0]:[A.x,A.y]},Q=new Set([s0]);
+  while(Q.size){let u=null;Q.forEach(k=>{if(u===null||dist[k]<dist[u])u=k});Q.delete(u);if(u===t0)break;(G[u]||[]).forEach(([v,d,pv])=>{const nd=dist[u]+d;if(dist[v]===undefined||nd<dist[v]){dist[v]=nd;prev[v]=u;pos[v]=pv;Q.add(v)}})}
+  const pts=[];let k=t0;if(dist[t0]===undefined)return{from:{x:A.x,y:A.y},to:{x:Bq.x,y:Bq.y},mid:[]};while(k&&k!==s0){pts.unshift({x:pos[k][0],y:pos[k][1]});k=prev[k]}
+  const to=pts.pop()||{x:Bq.x,y:Bq.y};const sg=A.sg;return{from:{x:A.x,y:A.y,ax:sg[1]===sg[3]?'h':'v'},to,mid:pts}}
+const ringPath=pubPath;
 function taxiRide(dest,shared){if(S.ride)return toast('You already have a ride.');
   const b=BID[dest],door={x:b.door[0],y:b.door[1]+(b.door[1]>b.y?22:-22)},RP=ringPath({x:BID.taxi.door[0],y:BID.taxi.door[1]},door),start=RP.from,drop=RP.to,len=pathLen([start,...RP.mid,drop]);
   const walk=Math.hypot(drop.x-door.x,drop.y-door.y);if(walk>260)setTimeout(()=>toast(`🚕 Taxis can't enter the campus. The driver will drop you at the nearest gate road. Walk or take the free shuttle from there.`),1200);
@@ -120,7 +130,7 @@ function updRide(dt){const r=S.ride;if(!r)return;const p=P();
       if(r.ov===1){r.ovT+=dt;const b=vehicles().find(o=>o.ref===r.ovB&&!o.shadow);if(!b||((b.x-L0.x)*dx+(b.y-L0.y)*dy)<-(hl+b.hl+14)||r.ovT>14||nearJunc(L0.x,L0.y,dx,dy,0,RHW+140+hl))r.ov=2}
       else if(r.ov===2&&Math.abs((r.lo??LANE)-LANE)<1)r.ov=0}
     const done=moveAlong(r,Math.min(dt*r.rv,Math.max(0,free-3)/r.sp));const L=rideLane(r,dt);placeCar(r.g,L.x,L.y,r.dir.x,r.dir.y);if(r.phase==='drive'){p.x=L.x;p.y=L.y}
-    if(done){if(r.phase==='pickup'){r.phase='wait';r.waitUntil=S.min+30;msg(`${r.app==='ryde'?'Ryde':'Dash'} driver`,`I'm here 📍 ${carDesc(r.app)} by the road. Come and get in!`);acts(true)}
+    if(done){if(r.phase==='pickup'){r.phase='wait';r.waitUntil=S.min+30;if(r.hail)toast(r.app==='trotro'?'🚐 The trotro stops. The mate slides the door open: "Enter, enter!"':'🚕 The taxi stops beside you. "Where are you going?"');else msg(`${r.app==='ryde'?'Ryde':'Dash'} driver`,`I'm here 📍 ${carDesc(r.app)} by the road. Come and get in!`);acts(true)}
       else if(r.phase==='drive'){r.phase='drop';r.t=0;r.side=rideSide(r,r.door.x,r.door.y)}
       else{scene.remove(r.g);disposeTree(r.g);S.ride=null;acts(true)}}return}
   r.t+=dt;{const L=rideLane(r,dt);placeCar(r.g,L.x,L.y,r.dir.x,r.dir.y)}
@@ -130,8 +140,8 @@ function updRide(dt){const r=S.ride;if(!r)return;const p=P();
     setDoor(r,Math.min(1,r.t/.45));
     if(r.t>.6&&!p.inCar){p.inCar=true;toast(r.app==='taxi'?'You open the door and get in. "Driver, good day!" 🚕':'You open the door and get in. Driver: "Charley, how far? Seatbelt o." 😄')}
     if(r.t>.6)setDoor(r,Math.max(0,1-(r.t-.6)/.4));
-    if(r.t>1.1){setDoor(r,0);if(r.shared&&!r.filled){r.phase='fill';r.t=0;toast('Waiting for the taxi to fill up with passengers… 🚕');acts(true);return}r.phase='drive';r.pts=r.drive;r.i=0;acts(true)}return}
-  if(r.phase==='fill'){if(r.t>3.2){r.filled=true;r.phase='drive';r.pts=r.drive;r.i=0;toast('The taxi is full. Off we go! 🚕')}return}
+    if(r.t>1.1){setDoor(r,0);if(r.shared&&!r.filled){r.phase='fill';r.t=0;toast(r.app==='trotro'?'The mate shouts for more passengers… "One more seat! Let\'s go!" 🚐':'Waiting for the taxi to fill up with passengers… 🚕');acts(true);return}r.phase='drive';r.pts=r.drive;r.i=0;acts(true)}return}
+  if(r.phase==='fill'){if(r.t>3.2){r.filled=true;r.phase='drive';r.pts=r.drive;r.i=0;toast(r.app==='trotro'?'The trotro is full. The mate bangs the side: "Drive!" 🚐':'The taxi is full. Off we go! 🚕')}return}
   if(r.phase==='drop'){const dp=rideDoorPt(r,r.side);setDoor(r,Math.min(1,r.t/.4));
     if(r.t>.45&&p.inCar){p.inCar=false;p.pose=null;p.x=dp.x;p.y=dp.y;unstick(p);p.money-=r.price;advance(r.mins);toast(r.app==='taxi'?(Math.hypot(r.door.x-p.x,r.door.y-p.y)>260?`🚕 Dropped at the road outside campus. Walking to ${BID[r.dest].name}… "Medaase, driver!"`:`Arrived at ${BID[r.dest].name}. "Medaase, driver!" 🚕`):`Arrived at ${BID[r.dest].name}. Paid ${cedi(r.price)} on MoMo. ⭐⭐⭐⭐⭐`);p.target={...r.door}}
     if(r.t>.9)setDoor(r,Math.max(0,1-(r.t-.9)/.4));

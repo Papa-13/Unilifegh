@@ -155,11 +155,12 @@ function acts0(force){
       const btns=VV.kind==='car'?[['💬 Chat with the driver','vchat'],[S.radio?'🔉 Music down':'🎵 Ask for some Afrobeats','vradio'],['📱 Text the group chat','vphone']]:[['💬 Talk to the student beside you','bchat'],['😴 Doze off','bdoze'],['📱 Scroll TikTok','vphone']];
       $('acts').innerHTML=`<span class="eyebrow" id="vehL">${VV.kind==='car'?`🚗 Riding to ${esc(BID[S.ride.dest].name)}`:`🚌 Shuttle to ${esc(SH_STOPS[p.onBus.dest].name)}`}</span>`+btns.map(([t,kk])=>`<button class="ghost sm" data-v="${kk}">${t}</button>`).join('');
       $('acts').querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>vehAct(b.dataset.v))}actKey='veh';return}
-  if(S.busy||rideBusy()||p.onBus){$('where').textContent=inside?IS.title:zoneName(p.x,p.y);const ph=S.ride&&S.ride.phase;$('acts').innerHTML=`<span class="eyebrow">⏳ ${esc(S.busy?S.busy.label+'…':p.onBus?`On the shuttle to ${SH_STOPS[p.onBus.dest].name}…`:ph==='board'?'Opening the door and getting in…':ph==='fill'?'Waiting for the taxi to fill up…':ph==='drop'?'Getting out…':`Riding to ${BID[S.ride.dest].name}…`)}</span>`;actKey='busy';return}
+  if(S.busy||rideBusy()||p.onBus){$('where').textContent=inside?IS.title:zoneName(p.x,p.y);const ph=S.ride&&S.ride.phase;$('acts').innerHTML=`<span class="eyebrow">⏳ ${esc(S.busy?S.busy.label+'…':p.onBus?`On the shuttle to ${SH_STOPS[p.onBus.dest].name}…`:ph==='board'?'Opening the door and getting in…':ph==='fill'?(S.ride.app==='trotro'?'Waiting for the trotro to fill up…':'Waiting for the taxi to fill up…'):ph==='drop'?'Getting out…':`Riding to ${BID[S.ride.dest].name}…`)}</span>`;actKey='busy';return}
   const list=inside?(IS.kind==='bld'?placeActions(BID[IS.bid]||{id:IS.bid},true):roomActions()):placeActions(b,false);
   try{memActs(list,inside,b)}catch(e){console.error(e)}
   if(!inside)try{hawkerActs(list)}catch(e){console.error(e)}
   try{dateActs(list)}catch(e){console.error(e)}
+  if(!inside)try{hailActs(list)}catch(e){console.error(e)}
   {const rp=mpNear();if(rp)list.unshift([`🌐 ${rp.nm} (real student)`,()=>mpCard(rp),null,'b']);if(!inside&&MP.room&&mpOnline().length)list.push(['🗨️ Say something out loud',()=>mpSay()])}
   const stp=!inside&&nearStop();if(stp)list.unshift([`🚌 Wait for the free shuttle (${stp.name})`,()=>waitShuttle(stp),null,'b']);
   if(p.food&&p.food.length)list.unshift([`🍱 Eat your ${p.food[0].name}`,()=>{const f=p.food.shift();doAct(`Eating ${f.name}`,25,{hunger:f.food,fun:8})},null,'b']);
