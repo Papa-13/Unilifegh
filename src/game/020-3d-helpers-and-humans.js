@@ -90,6 +90,12 @@ const OSPEC={
  f_kaba:{sl:1,legs:'skin',over:'kaba',puff:1},
  f_dress:{sl:0,legs:'skin',neck:1,over:'sundress'},
  m_unitee:{sl:1,legs:'pants',pc:'#2b2b2b',loose:1,print:'AKWAABA U'},
+ m_rugby:{sl:2,legs:'pants',pc:'#7aa0c8',collar:1,placket:1,loose:1},
+ m_suit:{sl:2,legs:'pants',match:1,solid:1,jacket:'pal',tee:'#f4f1ea',collar:1},
+ m_cargo2:{sl:1,legs:'pants',pc:'#2b2b2b',cargo:1,loose:1},
+ f_dskirt:{sl:1,legs:'skin',crop:1,over:'dskirt'},
+ f_formal:{sl:2,legs:'pants',pc:'#cdbb9a',tee:'#ffffff',collar:1,buttons:1,wide:1},
+ f_cargo:{sl:0,legs:'pants',pc:'#5b6b3a',cargo:1,neck:2,crop:1,wide:1},
  f_unitee:{sl:1,legs:'pants',pc:'#5d7fa8',wide:1,print:'AKWAABA U'}};
 const ospec=(f,O)=>OSPEC[(f?'f_':'m_')+O]||OSPEC[(f?'m_':'f_')+O]||OSPEC.m_tee;
 const hexN=c=>new THREE.Color(c).getHex();
@@ -226,6 +232,7 @@ function makeHuman(L,{label=null,labelColor='#f6f0e8',ring=false}={}){
   const shell=(bone,key,pts,m,sz=.8,ph)=>{const k=mesh(ph?new THREE.LatheGeometry(pts.map(([r,y])=>new THREE.Vector2(r,y)),28,ph[0],ph[1]):lathe(key,pts,28),m,0,-new THREE.Vector3().setFromMatrixPosition(bone.matrixWorld).y,0,bone);k.scale.z=sz;return k};
   if(sp.over==='sundress')shell(hips,'sundress',[[.3,.47],[.255,.62],[.212,.78],[.172,.95],[.152,1.03]],clothStd(L.pal,1));
   if(sp.over==='bodycon')shell(hips,'bodycon',[[.172,.55],[.19,.66],[.2,.78],[.19,.88],[.166,.97],[.146,1.03]],stdM(hexN(PAL[L.pal].a),.6,{side:THREE.DoubleSide}));
+  if(sp.over==='dskirt')shell(hips,'dskirt',[[.24,.06],[.222,.3],[.205,.6],[.195,.82],[.168,.96],[.152,1.0]],denimStd(0x4a6d99));
   if(sp.over==='mini')shell(hips,'mini',[[.228,.6],[.207,.72],[.18,.88],[.158,.99]],stdM(hexN(sp.oc),.85,{side:THREE.DoubleSide}));
   if(sp.over==='kaba'){shell(hips,'kabaS',[[.21,.07],[.195,.3],[.19,.6],[.2,.82],[.165,.96],[.15,1.0]],clothStd(L.pal,1));shell(spine,'pep',[[.235,.86],[.2,.93],[.163,.99]],clothStd(L.pal,1))}
   if(sp.over==='smock')shell(spine,'smock',[[.31,.66],[.27,.8],[.225,.95],[.2,1.1],[.212,1.26],[.205,1.32]],clothStd(L.pal,1));
@@ -253,23 +260,23 @@ function makeHuman(L,{label=null,labelColor='#f6f0e8',ring=false}={}){
   if(L.bag==='tote'){const tb=box(.05,.3,.26,stdM(0xd9c39a,.9),-.04,-.22,0,elbows[0])}
   // neck & head
   if(L.extra==='chain'){const t=mesh(new THREE.TorusGeometry(.088,.008,6,24),gold,0,at(chest,1.385),.02,chest);t.rotation.x=Math.PI/2.4}
-  const head=new THREE.Group();headB.add(head);head.scale.setScalar(1.12);head.position.y=.008;
+  const head=new THREE.Group();headB.add(head);head.scale.setScalar(1.06);head.position.y=.008;
   mesh(headGeo(f),skin,0,0,0,head);
   // eyes with iris, lids and lashes
   const lids=[],brows=[];
   [-1,1].forEach(s=>{const ex=s*.043,ey=.014,ez=.093;
-    mesh(sph(.0205,16,12),stdM(0xf3eee6,.2),ex,ey,ez,head);
-    const ir=mesh(new THREE.CircleGeometry(.0108,20),irisM(),ex,ey,ez+.0196,head);
+    const sc=mesh(sph(.0205,16,12),stdM(0xe9dfd0,.25),ex,ey,ez,head);sc.scale.set(1.12,.86,1);
+    const ir=mesh(new THREE.CircleGeometry(.0122,20),irisM(),ex,ey-.0005,ez+.0193,head);
     const lp=new THREE.Group();lp.position.set(ex,ey,ez);head.add(lp);
     const lid=mesh(new THREE.SphereGeometry(.0222,16,8,0,Math.PI*2,0,Math.PI*.5),skin,0,0,0,lp);lp.rotation.x=-.55;lids.push(lp);
     const lash=mesh(new THREE.TorusGeometry(.0212,f?.0026:.0016,4,14,Math.PI),stdM(0x0a0806,.6),0,.0005,.004,lp);lash.rotation.x=Math.PI/2+.1;lash.rotation.y=0;
     const bp=new THREE.Group();bp.position.set(ex+s*.002,ey+.004,ez+.016);head.add(bp);bp.userData.s=s;brows.push(bp);const br=mesh(new THREE.TorusGeometry(.03,f?.0035:.005,5,12,Math.PI*.42),hair,0,0,0,bp);br.rotation.z=Math.PI/2-Math.PI*.21+s*.05;br.scale.set(1,.55,1)});
   // nose, lips, ears
-  const brg=mesh(tcap(.011,.015,.05,10),skin,0,.035,.113,head);brg.rotation.x=.28;
-  const tip=mesh(sph(.017,14,10),skin,0,-.02,.124,head);tip.scale.set(1.1,.88,.85);
-  [-1,1].forEach(s=>{mesh(sph(.011,10,8),skin,s*.016,-.027,.114,head);mesh(sph(.0045,8,6),stdM(0x1a0e08,.9),s*.009,-.033,.119,head)});
+  const brg=mesh(tcap(.009,.013,.048,10),skin,0,.033,.11,head);brg.rotation.x=.26;
+  const tip=mesh(sph(.0155,14,10),skin,0,-.021,.12,head);tip.scale.set(1.25,.8,.78);
+  [-1,1].forEach(s=>{mesh(sph(.0098,10,8),skin,s*.0175,-.027,.112,head);mesh(sph(.0045,8,6),stdM(0x1a0e08,.9),s*.009,-.033,.119,head)});
   const ul=mesh(sph(.021,16,10),stdM(lipC,.45),0,-.06,.111,head);ul.scale.set(1.55,.42,.62);
-  const ll=mesh(sph(.021,16,10),stdM(lipC,.4),0,-.073,.109,head);ll.scale.set(1.4,.58,.62);
+  const ll=mesh(sph(.021,16,10),stdM(lipC,.4),0,-.074,.109,head);ll.scale.set(1.45,.64,.66);
   const mline=box(.05,.0025,.004,stdM(0x2a1410,.9),0,-.066,.121,head);
   const mo=mesh(sph(.02,14,10),stdM(0x3a0f0c,.8),0,-.067,.112,head);mo.scale.set(1.15,.05,.4);const teeth=box(.034,.008,.004,stdM(0xf4f1ea,.3),0,-.06,.118,head);teeth.visible=false;
   const arcM=stdM(0x2a1410,.9),smA=mesh(new THREE.TorusGeometry(.028,.0024,4,14,Math.PI*.55),arcM,0,-.044,.119,head);smA.rotation.z=Math.PI+Math.PI*.225;smA.visible=false;
@@ -300,6 +307,7 @@ function makeHuman(L,{label=null,labelColor='#f6f0e8',ring=false}={}){
   if(H==='bantu')[[0,.16,-.02],[-.075,.13,.04],[.075,.13,.04],[-.09,.11,-.07],[.09,.11,-.07],[0,.1,-.12]].forEach(([x,y,z])=>{const k=mesh(bumpySphere(.042,'bantu'),hair,x,y,z,head);k.scale.y=.85});
   if(H==='ponytail'){const pt=mesh(tcap(.045,.012,.34,10),hair,0,.12,-.12,head);pt.rotation.x=.55;mesh(new THREE.TorusGeometry(.03,.008,6,12),stdM(0xc8322b,.6),0,.12,-.13,head).rotation.x=1}
   if(H==='bob'||H==='blonde'){const hm=H==='blonde'?stdM(0xd9b06a,.7,{side:THREE.DoubleSide}):hair;const len=H==='bob'?.2:.4;mesh(new THREE.CylinderGeometry(.145,H==='bob'?.16:.17,len,24,1,true,Math.PI*.56,Math.PI*.88),hm,0,.02-len/2+.06,-.01,head);const fr=mesh(new THREE.SphereGeometry(.144,24,12,0,Math.PI*2,0,Math.PI*.32),hm,0,.03,.012,head);fr.rotation.x=.35;const top=mesh(new THREE.SphereGeometry(.142,24,12,0,Math.PI*2,0,Math.PI*.5),hm,0,.02,-.012,head);top.rotation.x=-.3}
+  try{hairMore(H,L,f,head,hair,gold)}catch(e){console.error(e)}
   if(L.extra==='cap'){mesh(new THREE.SphereGeometry(.142,24,12,0,Math.PI*2,0,Math.PI*.5),cloth,0,.035,0,head);const b=mesh(cyl(.11,.11,.012,20),cloth,0,.05,.12,head);b.scale.set(1,1,.9)}
   if(L.extra==='headphones'){const hb=mesh(new THREE.TorusGeometry(.15,.013,8,22,Math.PI),stdM(0x1a1a1a,.4),0,.02,0,head);[-1,1].forEach(s=>{const cp=mesh(cyl(.045,.045,.04,16),stdM(0x1a1a1a,.4),s*.138,0,0,head);cp.rotation.z=Math.PI/2})}
   if(L.extra==='specs'){const fr=stdM(0x111111,.3);[-1,1].forEach(s=>mesh(new THREE.TorusGeometry(.025,.0028,6,18),fr,s*.044,.014,.122,head));box(.03,.004,.004,fr,0,.02,.124,head);[-1,1].forEach(s=>box(.004,.004,.16,fr,s*.1,.02,.05,head))}

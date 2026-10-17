@@ -91,7 +91,7 @@ const INTRO={'Law (LLB)':'Ghana Legal System','Human Biology (Medicine)':'Cell B
 const TT={0:[[0,8],[1,14]],1:[[2,8],[0,14]],2:[[1,8],[2,14]],3:[[0,8],[1,14]],4:[[2,8]]};
 const GOODLEC='Prof. Adjoa Sarpong',BADLEC='Dr. Ofori-Kuma';
 const INTERESTS=['Afrobeats','Football','Fashion','Tech','Church','Business','Books','Dance','Gaming'];
-const SKINS=['#3b2216','#4e2e1c','#6a3f26','#7f4d2e','#946039'];
+const SKINS=['#2b170d','#3b2216','#4a2a18','#5a321e','#6a3f26','#7f4d2e','#946039'];
 const PAL={
  maroon:{name:'Maroon',a:'#8e2a3a',b:'#e8b24a',pat:'stripe'},
  ankara:{name:'Orange Ankara',a:'#e0652a',b:'#1f3b73',pat:'dots'},
@@ -108,13 +108,17 @@ const PAL={
  ghana:{name:'Black Stars',a:'#c8102e',b:'#fcd116',pat:'ghana'},
  camo:{name:'Camo',a:'#5b6b3a',b:'#3a2f22',pat:'camo'},
  tiedye:{name:'Tie-dye',a:'#7a3fa0',b:'#f4a41c',pat:'tiedye'},
- batik:{name:'Blue batik',a:'#1f3b73',b:'#7fb0d8',pat:'batik'}};
-const HAIR={m:{short:'Short',fade:'Low cut',waves:'360 waves',afro:'Afro',locs:'Locs',twists:'Twists',cornrows:'Cornrows',dyed:'Blonde low cut',frohawk:'Frohawk',burst:'Burst fade & sponge twists'},f:{braids:'Knotless braids',afro:'Afro',puffs:'Afro puffs',bun:'Bun',locs:'Locs',cornrows:'Cornrows',wig:'Straight wig',duku:'Headwrap',bantu:'Bantu knots',ponytail:'Sleek ponytail',bob:'Bob wig',lowcut:'Low cut',blonde:'Blonde wig'}};
-const HAIRPRICE={short:20,fade:25,waves:30,afro:30,puffs:40,cornrows:90,locs:180,twists:120,braids:150,bun:40,wig:250,duku:30,dyed:60,frohawk:45,burst:70,bantu:80,ponytail:90,bob:200,lowcut:20,blonde:280};
-const OUTFIT={m:{tee:'Oversized tee & cargos',hoodie:'Hoodie & joggers',polo:'Polo & chinos',shirt:'Shirt & jeans',jacket:'Denim jacket & jeans',varsity:'Varsity jacket',track:'Tracksuit',kaftan:'Kaftan set',jersey:'Jersey & shorts',smock:'Fugu smock',unitee:'AKWAABA U campus tee'},
-  f:{jeans:'Crop top & jeans',hoodie:'Hoodie & leggings',bodycon:'Bodycon dress',tank:'Tank top & cargos',skirt:'Tee & mini skirt',twopiece:'Print two-piece',jumpsuit:'Jumpsuit',blazer:'Blazer suit',athleisure:'Athleisure set',kente:'Kente maxi dress',kaba:'Ankara two-piece',dress:'Sundress',unitee:'AKWAABA U campus tee'}};
+ batik:{name:'Blue batik',a:'#1f3b73',b:'#7fb0d8',pat:'batik'},
+ rugby:{name:'Green rugby stripes',a:'#1f5f3a',b:'#f1ece3',pat:'stripe'},
+ navy:{name:'Navy',a:'#1f2a44',b:'#3a4a6a',pat:'plain'},
+ khaki:{name:'Khaki',a:'#8a7d5a',b:'#5a5038',pat:'plain'}};
+const HAIR={m:{short:'Short',fade:'Low cut',waves:'360 waves',afro:'Afro',locs:'Locs',twists:'Twists',cornrows:'Cornrows',dyed:'Blonde low cut',frohawk:'Frohawk',burst:'Twist sponge curls',hightop:'High top fade',mdesign:'Braided designs',twists2:'Two-strand twists',locbun:'Half-up tied locs'},f:{braids:'Knotless braids',afro:'Afro',puffs:'Afro puffs',bun:'Bun',locs:'Locs',cornrows:'Cornrows',wig:'Straight wig',duku:'Headwrap',bantu:'Bantu knots',ponytail:'Sleek ponytail',bob:'Bob wig',lowcut:'Low cut',blonde:'Blonde wig',puff:'High puff',knotless:'Knotless braids (medium)',fulani:'Fulani braids',passion:'Passion twists',goddess:'Goddess locs',bobbraids:'Bob braids',halfup:'Half up half down',curlywig:'Curly wig',locbun:'Half-up tied locs'}};
+const HAIRPRICE={short:20,fade:25,waves:30,afro:30,puffs:40,cornrows:90,locs:180,twists:120,braids:150,bun:40,wig:250,duku:30,dyed:60,frohawk:45,burst:70,bantu:80,ponytail:90,bob:200,lowcut:20,blonde:280,hightop:35,mdesign:110,twists2:90,locbun:200,puff:40,knotless:130,fulani:170,passion:160,goddess:220,bobbraids:120,halfup:150,curlywig:260};
+const OUTFIT={m:{tee:'Oversized tee & cargos',hoodie:'Hoodie & joggers',polo:'Polo & chinos',shirt:'Shirt & jeans',jacket:'Denim jacket & jeans',varsity:'Varsity jacket',track:'Tracksuit',kaftan:'Kaftan set',jersey:'Jersey & shorts',smock:'Fugu smock',unitee:'AKWAABA U campus tee',rugby:'Rugby stripe shirt & jeans',cargo2:'Tee & black cargos',suit:'Suit (presentations)'},
+  f:{jeans:'Crop top & jeans',hoodie:'Hoodie & leggings',bodycon:'Bodycon dress',tank:'Tank top & cargos',skirt:'Tee & mini skirt',twopiece:'Print two-piece',jumpsuit:'Jumpsuit',blazer:'Blazer suit',athleisure:'Athleisure set',kente:'Kente maxi dress',kaba:'Ankara two-piece',dress:'Sundress',unitee:'AKWAABA U campus tee',dskirt:'Crop top & denim maxi skirt',cargo:'Tank & cargo pants',formal:'Shirt & trousers (presentations)'}};
 const SHOES={sneakers:'Sneakers',sandals:'Sandals',slides:'Slides',shoes:'Leather shoes'};
-const EXTRA={none:'Nothing',specs:'Glasses',headphones:'Headphones',cap:'Cap',chain:'Chain',earrings:'Earrings'};
+const EXTRA={none:'Nothing',specs:'Glasses',headphones:'Headphones',cap:'Cap',chain:'Chain',earrings:'Hoop earrings',studs:'Stud earrings'};
+const BEARDS={none:'Clean shaven',goatee:'Goatee',full:'Full beard'};
 const BAGS={backpack:'Backpack',tote:'Tote bag',none:'No bag'};
 /* family background */
 const BG={
@@ -247,4 +251,4 @@ const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const cedi=n=>'GH₵'+Math.round(n).toLocaleString('en-GB');
 const $=id=>document.getElementById(id);
-function randomLook(g){return{gender:g,skin:pick(SKINS),hair:pick(Object.keys(HAIR[g])),outfit:pick(Object.keys(OUTFIT[g])),pal:pick(Object.keys(PAL)),shoes:pick(Object.keys(SHOES)),extra:pick(Object.keys(EXTRA).filter(e=>g==='f'||e!=='earrings')),bag:pick(['backpack','backpack','tote','none'])}}
+function randomLook(g){return{gender:g,skin:pick(SKINS),hair:pick(Object.keys(HAIR[g])),outfit:pick(Object.keys(OUTFIT[g])),pal:pick(Object.keys(PAL)),shoes:pick(Object.keys(SHOES)),extra:pick(Object.keys(EXTRA).filter(e=>g==='f'||e!=='earrings')),bag:pick(['backpack','backpack','tote','none']),beard:g==='m'?pick(['none','none','goatee','goatee','full']):'none'}}
