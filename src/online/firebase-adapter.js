@@ -6,7 +6,7 @@
 import {initializeApp} from 'firebase/app';
 import {getAuth,onAuthStateChanged,signInAnonymously,GoogleAuthProvider,signInWithPopup,signInWithRedirect,signOut} from 'firebase/auth';
 import {getFirestore,doc as fsDoc,collection as fsColl,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot,query,where,orderBy,limit,getDocs} from 'firebase/firestore';
-import {getDatabase,ref,set,remove,onDisconnect,onValue,onChildAdded,onChildChanged,onChildRemoved,serverTimestamp,goOffline} from 'firebase/database';
+import {getDatabase,ref,set,remove,onDisconnect,onValue,onChildAdded,onChildChanged,onChildRemoved,serverTimestamp,goOffline,push,query as rtQuery,limitToLast} from 'firebase/database';
 import cfg from './firebase-config.js';
 
 if(!cfg||!cfg.apiKey||String(cfg.apiKey).includes('PASTE')){console.warn('YOLO: no Firebase config, playing offline');window.__fbResolve(null)}
@@ -22,6 +22,14 @@ async function start(){
   window.fbIdToken=()=>auth.currentUser?auth.currentUser.getIdToken():Promise.resolve(null);
   // the server's clock, so the shared campus time and the club DJ line up on every phone
   onValue(ref(rtdb,'.info/serverTimeOffset'),s=>{window.__srvOff=+s.val()||0});
+  /* group chats and the campus feed live in the Realtime Database under groups/ and feed/ */
+  const okP=p=>/^(groups|feed)\/[A-Za-z0-9_-]{1,60}(\/[A-Za-z0-9_-]{1,60}){0,3}$/.test(p);
+  window.fbRT={
+    listen(path,n,cb){if(!okP(path))return()=>{};const q=rtQuery(ref(rtdb,path),limitToLast(n));return onChildAdded(q,s=>cb(s.key,s.val()))},
+    watch(path,cb){if(!okP(path))return()=>{};return onValue(ref(rtdb,path),s=>cb(s.val()))},
+    async push(path,v){if(!okP(path))throw new Error('bad path');const r=push(ref(rtdb,path));await set(r,v);return r.key},
+    async set(path,v){if(!okP(path))throw new Error('bad path');await set(ref(rtdb,path),v)},
+    uid:()=>auth.currentUser&&auth.currentUser.uid};
   window.__fbResolve({user:userApi(u),db:dbApi(fs),room:roomApi(rtdb,u.uid,null)});
 }
 

@@ -144,7 +144,7 @@ function acts0(force){
   if(!S)return;const p=P();
   const inside=!!IS,b=inside?null:locOf(p.x,p.y),n=inside?nearInterior():nearNPC();
   const near=inside?IS.objs.filter(o=>Math.hypot(o.x-p.ix,o.z-p.iz)<o.r).map(o=>o.id).join(','):'';
-  const key=[typeof hawkerNear==='function'&&(hawkerNear()||{}).id,S.ride&&S.ride.phase+(S.ride.phase==='wait'&&Math.hypot(p.x-S.ride.pos.x,p.y-S.ride.pos.y)<110),S.del&&S.del.phase+(S.del.rider&&dist(p,S.del.rider)<60),S.buddyKey=(buddy()||{}).id,inside,!inside&&nearStop()&&nearStop().i,IS&&IS.bid,p.food&&p.food.length,b&&b.id,near,n&&n.id,Math.floor(hour()*2),p.job,S.flags.hx,S.flags.reported,S.unread>0,p.prov,p.items.length,p.flyers,!!p.race,p.biz&&p.biz.bookings].join('|');if(key===actKey&&!force)return;actKey=key;
+  const key=[typeof hawkerNear==='function'&&(hawkerNear()||{}).id,S.date&&[S.date.acts,typeof dateAtVenue==='function'&&dateAtVenue(),typeof datePartnerHere==='function'&&datePartnerHere(),Math.floor(hour()*4)].join(),S.ride&&S.ride.phase+(S.ride.phase==='wait'&&Math.hypot(p.x-S.ride.pos.x,p.y-S.ride.pos.y)<110),S.del&&S.del.phase+(S.del.rider&&dist(p,S.del.rider)<60),S.buddyKey=(buddy()||{}).id,inside,!inside&&nearStop()&&nearStop().i,IS&&IS.bid,p.food&&p.food.length,b&&b.id,near,n&&n.id,Math.floor(hour()*2),p.job,S.flags.hx,S.flags.reported,S.unread>0,p.prov,p.items.length,p.flyers,!!p.race,p.biz&&p.biz.bookings].join('|');if(key===actKey&&!force)return;actKey=key;
   if(b&&b.id!==S._atB){S._atB=b.id;try{ev('at',b.id)}catch(e){}}
   $('where').textContent=inside?IS.title:zoneName(p.x,p.y);$('mini').hidden=inside;
   if(S.shuttleWait!=null&&!p.onBus){const ah=S.Q?Math.max(0,S.Q.list.indexOf('P')):0,wk='wait'+ah+S.pBoard;if(actKey!==wk){actKey=wk;$('acts').innerHTML=`<span class="eyebrow">🚌 ${S.pBoard?'Getting on the shuttle…':`In the queue at ${esc(SH_STOPS[S.shuttleWait].name)} · ${ah?ah+' ahead of you':'you\'re first in line'}`}</span>${S.pBoard?'':'<button class="ghost sm" id="sw">Leave the queue</button>'}`;const sw=$('sw');if(sw)sw.onclick=()=>{S.shuttleWait=null;p.pose=null;p.face=null;acts(true)}}return}
@@ -159,6 +159,7 @@ function acts0(force){
   const list=inside?(IS.kind==='bld'?placeActions(BID[IS.bid]||{id:IS.bid},true):roomActions()):placeActions(b,false);
   try{memActs(list,inside,b)}catch(e){console.error(e)}
   if(!inside)try{hawkerActs(list)}catch(e){console.error(e)}
+  try{dateActs(list)}catch(e){console.error(e)}
   {const rp=mpNear();if(rp)list.unshift([`🌐 ${rp.nm} (real student)`,()=>mpCard(rp),null,'b']);if(!inside&&MP.room&&mpOnline().length)list.push(['🗨️ Say something out loud',()=>mpSay()])}
   const stp=!inside&&nearStop();if(stp)list.unshift([`🚌 Wait for the free shuttle (${stp.name})`,()=>waitShuttle(stp),null,'b']);
   if(p.food&&p.food.length)list.unshift([`🍱 Eat your ${p.food[0].name}`,()=>{const f=p.food.shift();doAct(`Eating ${f.name}`,25,{hunger:f.food,fun:8})},null,'b']);

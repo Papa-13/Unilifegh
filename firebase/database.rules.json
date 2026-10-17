@@ -15,6 +15,42 @@
           }
         }
       }
+    },
+    "groups": {
+      "$g": {
+        ".read": "auth != null",
+        "msgs": {
+          "$m": {
+            ".write": "auth != null && !data.exists() && newData.child('by').val() === auth.uid",
+            ".validate": "newData.hasChildren(['by','nm','tx','at']) && newData.child('tx').isString() && newData.child('tx').val().length <= 240 && newData.child('nm').isString() && newData.child('nm').val().length <= 16 && newData.child('at').isNumber()"
+          }
+        }
+      }
+    },
+    "feed": {
+      "$c": {
+        ".read": "auth != null",
+        "posts": {
+          "$id": {
+            ".write": "auth != null && !data.exists() && newData.child('by').val() === auth.uid",
+            ".validate": "newData.hasChildren(['by','nm','cap','at']) && newData.child('cap').isString() && newData.child('cap').val().length <= 120 && newData.child('nm').val().length <= 16"
+          }
+        },
+        "img": {
+          "$id": {
+            ".write": "auth != null && !data.exists() && root.child('feed').child($c).child('posts').child($id).child('by').val() === auth.uid",
+            ".validate": "newData.isString() && newData.val().length < 70000 && newData.val().beginsWith('data:image/jpeg;base64,')"
+          }
+        },
+        "likes": {
+          "$id": {
+            "$uid": {
+              ".write": "auth != null && $uid === auth.uid",
+              ".validate": "newData.isBoolean()"
+            }
+          }
+        }
+      }
     }
   }
 }

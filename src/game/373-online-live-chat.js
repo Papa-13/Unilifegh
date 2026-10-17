@@ -7,6 +7,7 @@ function mpIn(rp,m){if(!m||typeof m!=='object'||typeof m.i!=='string')return;con
   if(m.to==='*all'){if(age>120000||!tx)return;MP.camp.push({nm:rp.nm,key:mpKey(rp),tx,t:+m.t||Date.now()});if(MP.camp.length>80)MP.camp.shift();if(!(MP.view&&MP.view.tab==='camp'&&!MP.view.key))MP.campUnread=(MP.campUnread||0)+1;mpBadge();if(MP.view)mpRedraw();return}
   if(m.to==='*near'){if(age>30000||!tx||!S||IS||!rp.mesh)return;const p=P();if(Math.hypot(rp.x-p.x,rp.y-p.y)>380)return;chatBubble(rp.mesh,tx);return}
   if(!forMe||age>180000)return;const ck=mpKey(rp);
+  if(DATE_KINDS.includes(k)){if(age>120000)return;try{dateIn(ck,rp.nm,k,tx)}catch(e){console.error(e)}return}
   if(HALL_KINDS.includes(k)){if(age>120000)return;try{hallIn(ck,rp.nm,k,tx,'p|'+rp.peer+'|'+m.i)}catch(e){console.error(e)}return}
   if(LOAN_KINDS.includes(k)){if(age>120000)return;try{loanIn(ck,rp.nm,k,tx,'p|'+rp.peer+'|'+m.i)}catch(e){console.error(e)}return}
   if(REL_KINDS.includes(k)){if(age>120000)return;try{relIn(ck,rp.nm,k,tx,'p|'+rp.peer+'|'+m.i)}catch(e){console.error(e)}return}

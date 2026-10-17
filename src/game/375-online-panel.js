@@ -51,7 +51,7 @@ function mpCard(rp){if(!S||!rp)return;S.paused=true;openSheet();MP.view=null;con
     ${MB.on&&fr&&!k.startsWith('p:')?`<div class="say" style="margin:6px 0"><b>💸 Money</b> <small id="pcRep" style="opacity:.8"></small><div class="grid2" style="margin-top:6px"><button class="ghost sm" id="pcSend">📲 Send money</button><button class="ghost sm" id="pcBorrow">🤝 Ask to borrow</button></div></div>`:''}
     ${(()=>{const r=relGet(),mine=r&&r.ck===k,g=rp.lookV&&rp.lookV.gender,rom=romOf(k);
       return `<div class="say" style="margin:6px 0"><b>❤️ Romance</b>${fr?` <small style="opacity:.8">· you feel ${rom}%</small>`:''}<div class="grid2" style="margin-top:6px">
-        <button class="ghost sm" data-pa="flirt" ${near?'':'disabled'}>😏 Flirt</button><button class="ghost sm" data-pa="date" ${near?'':'disabled'}>🌹 Ask on a date</button>
+        <button class="ghost sm" data-pa="flirt" ${near?'':'disabled'}>😏 Flirt</button><button class="ghost sm" data-pa="date" ${near?'':'disabled'}>🌹 Quick date</button>${fr?'<button class="btn sm" id="pcPlan">🌹 Plan a proper date</button>':''}
         ${fr?`<button class="ghost sm" data-pa="kiss" ${near?'':'disabled'}>💋 Kiss</button>`:''}
         ${fr&&!mine?`<button class="btn sm" id="pcGo">💍 Be my ${bfgf(g)}?</button>`:''}${mine?'<button class="ghost sm" id="pcBreak">💔 Break up</button>':''}</div>
         ${!fr?'<small style="opacity:.75">Become friends to kiss or ask them out.</small>':''}${r&&!mine?`<small style="opacity:.75">You're dating ${esc(r.nm)}. Flirting, dates or kisses with someone else is cheating, and people talk… 👀</small>`:''}</div>`})()}
@@ -65,6 +65,7 @@ function mpCard(rp){if(!S||!rp)return;S.paused=true;openSheet();MP.view=null;con
   if($('pcFr'))$('pcFr').onclick=()=>{if(MP.db&&MP.uid&&!k.startsWith('p:'))mailSend(k,'fr','');else mpSend(k,'fr','');toast('Friend request sent ✉️');closeSheet()};
   if($('pcAcc'))$('pcAcc').onclick=()=>{MP.view={key:k};mpAccept(k);closeSheet()};
   $('pcMap').onclick=()=>{closeSheet();campusMap()};
+  if($('pcPlan'))$('pcPlan').onclick=()=>datePlan(k,rp.nm);
   if($('pcSend'))$('pcSend').onclick=()=>mbSendSheet(k,rp.nm);if($('pcBorrow'))$('pcBorrow').onclick=()=>mbBorrowSheet(k,rp.nm);if($('pcRep'))mbRep(k).then(r=>{if($('pcRep'))$('pcRep').textContent='· '+mbRepTxt(r)});
   if($('pcGo'))$('pcGo').onclick=()=>{closeSheet();relAsk(rp,k,rp.nm,rp.lookV&&rp.lookV.gender)};if($('pcBreak'))$('pcBreak').onclick=()=>{closeSheet();relBreak(k,rp.nm)};
   if($('pcVisit'))$('pcVisit').onclick=()=>{closeSheet();visitOKFor(k)?visitGo(k):visitAsk(rp)};

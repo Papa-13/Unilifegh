@@ -35,6 +35,11 @@ The rules (`api/_momo-rules.js`) limit how fast cedis can grow (GH₵2,500 per r
 (GH₵5,000) and how much can be sent per day (GH₵15,000). Change those numbers there.
 Make sure the latest `firebase/firestore.rules` (with the `rep` rule) is pasted into Firebase.
 
+## Group chats and the campus feed
+
+These use the Realtime Database (`groups/` and `feed/`). Paste `firebase/database.rules.json` into
+Firebase → Realtime Database → Rules after updating.
+
 ## SRC elections
 
 Real-student SRC elections store candidates in `cands` and votes in `votes` (Firestore). The rules in
