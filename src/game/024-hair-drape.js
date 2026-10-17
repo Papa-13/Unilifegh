@@ -27,10 +27,10 @@ function drapeRoots(o){const R=[],N=o.n*4;for(let i=0;i<N&&R.length<o.n;i++){con
 function drapeGeo(key,o){if(GC[key])return GC[key];const L=[],ends=[],down=new THREE.Vector3(0,-1,0),c=DR.headC;
   drapeRoots(o).forEach((u,i)=>{const n=u.clone(),p=new THREE.Vector3(c.x+u.x*DR.hr[0],c.y+u.y*DR.hr[1],c.z+u.z*drZ(u.z));
     /* which way it flows from the top: centre part (to the sides) or all round from the crown */
-    const flow=o.flow==='part'?(u.z>-.25?new THREE.Vector3(Math.sign(u.x||.01),0,-.25):new THREE.Vector3(u.x*.4,0,-1).normalize()):new THREE.Vector3(u.x,0,u.z).normalize();
+    const fr=u.z>.3&&u.y<.75,flow=o.flow==='part'?(u.z>-.25?new THREE.Vector3(Math.sign(u.x||.01),0,fr?-.12:-.25):new THREE.Vector3(u.x*.4,0,-1).normalize()):new THREE.Vector3(u.x,0,u.z).normalize();
     let d=n.clone().multiplyScalar(o.lift??.1).add(flow.clone().multiplyScalar(.6)).add(down.clone().multiplyScalar(.3)).normalize();
     const len=o.len*(.78+HH(i,5)*.42)*(o.lenF?o.lenF(u):1),step=.016,pts=[p.clone()],nS=Math.max(3,Math.round(len/step));
-    for(let s=0;s<nS;s++){const g=down.clone().add(flow.clone().multiplyScalar(Math.max(0,.5-s*.08)));
+    for(let s=0;s<nS;s++){const g=down.clone().add(flow.clone().multiplyScalar(fr&&o.bang==null?(Math.abs(p.x)<.13&&p.y>-.03?.8:0):Math.max(0,.5-s*.08)));
       /* below the ears long hair relaxes in towards the neck and shoulders instead of hanging like a curtain */
       if(p.y<-.04&&!o.stiffHang){const pull=(o.pull??1.1)*SS(-.04,-.2,p.y);g.x-=p.x*pull*2.2;g.z-=(p.z+.03)*pull*1.6}
       {const lw=(o.softWave??.18)*SS(.0,-.12,p.y);g.x+=Math.sin(s*.45+i*2.3)*lw;g.z+=Math.cos(s*.38+i*1.9)*lw}
@@ -39,7 +39,8 @@ function drapeGeo(key,o){if(GC[key])return GC[key];const L=[],ends=[],down=new T
       if(o.len>.25){const k=SS(-.04,-.2,p.y);g.x-=p.x*2.4*k;g.z-=(p.z+.01)*1.4*k;                 // relax in towards the neck and shoulders
         if(u.z>0&&HH(i,21)<.45)g.z-=.9*k;                                                        // some front pieces fall behind the shoulder
         g.x+=Math.sin(s*.45+i*3.1)*.12;g.z+=Math.cos(s*.38+i*2.3)*.1}                            // a little natural wander                        // side strands go behind the shoulders
-      d.multiplyScalar(o.stiff??.45).addScaledVector(g.normalize(),1-(o.stiff??.45)).normalize();p.addScaledVector(d,step);const q0=p.clone();drapeFix(p,o);if(q0.distanceToSquared(p)>1e-8&&p.y<-.12){d.x*=.6;d.z*=.6;d.y=Math.min(d.y,-.35);d.normalize()}pts.push(p.clone())}
+      d.multiplyScalar(o.stiff??.45).addScaledVector(g.normalize(),1-(o.stiff??.45)).normalize();p.addScaledVector(d,step);if(o.bang!=null&&s>1&&p.z>.02&&p.y<o.bang+.005&&Math.abs(p.x)<.122)break;                // a fringe ends at the brows instead of bending sideways
+      const q0=p.clone();drapeFix(p,o);if(q0.distanceToSquared(p)>1e-8&&p.y<-.12){d.x*=.6;d.z*=.6;d.y=Math.min(d.y,-.35);d.normalize()}pts.push(p.clone())}
     /* relax the path so it curves softly instead of kinking, then keep it out of the head/body */
     for(let it=0;it<4;it++)for(let j=1;j<pts.length-1;j++){const m=pts[j-1].clone().add(pts[j+1]).multiplyScalar(.5);pts[j].lerp(m,j<3?.25:.55);drapeFix(pts[j],o)}
     if(pts.length>4){const e=pts.length-1,sw=(HH(i,11)-.5)*.03,sz=(HH(i,12)-.5)*.02;for(let j=2;j<=e;j++){const k=Math.pow(j/e,1.6);pts[j].x+=sw*k;pts[j].z+=sz*k;drapeFix(pts[j],o)}}
