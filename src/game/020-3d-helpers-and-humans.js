@@ -199,7 +199,7 @@ function bodyGeo(f,O){const key='body'+(f?'f':'m')+O;if(GC[key])return GC[key];c
     if(sp.stripes&&y<1.36&&Math.abs(Math.sin(a))>.95)return 3;
     return 1},tdef,false,true);
   // neck
-  tube([[1.6,.046],[1.54,.048],[1.48,.052],[1.43,.06]].map(([y,r])=>({x:0,y,z:-.004,rx:r,rz:r*.95,w:[[HD,smooth(1.53,1.6,y)],[NK,1-smooth(1.53,1.6,y)-(1-smooth(1.43,1.48,y))],[CH,1-smooth(1.43,1.48,y)]]})),()=>0,null,true,false);
+  tube([[1.665,.043],[1.6,.045],[1.54,.047],[1.48,.052],[1.43,.062]].map(([y,r])=>({x:0,y,z:y>1.5?.004:-.004,rx:r*(f?.9:1),rz:r*.95*(f?.9:1),w:[[HD,smooth(1.56,1.64,y)],[NK,1-smooth(1.56,1.64,y)-(1-smooth(1.43,1.48,y))],[CH,1-smooth(1.43,1.48,y)]]})),()=>0,null,true,false);
   // arms
   const ay=[1.425,1.41,1.385,1.35,1.3,1.24,1.17,1.11,1.07,1.03,.96,.88,.82,.795],ar=[.02,.042,.056,.062,.061,.057,.051,.046,.043,.045,.041,.033,.029,.02],ak=f?.86:1,ain=[.55,.72,.87,.96,1,1,1,1,1,1,1,1,1,1];
   [[-1,AL,EL],[1,AR,ER]].forEach(([s,ab,eb])=>{const x0=s*(f?.205:.225);
@@ -295,7 +295,7 @@ function makeHumanProc(L,{label=null,labelColor='#f6f0e8',ring=false}={}){
   if(L.bag==='tote'){const tb=box(.05,.3,.26,stdM(0xd9c39a,.9),-.04,-.22,0,elbows[0])}
   // neck & head
   if(L.extra==='chain'){const t=mesh(new THREE.TorusGeometry(.088,.008,6,24),gold,0,at(chest,1.385),.02,chest);t.rotation.x=Math.PI/2.4}
-  const head=new THREE.Group();headB.add(head);head.scale.setScalar(1.06);head.position.y=.008;
+  const head=new THREE.Group();headB.add(head);head.scale.setScalar(1.06);head.position.set(0,.062,.004);
   mesh(headGeo(f),skin,0,0,0,head);
   // eyes with iris, lids and lashes
   const lids=[],brows=[];
@@ -334,7 +334,8 @@ const disposeTree=o=>o.traverse(n=>{if(n.geometry)n.geometry.dispose()});
 /* hair, beards, caps, glasses and headphones, built on a head group (also used for the realistic characters) */
 const hatOn=L=>['cap','durag','bucket'].includes(L.extra);
 function hairBlock(L,f,head,hair,cloth,gold){
-  const H=L.hair,capG=new THREE.SphereGeometry(.134,30,18,0,Math.PI*2,0,Math.PI*.54);
+  let H=L.hair;const capG=new THREE.SphereGeometry(.134,30,18,0,Math.PI*2,0,Math.PI*.54);
+  try{if(longHair(H,L,f,head,hair,gold)||coilHair(H,L,f,head,hair))H='_'}catch(e){console.error(e)}
   const capOn=['short','braids','bun','locs','twists','wig','fade','waves','cornrows'].includes(H)&&!(H==='afro');
   if(capOn&&!(hatOn(L)&&['short','fade'].includes(H))){const c=mesh(capG,H==='fade'||H==='waves'?(H==='waves'?wavesM():fadeM(!!L.grey)):hair,0,.02,-.012,head);c.scale.set(H==='fade'?.985:1,H==='fade'?1.06:1.1,H==='fade'?1.02:1.06);c.rotation.x=-.52}
   if(H==='afro'&&!hatOn(L))mesh(afroGeo('afro'+(f?'f':'m'),f?.205:.19,0,f?.075:.07,f?-.04:-.035,f?.085:.08),hair,0,f?.075:.07,f?-.04:-.035,head);
