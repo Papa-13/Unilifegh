@@ -55,8 +55,8 @@ function enterRoom0(owner){fadeIn();
     if(tier>=3){const ux=BX0+.42,uz=-.88;box(.8,.1,1.68,white,ux,.05,uz,s);[-.36,.36].forEach(dx=>box(.08,.55,1.68,white,ux+dx,.28,uz,s));[-.8,.8].forEach(dz=>box(.8,.55,.08,white,ux,.28,uz+dz,s));
       const tw=mesh(new THREE.PlaneGeometry(.64,1.52),new THREE.MeshLambertMaterial({color:0x9fdcf0,transparent:true,opacity:.55,depthWrite:false}),ux,.4,uz,s);tw.rotation.x=-Math.PI/2;OB(BX0,ux+.42,uz-.86,uz+.86);IS.spots.tub={x:ux,z:uz+.72,ly:.24}}
     else{box(.04,.04,.6,0xaaaaaa,BX0+.08,1.3,-.6,s);box(.03,.55,.5,lam([0xe8b24a,0x5aa9e6,0xe58fb0][tier]||0xe8b24a),BX0+.09,1.05,-.6,s)}
-    if((mine?P().home:owner.home)==='lodge'){[0,.3].forEach((dz,i)=>mesh(cyl(.13,.13,.42,12),lam(i?0x9fd3f0:0xf2c230),BX0+.25,.21,-.95+dz,s));mesh(cyl(.17,.14,.3,12),lam(0x2f6bb5),BX0+.65,.15,-.35,s);OB(BX0,BX0+.85,-1.15,-.15)}
-    IS.waterOff=mine&&P().home==='lodge'&&S.waterOffDay===day();
+    if(HT(mine?P().home:owner.home)==='lodge'){[0,.3].forEach((dz,i)=>mesh(cyl(.13,.13,.42,12),lam(i?0x9fd3f0:0xf2c230),BX0+.25,.21,-.95+dz,s));mesh(cyl(.17,.14,.3,12),lam(0x2f6bb5),BX0+.65,.15,-.35,s);OB(BX0,BX0+.85,-1.15,-.15)}
+    IS.waterOff=mine&&HT(P().home)==='lodge'&&S.waterOffDay===day();
     IS.objs.push({id:'bath',label:'Bathroom',x:cx,z:bz/2-.1,r:1.35})}
   const slots=bedSlots(beds,W,tier);IS.slots=slots;
   const others=[0x5aa9e6,0x4fb87a,0xe58fb0,0xf4f1ea];const drawn={};
@@ -185,7 +185,7 @@ function roomActions(){
     if(o.id==='bath'&&IS.mine){const bq=IS.bathBusy;
       if(bq){a.push([`Shower · ${bq.n.name} is bathing`,null]);a.push(['Knock: "Are you done?"',()=>knockBath()])}
       else{a.push([IS.waterOff?'Shower (no water today 😩)':'🚿 Take a shower (20m)',IS.waterOff?null:()=>doAct('Taking a shower',20,{hygiene:100,fun:5,energy:4}),null,'b']);
-        if(p.home==='lodge')a.push(['Bucket bath with gallon water (30m)',()=>doAct('Bucket bath with water from the gallons',30,{hygiene:90,energy:-3})])}
+        if(HT(p.home)==='lodge')a.push(['Bucket bath with gallon water (30m)',()=>doAct('Bucket bath with water from the gallons',30,{hygiene:90,energy:-3})])}
       if(IS.spots.tub)a.push(['🛁 Soak in the bathtub (45m)',()=>doAct('Relaxing in the bathtub',45,{hygiene:100,fun:15,energy:10})]);
       a.push(['Brush & freshen up (10m)',()=>doAct('Brushing and freshening up',10,{hygiene:20})])}
     if(o.id==='chop'){const F=[['Gari soakings with sugar & milk',28],['Bread, butter & Milo',24],['Cornflakes & Peak milk',22],['Groundnut paste on bread',26]];a.push([`🥫 Eat from your ${IS.provLbl||'food cupboard'} (${p.prov} left)`,p.prov>0?()=>{p.prov--;const f=pick(F);doAct(`Eating ${f[0].toLowerCase()}`,20,{hunger:f[1]})}:null]);

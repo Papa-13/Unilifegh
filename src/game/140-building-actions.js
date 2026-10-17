@@ -22,7 +22,7 @@ function placeActions(b,inside){
   if(b.id===p.home&&!inside){const rt=roomOf();if(!rt.kitchen)a.push(['🍳 Shared kitchen',()=>enterBuilding('hkitchen')])}
   if(b.id==='hkitchen')a.push(['🍳 Cook something',()=>cookSheet('kitchen'),null,'b']);
   if(b.id==='hbath'){const wOff=IS&&IS.waterOff;a.push([wOff?'Shower (no water today 😩)':'Take a shower (20m)',wOff?null:()=>doAct('Taking a shower',20,{hygiene:100,fun:5,energy:4})]);
-    if(p.home==='lodge')a.push(['Bucket bath with poly tank water (30m)',()=>doAct('Bucket bath with water from the poly tank',30,{hygiene:90,energy:-3})]);
+    if(HT(p.home)==='lodge')a.push(['Bucket bath with poly tank water (30m)',()=>doAct('Bucket bath with water from the poly tank',30,{hygiene:90,energy:-3})]);
     if(IS&&IS.spots.tub)a.push(['Soak in the bathtub (45m)',()=>doAct('Relaxing in the bathtub',45,{hygiene:100,fun:15,energy:10})]);
     a.push(['Brush & freshen up (10m)',()=>doAct('Brushing and freshening up',10,{hygiene:20})])}
   if(b.id==='club'&&inside)a.push(['🎧 See the DJ\'s set',()=>djSongs()]);
@@ -32,7 +32,7 @@ function placeActions(b,inside){
     a.push(['📣 Ask the DJ for a shout-out · GH₵10',()=>{if(!spend(10))return;p.needs.fun=clamp(p.needs.fun+8);toast(`DJ Kwaku Flames: "Shout out to ${p.name==='You'?'my fresher':p.name}! This one's for you!" 🎧🔥`)}])}
   if(b.id==='market'){if(h>=6&&h<19){a.push(['🧺 Buy foodstuff',()=>marketSheet(),null,'b']);a.push(['Buy a provisions pack · GH₵50',()=>{if(!spend(50))return;p.prov+=6;doAct('Buying foodstuff at the market',15,{})}])}else a.push(['Market closed (06:00–19:00)',null])}
   if(b.id==='pool'&&h>=6&&h<19&&typeof MP!=='undefined'&&MP.campus)sgRealHere('pool').slice(0,3).forEach(rp=>a.push([`🏊 Race ${rp.nm} (real student)`,()=>sgInvite(rp,'sw'),null,'b']));
-  if(b.id==='pool'){if(h>=6&&h<19){const free=p.home==='royal';a.push([free?'🏊 Swim (45m, free for Royal Crest)':'🏊 Swim (45m) · GH₵15',()=>{if(!free&&!spend(15))return;p.fit++;doAct('Swimming',45,{fun:22,energy:-10,hygiene:8});meetRandom('pool')},null,'b']);a.push(['Chill by the pool (30m)',()=>doAct('Chilling by the pool',30,{fun:10,energy:5})])}else a.push(['Pool closed (06:00–19:00)',null])}
+  if(b.id==='pool'){if(h>=6&&h<19){const free=HT(p.home)==='royal';a.push([free?'🏊 Swim (45m, free for premium residents)':'🏊 Swim (45m) · GH₵15',()=>{if(!free&&!spend(15))return;p.fit++;doAct('Swimming',45,{fun:22,energy:-10,hygiene:8});meetRandom('pool')},null,'b']);a.push(['Chill by the pool (30m)',()=>doAct('Chilling by the pool',30,{fun:10,energy:5})])}else a.push(['Pool closed (06:00–19:00)',null])}
   if(b.id==='parade'){const ev=eventNow();
     if(!ev){const nx=nextEvent();a.push(['No event right now',null,nx?`Next: ${nx.name}, ${DAYS[(S.semStart+nx.sd)%7]} ${hm(nx.from*60)}`:'SRC Week is over this semester']);
       a.push(['Hang out on the grounds (30m)',()=>{doAct('Hanging out on the parade grounds',30,{social:10,fun:8});meetRandom('parade')}]);a.push(['Jog laps (30m)',()=>{p.fit++;doAct('Jogging laps of the parade grounds',30,{fun:10,energy:-8,hygiene:-8})}])}
@@ -89,7 +89,7 @@ function placeActions(b,inside){
     if(S.flags.hx===1&&!S.flags.reported)a.push(['Report harassment confidentially',()=>report()])}
   if(b.id==='chapel'){if(w===6&&h>=8.5&&h<12)a.push(['Attend Sunday service (2h)',()=>{doAct('At Sunday service',120,{social:20,fun:10,energy:4});S.npcs.filter(n=>n.ints.includes('Church')).forEach(n=>{n.met=true;n.friend=clamp(n.friend+5)});toast('The choir was 🔥. You met the church crowd. Friendship +5')}]);else a.push(['Pray quietly (20m)',()=>doAct('Quiet time in the chapel',20,{fun:6,energy:3})])}
   if(b.id==='clinic'){a.push(['See the nurse (1h, free)',()=>{doAct('Check-up at the Health Centre',60,{energy:15});toast('Nurse: "You need more sleep and real food, not just indomie." 🩺')}]);a.push(['Buy multivitamins · GH₵25',()=>{if(spend(25))doAct('Taking vitamins',5,{energy:10})}])}
-  if(b.id==='gym'){if(h>=6&&h<21)a.push(['Run on the treadmill (30m)',()=>{p.fit++;doAct('Treadmill run',30,{fun:8,energy:-10,hygiene:-8})}]);if(h>=6&&h<21)a.push([p.home==='royal'?'Work out (free for Royal Crest)':'Work out (1h) · GH₵10',()=>{if(p.home!=='royal'&&!spend(10))return;p.fit+=2;doAct('Working out',60,{fun:15,energy:-15,social:5,hygiene:-12});meetRandom('gym')}]);else a.push(['Closed (06:00–21:00)',null])}
+  if(b.id==='gym'){if(h>=6&&h<21)a.push(['Run on the treadmill (30m)',()=>{p.fit++;doAct('Treadmill run',30,{fun:8,energy:-10,hygiene:-8})}]);if(h>=6&&h<21)a.push([HT(p.home)==='royal'?'Work out (free for premium residents)':'Work out (1h) · GH₵10',()=>{if(p.home!=='royal'&&!spend(10))return;p.fit+=2;doAct('Working out',60,{fun:15,energy:-15,social:5,hygiene:-12});meetRandom('gym')}]);else a.push(['Closed (06:00–21:00)',null])}
   if(b.id==='mall'){if(h>=9&&h<21){a.push(['Shop at the mall',()=>mall()]);if(p.biz&&!BIZ[p.biz.type].service)a.push([`Buy stock here (pricier) · ${cedi(Math.round(BIZ[p.biz.type].unit*1.35)*BIZ[p.biz.type].pack)}`,()=>buyStock('mall')])}else a.push(['Closed (09:00–21:00)',null])}
   if(b.id==='salon'){if(h>=8&&h<20)a.push([p.look.gender==='f'?'Get your hair done':'Get a haircut',()=>salon()]);else a.push(['Closed (08:00–20:00)',null])}
   if(b.id==='taxi')a.push(['🚕 Take a taxi',()=>taxiMenu(),null,'b']);

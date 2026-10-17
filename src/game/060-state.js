@@ -28,7 +28,7 @@ function newGame(){
   if(pre.bg==='rich'){p.items.push('speaker','mirror')}
   const npcs=NOBOTS?[]:NPCS.map(([n,g,home,ints,pers],i)=>{const look=randomLook(g);const pg=pick(ALLPROGS);
     const h=makeHuman(look,{label:n});scene.add(h.g);const dd=BID[home].door;
-    return{id:i,name:n,gender:g,prog:pg.name,col:pg.col,home,origHome:home,ints,pers,look,wealth:home==='royal'?'rich':home==='lodge'?pick(['poor','avg']):pick(['avg','avg','rich']),reliable:Math.random()<.7,
+    return{id:i,name:n,gender:g,prog:pg.name,col:pg.col,home,origHome:home,ints,pers,look,wealth:HT(home)==='royal'?'rich':HT(home)==='lodge'?pick(['poor','avg']):pick(['avg','avg','rich']),reliable:Math.random()<.7,
       x:dd[0]+R(-40,40),y:dd[1]+R(4,30)*outDir(BID[home]),tx:0,ty:0,mesh:h.g,legs:h.legs,knees:h.knees,arms:h.arms,elbows:h.elbows,head:h.head,lids:h.lids,torso:h.torso,phase:Math.random()*6,
       friend:0,romance:0,met:false,talks:0,dates:0,contact:false,chem:R(0,1),plan:null,lastPlan:-1,with:0,mate:false,bed:-1,customer:false}});
   // two coursemates share your programme

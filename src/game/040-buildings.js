@@ -26,9 +26,9 @@ function buildArch(b,s,cx,cz,w,d,f){
   const add=(k,geo,x,y,z,ry,sx,sy,sz,rx=0,rz=0)=>{E.set(rx,ry,rz,'YXZ');Q.setFromEuler(E);M.compose(V.set(x,y,z),Q,SC.set(sx,sy,sz));(B[k]=B[k]||[]).push({geo,m:M.clone()})};
   const bx=(k,sx,sy,sz,x,y,z,ry=0)=>add(k,AG.box,x,y,z,ry,sx,sy,sz);
   const H=b.ht,id=b.id,zone=b.zone,home=!!b.home;
-  const style=id==='senate'?'senate':id==='lib'?'library':id==='greathall'?'hall':id==='chapel'?'chapel':id==='club'?'club':id==='mall'?'mall':(id==='unity'||id==='bank')?'bank':id==='royal'?'tower':
+  const style=id==='senate'?'senate':id==='lib'?'library':id==='greathall'?'hall':id==='chapel'?'chapel':id==='club'?'club':id==='mall'?'mall':(id==='unity'||id==='bank')?'bank':HT(id)==='royal'?'tower':
     (id==='gym'||id==='hall')?'sports':id==='pavilion'?'pavilion':home?'hostel':zone==='c'?'shop':'college';
-  const roofT={hostel:id==='lodge'?'corr':'hip',chapel:'gable',sports:id==='hall'?'barrel':'flat',college:['canteen','office','print','clinic'].includes(id)?'hip':'flat',pavilion:'flat'}[style]||'flat';
+  const roofT={hostel:HT(id)==='lodge'?'corr':'hip',chapel:'gable',sports:id==='hall'?'barrel':'flat',college:['canteen','office','print','clinic'].includes(id)?'hip':'flat',pavilion:'flat'}[style]||'flat';
   const floors=Math.max(1,Math.round((H-.2)/1.2)),fh=(H-.2)/floors;
   const F=[{n:[0,f],ry:f>0?0:Math.PI,L:w,o:d/2,front:1},{n:[0,-f],ry:f>0?Math.PI:0,L:w,o:d/2},{n:[1,0],ry:Math.PI/2,L:d,o:w/2},{n:[-1,0],ry:-Math.PI/2,L:d,o:w/2}];
   const fp=(Fc,a,out)=>[cx+Fc.n[0]*(Fc.o+out)+Math.cos(Fc.ry)*a,cz+Fc.n[1]*(Fc.o+out)-Math.sin(Fc.ry)*a];
@@ -74,7 +74,7 @@ function buildArch(b,s,cx,cz,w,d,f){
   if(style==='chapel'){add('roof',AG.gable,cx,H,cz,Math.PI/2*(f>0?1:1),d+.35,1.7,w+.35);const tx=-FR.L/2+.7;fb(FR,'wall',1.1,H+2.2,1.1,tx,(H+2.2)/2,-.4);add('roof',AG.hip,...(()=>{const [x,z]=fp(FR,tx,-.95);return[x,H+2.75,z]})(),0,1.2,1.1,1.2);
     {const [x,z]=fp(FR,tx,-.4);bx('white',.08,.7,.08,x,H+3.6,z);bx('white',.4,.08,.08,x,H+3.75,z)}fb(FR,'stain',.5,.9,.05,tx,H+1.2,.15);ent();beds();signY=H-.5;signW=3}
   if(style==='hostel'){
-    if(id!=='lodge')[F[0],F[1]].forEach(Fc=>{for(let r=1;r<floors;r++){const y=.2+r*fh;fb(Fc,'stone',Fc.L-.5,.08,.5,0,y,0);fb(Fc,'trim',Fc.L-.5,.05,.04,0,y+.42,.48);for(let a=-Fc.L/2+.3;a<Fc.L/2-.2;a+=.22)fb(Fc,'trim',.025,.42,.025,a,y+.21,.48);for(let a=-Fc.L/2+1;a<Fc.L/2-.5;a+=1.6)if(Math.random()<.5)fb(Fc,Math.random()<.5?'cloth':'cloth2',.32,.34,.02,a,y+.62,.4)}})
+    if(HT(id)!=='lodge')[F[0],F[1]].forEach(Fc=>{for(let r=1;r<floors;r++){const y=.2+r*fh;fb(Fc,'stone',Fc.L-.5,.08,.5,0,y,0);fb(Fc,'trim',Fc.L-.5,.05,.04,0,y+.42,.48);for(let a=-Fc.L/2+.3;a<Fc.L/2-.2;a+=.22)fb(Fc,'trim',.025,.42,.025,a,y+.21,.48);for(let a=-Fc.L/2+1;a<Fc.L/2-.5;a+=1.6)if(Math.random()<.5)fb(Fc,Math.random()<.5?'cloth':'cloth2',.32,.34,.02,a,y+.62,.4)}})
     const stx=FR.L/2-.45;fb(FR,'accent',.9,H+.4,.2,stx,(H+.4)/2,0);for(let r=0;r<floors;r++)fb(FR,'glassD',.18,fh*.6,.02,stx,.2+r*fh+fh*.5,.2);
     if(roofT==='corr'){add('corr',AG.gable,cx,H,cz,f>0?Math.PI/2:Math.PI/2,d+.6,.9,w+.6);bx('trim',w+.6,.08,d+.6,cx,H,cz)}
     else{bx('trim',w+.7,.12,d+.7,cx,H+.02,cz);add('roof',AG.hip,cx,H+.48,cz,0,w+.7,.9,d+.7)}

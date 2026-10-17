@@ -6,7 +6,7 @@
 const HALL_KINDS=['gi','gc'];
 function hallFinalPlay(){const p=P(),mates=S.npcs.filter(n=>n.home===p.home&&!n.hidden&&!n.mirror&&!n.mate).slice(0,3);
   if(S.hallFinal&&S.hallFinal.d===day())return toast('You already played the final today.');
-  S.hallFinal={d:day(),home:p.home,opp:pick(Object.keys(BID).filter(k=>['lodge','sunrise','royal','bayview','heights','kotei'].includes(k)&&k!==p.home))};
+  S.hallFinal={d:day(),home:p.home,opp:pick(HOSTELS.map(h=>h.id).filter(k=>BID[k]&&k!==p.home))};
   story(`<div class="eyebrow">⚽ Inter-Hall Football Final</div><h3>${esc(BID[p.home].name)} vs ${esc(BID[S.hallFinal.opp].name)}</h3><p class="scene">The whole hostel is at the touchline with drums, vuvuzelas and a giant flag. Your captain hands you a jersey: "Today we bring the trophy home."</p>`,
     [['⚽ Kick off!','g',()=>{S.sportRoster=mates;doAct('Playing football',60,{fun:25,energy:-15,social:12,hygiene:-12})}],['Maybe next time','',()=>{S.hallFinal=null}]])}
 function hallFinalResult(r){const H=S.hallFinal;if(!H||H.done)return;H.done=1;const p=P(),win=r.win>0,draw=r.win===0;

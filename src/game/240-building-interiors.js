@@ -143,7 +143,7 @@ function enterBuilding(id,back){fadeIn();S.shuttleWait=null;const BD=IS?(IS.budd
     cooks.forEach((n,i)=>addInPerson(n.look,n.name,[-2.4,1.0][i],-D/2+1.02,Math.PI,'cook',{n}));
     const puffs=[];st.forEach((x,i)=>{if(i===1||cooks[i>1?1:0])for(let k=0;k<3;k++){const m=mesh(sph(.06,8,6),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.35,depthWrite:false}),x-.15,1.2,-D/2+.38,s);puffs.push({m,x:x-.15,o:k/3})}});
     let tt=0;IS.tick=dt=>{tt+=dt;puffs.forEach(q=>{const f=(tt*.45+q.o)%1;q.m.position.y=1.16+f*.75;q.m.position.x=q.x+Math.sin(f*6+q.o*5)*.05;q.m.material.opacity=.4*(1-f);q.m.scale.setScalar(1+f*1.6)})}}
-  if(id==='hbath'){const lodge=P().home==='lodge',priv=tier>=2;IS.waterOff=lodge&&S.waterOffDay===day();
+  if(id==='hbath'){const lodge=HT(P().home)==='lodge',priv=tier>=2;IS.waterOff=lodge&&S.waterOffDay===day();
     const water=new THREE.Group(),wm=new THREE.MeshBasicMaterial({color:0xd6f3ff,transparent:true,opacity:.55});for(let i=0;i<8;i++)mesh(cyl(.006,.006,1.9,4),wm,R(-.13,.13),1.05,R(-.13,.13),water);water.visible=false;s.add(water);IS.water=water;
     const curtM=new THREE.MeshStandardMaterial({color:priv?0xdfeef2:0x7fb3d5,transparent:true,opacity:priv?.8:.9,roughness:.6,side:THREE.DoubleSide});
     if(!priv){box(W,1.5,.04,0xbfe0ea,0,.75,-D/2+.08,s);
@@ -159,7 +159,7 @@ function enterBuilding(id,back){fadeIn();S.shuttleWait=null;const BD=IS?(IS.budd
       IS.obst.push({x1:-W/2,x2:-.95,z1:-D/2,z2:-D/2+1.22});IS.spots.shower={x:-1.6,z:-D/2+.62,ry:0};water.position.set(-1.6,0,-D/2+.62);
       B_(.42,.42,.58,0xffffff,.1,.21,-D/2+.42,true);box(.42,.4,.16,0xffffff,.1,.6,-D/2+.15,s);
       B_(.9,.85,.5,0x7a5536,1.25,.43,-D/2+.3,true);box(.4,.06,.32,0xffffff,1.25,.88,-D/2+.3,s);box(.7,.8,.03,0xcfe3f0,1.25,1.55,-D/2+.1,s);IS.spots.sink={x:1.25,z:-D/2+.95,ry:Math.PI};
-      if(P().home==='royal'){const tx=W/2-.7,tz=.55;box(.8,.1,1.8,0xffffff,tx,.05,tz,s);[-.36,.36].forEach(dx=>box(.08,.55,1.8,0xffffff,tx+dx,.28,tz,s));[-.86,.86].forEach(dz=>box(.8,.55,.08,0xffffff,tx,.28,tz+dz,s));
+      if(HT(P().home)==='royal'){const tx=W/2-.7,tz=.55;box(.8,.1,1.8,0xffffff,tx,.05,tz,s);[-.36,.36].forEach(dx=>box(.08,.55,1.8,0xffffff,tx+dx,.28,tz,s));[-.86,.86].forEach(dz=>box(.8,.55,.08,0xffffff,tx,.28,tz+dz,s));
         const tw=mesh(new THREE.PlaneGeometry(.64,1.64),new THREE.MeshLambertMaterial({color:0x9fdcf0,transparent:true,opacity:.55,depthWrite:false}),tx,.4,tz,s);tw.rotation.x=-Math.PI/2;IS.obst.push({x1:tx-.42,x2:tx+.42,z1:tz-.92,z2:tz+.92});IS.spots.tub={x:tx,z:tz+.8,ly:.24}}}
     IS.tick=()=>{if(water.visible)water.children.forEach((c,i)=>c.position.y=1.05-((performance.now()/250+i*.37)%1)*.12)}}
   // students inside take seats

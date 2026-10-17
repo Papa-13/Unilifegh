@@ -1,9 +1,11 @@
 /* ================= free campus shuttle ================= */
-const SH_ROUTE=[[600,330],[3400,330],[3400,1000],[4700,1000],[4700,2800],[600,2800]];
+const SH_ROUTE=[[600,330],[4400,330],[4400,1000],[2000,1000],[2000,2150],[4400,2150],[4400,2800],[600,2800]];
 function projD(rt,x,y){let acc=0,best=0,bd=1e9;for(let i=0;i<rt.length;i++){const a=rt[i],b=rt[(i+1)%rt.length],L=Math.hypot(b[0]-a[0],b[1]-a[1]);
   const t=clamp(((x-a[0])*(b[0]-a[0])+(y-a[1])*(b[1]-a[1]))/(L*L),0,1),px=a[0]+(b[0]-a[0])*t,py=a[1]+(b[1]-a[1])*t,dd=Math.hypot(px-x,py-y);if(dd<bd){bd=dd;best=acc+t*L}acc+=L}return best}
 const SH_PER=perim(SH_ROUTE);
-const SH_STOPS=[['Tech Junction · Trotro & Taxi',900,330],['Bomso · Bay View Hostel',1250,330],['Main Gate Shuttle Terminal',1600,330],['Senate & Registry',2250,330],['Library · Great Hall',2850,330],['CoS · CoHSS',3400,650],['CANR · CABE',3900,1000],['CHS · Botanical Garden',4300,1000],['Basketball Court · Sports Hall',4700,1350],['Gym · Swimming Pool',4700,1900],['Ayeduase Junction',4700,2600],['Ayeduase Heights',4250,2800],['Akwaaba Lodge · Ayeduase',3680,2800],['Kotei Court',2800,2800],['Sunrise Hostel · Kotei',2250,2800],['Gyinyaase Gardens',1050,2800],['Sankofa Hall · Gyinyaase Road',600,2350],['Shawarma · Club Vibes',600,1900],['Commercial Area · Mall',600,1250],['CoE · Engineering',600,760]].map(([name,x,y],i)=>{
+const SH_STOPS=(()=>{const L=[],P=perim(SH_ROUTE),sn=b=>b.name.split(' · ')[0].replace(' (private)','');for(let d=180;d<P-120;d+=520){const q=along(SH_ROUTE,d);
+    const near=B.filter(b=>!b.open||['taxi','trotro','terminal','parade','lake','market'].includes(b.id)).map(b=>({b,dd:Math.hypot(b.door[0]-q.x,b.door[1]-q.y)})).filter(o=>o.dd<420).sort((a,b)=>a.dd-b.dd).slice(0,2).map(o=>sn(o.b));
+    const z=zoneOf(q.x+(-q.dy)*120,q.y+q.dx*120);L.push([near.length?near.join(' · '):z,q.x,q.y])}return L})().map(([name,x,y],i)=>{
   const d=projD(SH_ROUTE,x,y),q=along(SH_ROUTE,d),ox=-q.dy,oy=q.dx;return{i,name,d,x:q.x,y:q.y,sx:q.x+ox*(RHW+26),sy:q.y+oy*(RHW+26),ox,oy}});
 function makeBus(){return makeBusModel()}
 function makeBus_old(){const g=new THREE.Group();box(3.4,1.05,1.15,0xf4f1ea,0,.85,0,g);box(3.42,.18,1.17,0x8e2a3a,0,.48,0,g);box(3.1,.42,1.17,0x24323f,0,1.08,0,g);box(.04,.55,.95,0x24323f,1.71,1.0,0,g);
