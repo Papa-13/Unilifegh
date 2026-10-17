@@ -94,7 +94,7 @@ function posePerson(c,moving,dt){
   else if(pose==='swim'){g.rotation.x=1.55;g.rotation.z=0;g.position.y=.06+Math.sin(t*9)*.012}
   else{g.rotation.x=lean;g.rotation.z=pv.rz;g.position.y=pv.y+(c.spotY||0)}
   const tt=performance.now()/1000,cid=c.id||0;
-  if(c.lids){const bt=(tt*.8+cid*1.3)%4.2;const cl=c.lying||bt<.13||(c.expr&&c.expr.e==='sleep');c.lids.forEach(l=>l.rotation.x=cl?.95:-.55)}
+  if(c.lids){const bt=(tt*.8+cid*1.3)%4.2;const cl=c.lying||bt<.13||(c.expr&&c.expr.e==='sleep');c.lids.forEach(l=>l.rotation.x=cl?.95:-.78)}
   if(c.head){const hy0=c.lookY!=null?c.lookY:(pose==='idle'||pose==='phone'||pose==='sit')?Math.sin(tt*.35+cid)*.25:0;const hyT=hy!=null?hy:hy0;c.head.rotation.y+=(hyT-c.head.rotation.y)*(dt?Math.min(1,dt*7):1);c.head.rotation.x=hx!=null?hx:pose==='phone'?.35:(pose==='sitWrite'||pose==='type')?.22:c.lying?0:Math.sin(tt*.5+cid)*.03}
   if(c.torso){c.torso.scale.y=1+Math.sin(tt*1.7+cid)*.01;const tw=moving&&pose==='walk'?Math.sin(c.phase)*.11:moving&&pose==='run'?Math.sin(c.phase)*.18:0;c.torso.rotation.y+=(tw-c.torso.rotation.y)*(dt?Math.min(1,dt*12):1)}
   faceExpr(c,pose,tt,dt);if(g.userData.ring){const rg=g.userData.ring;rg.visible=!(pose==='swim'||pose==='dive'||c.lying);rg.rotation.x=-Math.PI/2-g.rotation.x;rg.rotation.y=-g.rotation.z;rg.position.y=.03-(g.position.y-(c.spotY||0))}
@@ -120,12 +120,12 @@ function faceExpr(c,pose,tt,dt){const F=c.mesh&&c.mesh.userData.face;if(!F)retur
   if(e==='think'){browIn=.12;brow=.002}
   if(e==='meh'){brow=.006;frown=.3}
   F.mo.scale.y=.1+open*.95;F.mo.position.y=-.067-open*.008;F.mo.visible=open>.04;F.teeth.visible=open>.3&&smile>.4;
-  F.ul.position.y=-.06+open*.004+smile*.001;F.ll.position.y=-.073-open*.02+smile*.002;F.ll.position.z=.109-open*.003;
+  F.ul.position.y=-.0605+open*.004+smile*.001;F.ll.position.y=-.072-open*.02+smile*.002;F.ll.position.z=.1115-open*.003;
   F.smA.visible=false;F.frA.visible=false;F.mline.visible=open<.04;
-  F.ul.scale.x=1.55+smile*.28;F.ll.scale.x=1.4+smile*.3-frown*.1;
-  if(F.corners)F.corners.forEach(c=>{const s=c.userData.s;c.position.x=s*(.031+smile*.007);c.position.y=-.066+smile*.009-frown*.009;c.scale.setScalar(1+smile*.25)});
+  F.ul.scale.x=1.58+smile*.28;F.ll.scale.x=1.48+smile*.3-frown*.1;
+  if(F.corners)F.corners.forEach(c=>{const s=c.userData.s;c.position.x=s*(.03+smile*.007);c.position.y=-.066+smile*.009-frown*.009;c.scale.setScalar(1+smile*.25)});
   if(F.cheeks)F.cheeks.forEach(c=>{c.visible=smile>.3;c.position.y=-.037+smile*.006;c.position.z=.084+smile*.006;c.scale.set(.6+smile*.35,.45+smile*.3,.45+smile*.2)});
-  F.brows.forEach(b=>{const s=b.userData.s;b.position.y=.018+brow*1.6-(browIn>0?browIn*.012:0);b.rotation.z=s*browIn*1.4})}
+  F.brows.forEach(b=>{const s=b.userData.s;b.position.y=.024+brow*1.6-(browIn>0?browIn*.012:0);b.rotation.z=s*browIn*1.4})}
 function setProp(c,pose,t){
   c._props=c._props||{};const want={drink:'bottle',sitDrink:'bottle',phone:'phone',kick:'ball',dribble:'bball',lift:'bar',sitEat:'plate',eat:'plate',brush:'brush',cook:'spoon',sing:'mic',sweep:'broom'}[pose]||null;
   for(const k in c._props)c._props[k].visible=k===want;

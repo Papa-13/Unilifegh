@@ -111,15 +111,21 @@ const PAL={
  batik:{name:'Blue batik',a:'#1f3b73',b:'#7fb0d8',pat:'batik'},
  rugby:{name:'Green rugby stripes',a:'#1f5f3a',b:'#f1ece3',pat:'stripe'},
  navy:{name:'Navy',a:'#1f2a44',b:'#3a4a6a',pat:'plain'},
- khaki:{name:'Khaki',a:'#8a7d5a',b:'#5a5038',pat:'plain'}};
+ khaki:{name:'Khaki',a:'#8a7d5a',b:'#5a5038',pat:'plain'},
+ sky:{name:'Sky blue (Business)',a:'#7fb2e0',b:'#1f3b73',pat:'plain'},
+ yellow:{name:'Yellow (Packaging)',a:'#f2c230',b:'#1c1c1c',pat:'plain'},
+ purple:{name:'Purple (Agric)',a:'#6a3f96',b:'#f1ece3',pat:'plain'},
+ wax:{name:'Wax print swirl',a:'#c43d2b',b:'#f2b134',pat:'wax'},
+ adinkra:{name:'Adinkra print',a:'#f1e2c4',b:'#2a1a12',pat:'adinkra'},
+ mudcloth:{name:'Mud cloth',a:'#3a2c22',b:'#e9dcc4',pat:'mud'}};
 const HAIR={m:{short:'Short',fade:'Low cut',waves:'360 waves',afro:'Afro',locs:'Locs',twists:'Twists',cornrows:'Cornrows',dyed:'Blonde low cut',frohawk:'Frohawk',burst:'Twist sponge curls',hightop:'High top fade',mdesign:'Braided designs',twists2:'Two-strand twists',locbun:'Half-up tied locs'},f:{braids:'Knotless braids',afro:'Afro',puffs:'Afro puffs',bun:'Bun',locs:'Locs',cornrows:'Cornrows',wig:'Straight wig',duku:'Headwrap',bantu:'Bantu knots',ponytail:'Sleek ponytail',bob:'Bob wig',lowcut:'Low cut',blonde:'Blonde wig',puff:'High puff',knotless:'Knotless braids (medium)',fulani:'Fulani braids',passion:'Passion twists',goddess:'Goddess locs',bobbraids:'Bob braids',halfup:'Half up half down',curlywig:'Curly wig',locbun:'Half-up tied locs'}};
 const HAIRPRICE={short:20,fade:25,waves:30,afro:30,puffs:40,cornrows:90,locs:180,twists:120,braids:150,bun:40,wig:250,duku:30,dyed:60,frohawk:45,burst:70,bantu:80,ponytail:90,bob:200,lowcut:20,blonde:280,hightop:35,mdesign:110,twists2:90,locbun:200,puff:40,knotless:130,fulani:170,passion:160,goddess:220,bobbraids:120,halfup:150,curlywig:260};
-const OUTFIT={m:{tee:'Oversized tee & cargos',hoodie:'Hoodie & joggers',polo:'Polo & chinos',shirt:'Shirt & jeans',jacket:'Denim jacket & jeans',varsity:'Varsity jacket',track:'Tracksuit',kaftan:'Kaftan set',jersey:'Jersey & shorts',smock:'Fugu smock',unitee:'AKWAABA U campus tee',rugby:'Rugby stripe shirt & jeans',cargo2:'Tee & black cargos',suit:'Suit (presentations)'},
-  f:{jeans:'Crop top & jeans',hoodie:'Hoodie & leggings',bodycon:'Bodycon dress',tank:'Tank top & cargos',skirt:'Tee & mini skirt',twopiece:'Print two-piece',jumpsuit:'Jumpsuit',blazer:'Blazer suit',athleisure:'Athleisure set',kente:'Kente maxi dress',kaba:'Ankara two-piece',dress:'Sundress',unitee:'AKWAABA U campus tee',dskirt:'Crop top & denim maxi skirt',cargo:'Tank & cargo pants',formal:'Shirt & trousers (presentations)'}};
-const SHOES={sneakers:'Sneakers',sandals:'Sandals',slides:'Slides',shoes:'Leather shoes'};
-const EXTRA={none:'Nothing',specs:'Glasses',headphones:'Headphones',cap:'Cap',chain:'Chain',earrings:'Hoop earrings',studs:'Stud earrings'};
+const OUTFIT={m:{tee:'Oversized tee & cargos',hoodie:'Hoodie & joggers',polo:'Polo & chinos',shirt:'Shirt & jeans',jacket:'Denim jacket & jeans',varsity:'Varsity jacket',track:'Tracksuit',kaftan:'Kaftan set',jersey:'Jersey & shorts',smock:'Fugu smock',unitee:'AKWAABA U campus tee',rugby:'Rugby stripe shirt & jeans',cargo2:'Tee & black cargos',suit:'Suit (presentations)',faculty:'Department shirt & black trousers',friday:'Friday wear: print shirt & trousers',baggy:'Oversized tee & baggy jeans',jorts:'Tee & jorts',halltee:'Hall Week tee & joggers'},
+  f:{jeans:'Crop top & jeans',hoodie:'Hoodie & leggings',bodycon:'Bodycon dress',tank:'Tank top & cargos',skirt:'Tee & mini skirt',twopiece:'Print two-piece',jumpsuit:'Jumpsuit',blazer:'Blazer suit',athleisure:'Athleisure set',kente:'Kente maxi dress',kaba:'Ankara two-piece',dress:'Sundress',unitee:'AKWAABA U campus tee',dskirt:'Crop top & denim maxi skirt',cargo:'Tank & cargo pants',formal:'Shirt & trousers (presentations)',faculty:'Department shirt & black skirt',friday:'Friday wear: print wrap skirt & tee',corset:'Corset top & baggy jeans',halltee:'Hall Week tee & jorts'}};
+const SHOES={sneakers:'Sneakers',chunky:'Chunky white sneakers',socks:'Slides & socks',sandals:'Sandals',slides:'Slides',shoes:'Leather shoes'};
+const EXTRA={none:'Nothing',specs:'Glasses',headphones:'Headphones',cap:'Cap',chain:'Chain',earrings:'Hoop earrings',studs:'Stud earrings',durag:'Durag',bucket:'Bucket hat',watch:'Watch',beads:'Bead bracelets'};
 const BEARDS={none:'Clean shaven',goatee:'Goatee',full:'Full beard'};
-const BAGS={backpack:'Backpack',tote:'Tote bag',none:'No bag'};
+const BAGS={backpack:'Backpack',sling:'Crossbody sling bag',tote:'Tote bag',none:'No bag'};
 /* family background */
 const BG={
  rich:{name:'Wealthy home',emoji:'🏡',fund:20000,allow:800,momo:8000,agg:[6,13],story:'Your dad runs a construction company in East Legon and your mum is a pharmacist. You went to a top boarding school. Money is not the problem. Making real friends might be.'},
@@ -251,4 +257,8 @@ const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const cedi=n=>'GH₵'+Math.round(n).toLocaleString('en-GB');
 const $=id=>document.getElementById(id);
-function randomLook(g){return{gender:g,skin:pick(SKINS),hair:pick(Object.keys(HAIR[g])),outfit:pick(Object.keys(OUTFIT[g])),pal:pick(Object.keys(PAL)),shoes:pick(Object.keys(SHOES)),extra:pick(Object.keys(EXTRA).filter(e=>g==='f'||e!=='earrings')),bag:pick(['backpack','backpack','tote','none']),beard:g==='m'?pick(['none','none','goatee','goatee','full']):'none'}}
+/* outfits that only look right in certain colours (what students actually wear) */
+const PRINTS=['ankara','kente','wax','adinkra','batik','green','mudcloth','tiedye'],PLAINS=['black','white','denim','olive','beige','heather','navy','khaki','pink','lilac','maroon'];
+const LOOK_PAL={baggy:PLAINS,jorts:PLAINS,faculty:['sky','yellow','purple','white','white','sky'],friday:PRINTS,kaba:PRINTS,kabaslit:PRINTS,twopiece:PRINTS,kente:['kente'],smock:['maroon','navy','black','beige','green'],jersey:['ghana','ghana','rugby','maroon','navy','white'],suit:['black','navy','heather'],formal:['white','sky','black'],halltee:['maroon','ghana','navy','yellow','green','purple','black'],kaftan:['white','beige','black','navy','olive','wax','adinkra'],corset:['black','white','pink','lilac','beige','maroon']};
+function fitLook(L){const o=L.outfit;if(LOOK_PAL[o]&&!LOOK_PAL[o].includes(L.pal))L.pal=pick(LOOK_PAL[o]);if(['faculty','suit','formal'].includes(o)&&!['shoes','chunky'].includes(L.shoes))L.shoes=pick(['shoes','shoes','chunky']);if(['faculty','suit','formal','kente','kabaslit'].includes(o)&&['durag','bucket','cap','headphones'].includes(L.extra))L.extra='watch';return L}
+function randomLook(g){const outfit=pick(Object.keys(OUTFIT[g]));return fitLook({gender:g,skin:pick(SKINS),hair:pick(Object.keys(HAIR[g])),outfit,pal:pick(Math.random()<.45?PRINTS:PLAINS.concat(Object.keys(PAL))),shoes:pick(Object.keys(SHOES)),extra:pick(Object.keys(EXTRA).filter(e=>g==='f'||e!=='earrings')),bag:pick(['backpack','backpack','sling','tote','none']),beard:g==='m'?pick(['none','none','goatee','goatee','full']):'none'})}

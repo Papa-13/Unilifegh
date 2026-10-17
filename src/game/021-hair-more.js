@@ -5,9 +5,10 @@
    bob braids, half up half down, curly wig. Also beards for guys. */
 function hairMore(H,L,f,head,hair,gold){const capG=new THREE.SphereGeometry(.134,30,18,0,Math.PI*2,0,Math.PI*.54);
   const cap=(m,sy=1.07)=>{const c=mesh(capG,m||hair,0,.02,-.012,head);c.scale.set(.99,sy,1.03);c.rotation.x=-.52;return c};
-  const fade=()=>cap(stdM(L.grey?0xa9a49b:0x2a221c,.9),1.04);
-  const capOK=L.extra!=='cap';
-  if(H==='hightop'){fade();if(capOK){mesh(new THREE.CylinderGeometry(.126,.128,.075,22),hair,0,.165,-.012,head);const top=mesh(bumpySphere(.126,'htop'),hair,0,.2,-.012,head);top.scale.set(1,.28,1)}}
+  const fade=()=>cap(fadeM(!!L.grey),1.04);
+  const capOK=!hatOn(L);
+  if(H==='hightop'){fade();if(capOK){/* flat-top block of tight coils, slightly wider at the top, rounded edges */const ht=mesh(lathe('htop2',[[.12,.06],[.126,.09],[.13,.13],[.131,.17],[.124,.2],[.105,.212],[.06,.216],[.001,.215]],28),hair,0,0,-.014,head);ht.scale.set(1,1,1.02);
+    const tex=mesh(bumpySphere(.12,'htopB'),hair,0,.185,-.014,head);tex.scale.set(1.04,.26,1.06)}}
   if(H==='mdesign'){fade();const cr=mesh(cornrowGeo(),hair,0,.02,-.012,head);cr.scale.set(1,1.1,1.06);cr.rotation.x=-.52;cr.rotation.z=.28;
     for(let i=0;i<3;i++){const z=mesh(new THREE.TorusGeometry(.13,.0035,4,24,.9),stdM(0x15100c,.9),0,.03+i*.03,-.01,head);z.rotation.set(Math.PI/2,0,1.9+i*.3)}}
   if(H==='twists2'){cap(hair,1.08);if(capOK)for(let i=0;i<46;i++){const a=i*2.399,r=.03+Math.sqrt(i/46)*.09;const t=mesh(tcap(.017,.012,.1+((i*7)%3)*.015,6),hair,Math.cos(a)*r,.16-r*.5,Math.sin(a)*r-.01,head);t.rotation.z=-Math.cos(a)*r*9;t.rotation.x=Math.sin(a)*r*9}}
@@ -24,7 +25,7 @@ function hairMore(H,L,f,head,hair,gold){const capG=new THREE.SphereGeometry(.134
   if(H==='curlywig'){const hm=hair;mesh(new THREE.CylinderGeometry(.15,.19,.4,24,1,true,Math.PI*.56,Math.PI*.88),hm,0,-.13,-.01,head);const fr=mesh(new THREE.SphereGeometry(.144,24,12,0,Math.PI*2,0,Math.PI*.32),hm,0,.03,.012,head);fr.rotation.x=.35;cap(hm,1.1);
     for(let i=0;i<22;i++){const a=Math.PI*(.05+i*.04),k=(i*7)%3;mesh(sph(.036,7,6),hm,Math.cos(a)*(.16+k*.012),-.12-k*.08,-Math.sin(a)*.15,head)}}
   /* beards for guys: a neat moustache and chin beard, or a full beard along the jaw */
-  if(!f&&(L.beard==='goatee'||L.beard==='full')){const bm=stdM(0x16100c,.95);const mu=mesh(sph(.024,12,8),bm,0,-.049,.113,head);mu.scale.set(1.25,.2,.42);
-    const ch=mesh(sph(.026,12,10),bm,0,-.1,.093,head);ch.scale.set(1.05,.62,.42);
+  if(!f&&(L.beard==='goatee'||L.beard==='full')){const bm=stdM(0x16100c,.95);const mu=mesh(sph(.024,12,8),bm,0,-.05,.114,head);mu.scale.set(1.3,.17,.36);
+    const ch=mesh(sph(.026,12,10),bm,0,-.108,.1,head);ch.scale.set(.95,.5,.34);ch.rotation.x=.5;
     if(L.beard==='full'){const jaw=mesh(new THREE.TorusGeometry(.098,.011,6,20,Math.PI*.9),bm,0,-.045,.02,head);jaw.rotation.set(Math.PI/2+.25,0,Math.PI*1.05);jaw.scale.set(1.12,1.12,.9)}}
   if(L.extra==='studs')[-1,1].forEach(s=>mesh(sph(.009,8,6),stdM(0xe8eef2,.15,{metalness:.9}),s*.124,-.035,.005,head))}
