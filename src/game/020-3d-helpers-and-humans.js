@@ -22,6 +22,10 @@ function clothMat(key){
   if(p.pat==='diag'){g.strokeStyle=p.b;g.lineWidth=8;for(let k=-128;k<256;k+=26){g.beginPath();g.moveTo(k,0);g.lineTo(k+128,128);g.stroke()}}
   else if(p.pat==='stripe'){g.fillStyle=p.b;for(let y=0;y<128;y+=32)g.fillRect(0,y,128,6)}
   else if(p.pat==='kente'){const cols=[p.a,p.b,'#b3261e',p.a,'#111'];for(let x=0;x<128;x+=32)for(let y=0;y<128;y+=8){g.fillStyle=cols[(x/32+y/8)%cols.length];g.fillRect(x,y,32,8)}g.fillStyle='#111';for(let x=0;x<128;x+=32)g.fillRect(x,0,3,128)}
+  else if(p.pat==='ghana'){g.fillStyle=p.a;g.fillRect(0,0,128,43);g.fillStyle=p.b;g.fillRect(0,43,128,42);g.fillStyle='#006b3f';g.fillRect(0,85,128,43);g.fillStyle='#111';g.beginPath();for(let i=0;i<10;i++){const r=i%2?7:17,a=-Math.PI/2+i*Math.PI/5;g.lineTo(64+Math.cos(a)*r,64+Math.sin(a)*r)}g.closePath();g.fill()}
+  else if(p.pat==='camo'){const cs=[p.b,'#8a8a5a','#2f3a22',p.a];for(let i=0;i<46;i++){g.fillStyle=cs[i%4];g.beginPath();g.ellipse(Math.random()*128,Math.random()*128,8+Math.random()*14,5+Math.random()*9,Math.random()*3,0,7);g.fill()}}
+  else if(p.pat==='tiedye'){for(let r=96;r>0;r-=8){g.fillStyle=(r/8)%2?p.a:p.b;g.beginPath();g.arc(64,64,r+Math.sin(r)*4,0,7);g.fill()}g.globalAlpha=.25;g.fillStyle='#e04a7a';g.fillRect(0,0,64,64);g.fillRect(64,64,64,64);g.globalAlpha=1}
+  else if(p.pat==='batik'){g.strokeStyle=p.b;g.lineWidth=3;for(let x=0;x<128;x+=32)for(let y=0;y<128;y+=32){g.beginPath();g.arc(x+16,y+16,10,0,7);g.stroke();g.beginPath();g.moveTo(x+16,y+4);g.lineTo(x+16,y+28);g.moveTo(x+4,y+16);g.lineTo(x+28,y+16);g.stroke()}}
   else if(p.pat==='dots'){for(let x=16;x<128;x+=32)for(let y=16;y<128;y+=32){g.fillStyle=p.b;g.beginPath();g.arc(x,y,9,0,7);g.fill();g.fillStyle='#f4c542';g.beginPath();g.arc(x,y,3.5,0,7);g.fill()}}
   else{g.fillStyle='rgba(0,0,0,.06)';for(let y=0;y<128;y+=4)g.fillRect(0,y,128,1)}
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,2);
@@ -84,7 +88,9 @@ const OSPEC={
  f_tank:{sl:0,legs:'pants',pc:'#b9a582',cargo:1,neck:2,crop:1},
  f_skirt:{sl:1,legs:'skin',over:'mini',oc:'#3d5f8f',belt:1,loose:1},
  f_kaba:{sl:1,legs:'skin',over:'kaba',puff:1},
- f_dress:{sl:0,legs:'skin',neck:1,over:'sundress'}};
+ f_dress:{sl:0,legs:'skin',neck:1,over:'sundress'},
+ m_unitee:{sl:1,legs:'pants',pc:'#2b2b2b',loose:1,print:'AKWAABA U'},
+ f_unitee:{sl:1,legs:'pants',pc:'#5d7fa8',wide:1,print:'AKWAABA U'}};
 const ospec=(f,O)=>OSPEC[(f?'f_':'m_')+O]||OSPEC[(f?'m_':'f_')+O]||OSPEC.m_tee;
 const hexN=c=>new THREE.Color(c).getHex();
 function torsoMat(L,f){const O=L.outfit,sp=ospec(f,O),k='to'+(f?'f':'m')+O+L.pal+L.skin;if(SM[k])return SM[k];
@@ -213,6 +219,7 @@ function makeHuman(L,{label=null,labelColor='#f6f0e8',ring=false}={}){
   const bones=[hips,spine,chest,neckB,headB,arms[0],elbows[0],arms[1],elbows[1],legs[0],knees[0],legs[1],knees[1]];
   const body=new THREE.SkinnedMesh(bodyGeo(f,O),bodyMats(L,f,sp));body.castShadow=SHADOWS;body.receiveShadow=SHADOWS;g.add(body);g.updateMatrixWorld(true);body.bind(new THREE.Skeleton(bones));
   const torso=chest;
+  if(sp.print){const k='prt'+sp.print+L.pal;const tm=SM[k]||(SM[k]=new THREE.MeshBasicMaterial({map:textTex(sp.print,{w:256,h:72,font:'900 34px system-ui',color:PAL[L.pal].a==='#f1ece3'?'#8e2a3a':'#ffffff',stroke:false}),transparent:true,depthWrite:false}));const d=new THREE.Mesh(new THREE.PlaneGeometry(.3,.084),tm);d.position.set(0,-.015,f?.168:.192);chest.add(d)}
   const at=(bone,absY)=>absY-new THREE.Vector3().setFromMatrixPosition(bone.matrixWorld).y;
   const topM2=sp.solid?stdM(hexN(sp.tee||PAL[L.pal].a),.75):cloth,accC=sp.jacket?(sp.jacket==='pal'?PAL[L.pal].a:sp.jacket):sp.slc||PAL[L.pal].b;
   // ---- garments that hang (rigid, follow the hips or chest) ----
@@ -287,6 +294,12 @@ function makeHuman(L,{label=null,labelColor='#f6f0e8',ring=false}={}){
   if(H==='twists'){for(let i=0;i<22;i++){const a=i/22*Math.PI*2,r=i%2?.09:.06;const t=mesh(tcap(.02,.014,.085,6),hair,Math.cos(a)*r,.13,Math.sin(a)*r-.015,head);t.rotation.z=-Math.cos(a)*.6;t.rotation.x=Math.sin(a)*.6;t.position.y=.2}}
   if(H==='wig'){mesh(new THREE.CylinderGeometry(.143,.17,.42,24,1,true,Math.PI*.56,Math.PI*.88),hair,0,-.14,-.01,head);const fr=mesh(new THREE.SphereGeometry(.142,24,12,0,Math.PI*2,0,Math.PI*.3),hair,0,.03,.012,head);fr.rotation.x=.35}
   if(H==='duku'){const d=mesh(new THREE.SphereGeometry(.142,26,16,0,Math.PI*2,0,Math.PI*.56),cloth,0,.03,-.01,head);d.scale.set(1.06,1.35,1.1);d.rotation.x=-.32;const top=mesh(sph(.1,16,12),cloth,0,.17,-.05,head);top.scale.set(1.3,.75,1.15);const k=mesh(sph(.05,14,10),cloth,.06,.22,.03,head);k.scale.set(1.4,.8,1)}
+  if(['dyed','frohawk','burst','lowcut','bantu','ponytail'].includes(H)&&!(L.extra==='cap'&&H!=='ponytail')){const blond=H==='dyed',c=mesh(capG,blond?stdM(0xd9a54a,.85):H==='bantu'||H==='ponytail'?hair:stdM(L.grey?0xa9a49b:0x2a221c,.9),0,.02,-.012,head);c.scale.set(.99,H==='lowcut'||blond?1.05:1.09,1.03);c.rotation.x=-.52}
+  if(H==='frohawk'&&L.extra!=='cap'){const m=mesh(bumpySphere(.07,'froh'),hair,0,.14,-.02,head);m.scale.set(.75,.9,1.9)}
+  if(H==='burst'&&L.extra!=='cap')for(let i=0;i<26;i++){const a=i*2.4,r=.02+(i%5)*.015;mesh(sph(.024,7,6),hair,Math.cos(a)*r,.15+Math.random()*.02,Math.sin(a)*r-.01,head)}
+  if(H==='bantu')[[0,.16,-.02],[-.075,.13,.04],[.075,.13,.04],[-.09,.11,-.07],[.09,.11,-.07],[0,.1,-.12]].forEach(([x,y,z])=>{const k=mesh(bumpySphere(.042,'bantu'),hair,x,y,z,head);k.scale.y=.85});
+  if(H==='ponytail'){const pt=mesh(tcap(.045,.012,.34,10),hair,0,.12,-.12,head);pt.rotation.x=.55;mesh(new THREE.TorusGeometry(.03,.008,6,12),stdM(0xc8322b,.6),0,.12,-.13,head).rotation.x=1}
+  if(H==='bob'||H==='blonde'){const hm=H==='blonde'?stdM(0xd9b06a,.7,{side:THREE.DoubleSide}):hair;const len=H==='bob'?.2:.4;mesh(new THREE.CylinderGeometry(.145,H==='bob'?.16:.17,len,24,1,true,Math.PI*.56,Math.PI*.88),hm,0,.02-len/2+.06,-.01,head);const fr=mesh(new THREE.SphereGeometry(.144,24,12,0,Math.PI*2,0,Math.PI*.32),hm,0,.03,.012,head);fr.rotation.x=.35;const top=mesh(new THREE.SphereGeometry(.142,24,12,0,Math.PI*2,0,Math.PI*.5),hm,0,.02,-.012,head);top.rotation.x=-.3}
   if(L.extra==='cap'){mesh(new THREE.SphereGeometry(.142,24,12,0,Math.PI*2,0,Math.PI*.5),cloth,0,.035,0,head);const b=mesh(cyl(.11,.11,.012,20),cloth,0,.05,.12,head);b.scale.set(1,1,.9)}
   if(L.extra==='headphones'){const hb=mesh(new THREE.TorusGeometry(.15,.013,8,22,Math.PI),stdM(0x1a1a1a,.4),0,.02,0,head);[-1,1].forEach(s=>{const cp=mesh(cyl(.045,.045,.04,16),stdM(0x1a1a1a,.4),s*.138,0,0,head);cp.rotation.z=Math.PI/2})}
   if(L.extra==='specs'){const fr=stdM(0x111111,.3);[-1,1].forEach(s=>mesh(new THREE.TorusGeometry(.025,.0028,6,18),fr,s*.044,.014,.122,head));box(.03,.004,.004,fr,0,.02,.124,head);[-1,1].forEach(s=>box(.004,.004,.16,fr,s*.1,.02,.05,head))}

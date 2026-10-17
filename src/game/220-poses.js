@@ -96,7 +96,7 @@ function posePerson(c,moving,dt){
   const tt=performance.now()/1000,cid=c.id||0;
   if(c.lids){const bt=(tt*.8+cid*1.3)%4.2;const cl=c.lying||bt<.13||(c.expr&&c.expr.e==='sleep');c.lids.forEach(l=>l.rotation.x=cl?.95:-.55)}
   if(c.head){const hy0=c.lookY!=null?c.lookY:(pose==='idle'||pose==='phone'||pose==='sit')?Math.sin(tt*.35+cid)*.25:0;const hyT=hy!=null?hy:hy0;c.head.rotation.y+=(hyT-c.head.rotation.y)*(dt?Math.min(1,dt*7):1);c.head.rotation.x=hx!=null?hx:pose==='phone'?.35:(pose==='sitWrite'||pose==='type')?.22:c.lying?0:Math.sin(tt*.5+cid)*.03}
-  if(c.torso)c.torso.scale.y=1+Math.sin(tt*1.7+cid)*.01;
+  if(c.torso){c.torso.scale.y=1+Math.sin(tt*1.7+cid)*.01;const tw=moving&&pose==='walk'?Math.sin(c.phase)*.11:moving&&pose==='run'?Math.sin(c.phase)*.18:0;c.torso.rotation.y+=(tw-c.torso.rotation.y)*(dt?Math.min(1,dt*12):1)}
   faceExpr(c,pose,tt,dt);if(g.userData.ring){const rg=g.userData.ring;rg.visible=!(pose==='swim'||pose==='dive'||c.lying);rg.rotation.x=-Math.PI/2-g.rotation.x;rg.rotation.y=-g.rotation.z;rg.position.y=.03-(g.position.y-(c.spotY||0))}
   setProp(c,c.gest&&c.gest.k==='phonecall'?'phone':pose,t);
 }

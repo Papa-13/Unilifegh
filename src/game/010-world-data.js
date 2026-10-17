@@ -88,11 +88,15 @@ const PAL={
  olive:{name:'Olive',a:'#6b6b3a',b:'#3f3f22',pat:'plain'},
  beige:{name:'Beige',a:'#d8c7a6',b:'#8a6d4a',pat:'plain'},
  lilac:{name:'Lilac',a:'#b9a3d6',b:'#ffffff',pat:'plain'},
- heather:{name:'Heather grey',a:'#9a9ca0',b:'#2b2b2b',pat:'plain'}};
-const HAIR={m:{short:'Short',fade:'Low cut',waves:'360 waves',afro:'Afro',locs:'Locs',twists:'Twists',cornrows:'Cornrows'},f:{braids:'Knotless braids',afro:'Afro',puffs:'Afro puffs',bun:'Bun',locs:'Locs',cornrows:'Cornrows',wig:'Straight wig',duku:'Headwrap'}};
-const HAIRPRICE={short:20,fade:25,waves:30,afro:30,puffs:40,cornrows:90,locs:180,twists:120,braids:150,bun:40,wig:250,duku:30};
-const OUTFIT={m:{tee:'Oversized tee & cargos',hoodie:'Hoodie & joggers',polo:'Polo & chinos',shirt:'Shirt & jeans',jacket:'Denim jacket & jeans',varsity:'Varsity jacket',track:'Tracksuit',kaftan:'Kaftan set',jersey:'Jersey & shorts',smock:'Fugu smock'},
-  f:{jeans:'Crop top & jeans',hoodie:'Hoodie & leggings',bodycon:'Bodycon dress',tank:'Tank top & cargos',skirt:'Tee & mini skirt',twopiece:'Print two-piece',jumpsuit:'Jumpsuit',blazer:'Blazer suit',athleisure:'Athleisure set',kente:'Kente maxi dress',kaba:'Ankara two-piece',dress:'Sundress'}};
+ heather:{name:'Heather grey',a:'#9a9ca0',b:'#2b2b2b',pat:'plain'},
+ ghana:{name:'Black Stars',a:'#c8102e',b:'#fcd116',pat:'ghana'},
+ camo:{name:'Camo',a:'#5b6b3a',b:'#3a2f22',pat:'camo'},
+ tiedye:{name:'Tie-dye',a:'#7a3fa0',b:'#f4a41c',pat:'tiedye'},
+ batik:{name:'Blue batik',a:'#1f3b73',b:'#7fb0d8',pat:'batik'}};
+const HAIR={m:{short:'Short',fade:'Low cut',waves:'360 waves',afro:'Afro',locs:'Locs',twists:'Twists',cornrows:'Cornrows',dyed:'Blonde low cut',frohawk:'Frohawk',burst:'Burst fade & sponge twists'},f:{braids:'Knotless braids',afro:'Afro',puffs:'Afro puffs',bun:'Bun',locs:'Locs',cornrows:'Cornrows',wig:'Straight wig',duku:'Headwrap',bantu:'Bantu knots',ponytail:'Sleek ponytail',bob:'Bob wig',lowcut:'Low cut',blonde:'Blonde wig'}};
+const HAIRPRICE={short:20,fade:25,waves:30,afro:30,puffs:40,cornrows:90,locs:180,twists:120,braids:150,bun:40,wig:250,duku:30,dyed:60,frohawk:45,burst:70,bantu:80,ponytail:90,bob:200,lowcut:20,blonde:280};
+const OUTFIT={m:{tee:'Oversized tee & cargos',hoodie:'Hoodie & joggers',polo:'Polo & chinos',shirt:'Shirt & jeans',jacket:'Denim jacket & jeans',varsity:'Varsity jacket',track:'Tracksuit',kaftan:'Kaftan set',jersey:'Jersey & shorts',smock:'Fugu smock',unitee:'AKWAABA U campus tee'},
+  f:{jeans:'Crop top & jeans',hoodie:'Hoodie & leggings',bodycon:'Bodycon dress',tank:'Tank top & cargos',skirt:'Tee & mini skirt',twopiece:'Print two-piece',jumpsuit:'Jumpsuit',blazer:'Blazer suit',athleisure:'Athleisure set',kente:'Kente maxi dress',kaba:'Ankara two-piece',dress:'Sundress',unitee:'AKWAABA U campus tee'}};
 const SHOES={sneakers:'Sneakers',sandals:'Sandals',slides:'Slides',shoes:'Leather shoes'};
 const EXTRA={none:'Nothing',specs:'Glasses',headphones:'Headphones',cap:'Cap',chain:'Chain',earrings:'Earrings'};
 const BAGS={backpack:'Backpack',tote:'Tote bag',none:'No bag'};
