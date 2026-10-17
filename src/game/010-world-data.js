@@ -133,6 +133,7 @@ const SHOP=[
  {id:'tv',name:'32" flat-screen TV',price:1200,desc:'Watch shows and movies, play FIFA on the big screen'},
  {id:'kettle',name:'Electric kettle',price:120,desc:'Tea, Milo and quick noodles any time'},
  {id:'microwave',name:'Microwave',price:520,desc:'Warm up leftovers and food from your cupboard'},
+ {id:'laptop',name:'Laptop',price:3200,desc:'Do design gigs from your room (Phone → Hustles) and study online'},
  {id:'cupboard',name:'Kitchen cupboard',price:260,desc:'More space: stores up to 16 provision packs'},
  {id:'iron',name:'Pressing iron',price:90,desc:'Neat clothes: a little confidence boost before class'},
  {id:'dispenser',name:'Water dispenser',price:450,desc:'Cold and hot water. Refreshing on hot afternoons'}];

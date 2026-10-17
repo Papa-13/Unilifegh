@@ -52,7 +52,7 @@ function weatherTick(dt){if(!S||!S.p)return;const w=weatherAt(S.min);
   /* it started raining */
   const on=ri>.35;if(on&&!WX.was){toast(WX.storm?'⛈️ A storm is coming! Get indoors or grab your umbrella.':'🌧️ It\'s raining on campus.')}WX.was=on;
   if(on&&!IS){const p=P();if(p.spd>20&&!p.inCar&&!p.onBus)p.needs.hygiene=clamp((p.needs.hygiene??80)-dt*.25*ri)}
-  try{hawkerTick()}catch(e){}
+  try{hawkerTick();hustleTick()}catch(e){}
   SND.tick(dt)}
 
 /* ---- sound ---- */

@@ -49,7 +49,7 @@ function placeActions(b,inside){
   if(b.id==='square'&&fnight())a.push(["Join Freshers' Night! 🎉",()=>freshersNight()]);
   if(b.id==='square'&&p.race&&!p.race.done&&day()-S.semStart===7&&h>=17&&h<19&&!p.race.manifesto)a.push(['Read your manifesto 🎤',()=>manifesto()]);
   if(b.id===p.col&&inside){const L=TT[w]&&TT[w].find(([c,st])=>h>=st-.5&&h<=st+.75);if(L)a.push([`Attend ${courseName(L[0])} (${lecturerOf(L[0])})`,()=>lecture(L)]);else a.push(['No lecture now',null,nextLecture()]);
-    const ex=examNow();if(ex&&inside){const [ed,est,ec]=ex,done=p.exams&&p.exams[ec];a.unshift([done?`✅ ${courseName(ec)} exam done`:`📝 Write the ${courseName(ec)} exam (2h)`,done?null:()=>writeExam(ec,est),null,'b'])}
+    const ex=examNow();if(ex&&inside){const [ed,est,ec]=ex,done=p.exams&&p.exams[ec];a.unshift([done?`✅ ${courseName(ec)} exam done`:`📝 Write the ${courseName(ec)} exam (2h)`,done?null:()=>examQuiz(ec,est),null,'b'])}
     else if(ex)a.push([`📝 ${courseName(ex[2])} exam is on now · go inside`,null]);
     if(inside&&!ex)[0,1].forEach(li=>{const nm=li?BADLEC:GOODLEC,ln=lectureNow(),teaching=ln&&lecturerOf(ln[0])===nm,open=w<5&&h>=10&&h<16&&!teaching;
       a.push([`🚪 Visit ${nm}'s office`,open?()=>{S.lecIdx=li;enterBuilding('lecoff')}:null,open?null:teaching?'teaching now':'office hours Mon–Fri 10:00–16:00'])})}
@@ -144,6 +144,7 @@ function examScore(c,late){const p=P(),L=[];let s=30;
   const sl=S.lastSleep&&S.lastSleep.day===day()?S.lastSleep.h:0,sv=sl>=7?5:sl>=5?1:sl>0?-5:-10;s+=sv;L.push([sl?`Slept ${Math.round(sl)}h last night`:'No proper sleep last night',sv]);
   const n=p.needs;if(n.energy<25){s-=6;L.push(['Exhausted in the exam hall',-6])}if(n.hunger<20){s-=4;L.push(['Wrote on an empty stomach',-4])}if(n.fun<15){s-=3;L.push(['Stressed out',-3])}
   if(S.clubDay===day()-1){s-=4;L.push(['Partied at the club last night',-4])}if(late){s-=6;L.push(['Came in late',-6])}
+  const qx=(S.quizX||{})[c+'|'+S.sem];if(qx){s+=qx.bonus;L.push([`Questions you answered: ${qx.right} of ${qx.n} right`,qx.bonus])}
   s+=R(-5,5);return{score:Math.round(clamp(s)),lines:L}}
 function writeExam(c,st){const p=P(),late=hour()>st+.25;p.exams=p.exams||{};
   startBusy(`Writing the ${courseName(c)} exam`,{pose:'sitWrite',spot:IS&&IS.spots.seat,mins:Math.max(20,day()*1440+(st+2)*60-S.min)},0,()=>{const r=examScore(c,late);p.exams[c]=r;S.min=Math.max(S.min,day()*1440+(st+2)*60);hourly();p.needs.energy=clamp(p.needs.energy-15);p.needs.fun=clamp(p.needs.fun-5);
