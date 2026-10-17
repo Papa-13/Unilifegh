@@ -10,8 +10,8 @@ function setupPreview(c){
   const rim=new THREE.DirectionalLight(0xe8b24a,.45);rim.position.set(-3,2,-2);pvScene.add(rim);
   const floor=mesh(new THREE.CylinderGeometry(.85,.9,.08,48),new THREE.MeshStandardMaterial({color:0x2c1530,roughness:.4,metalness:.2}),0,-.04,0,pvScene);const ring=mesh(new THREE.TorusGeometry(.86,.012,8,64),new THREE.MeshBasicMaterial({color:0xf5b41f}),0,0,0,pvScene);ring.rotation.x=Math.PI/2;
   pvModel=null;rebuildPreview();pvOn=true}
-function rebuildPreview(){if(!pvScene)return;if(pvModel){pvScene.remove(pvModel);disposeTree(pvModel)}pvModel=makeHuman(myLook).g;pvModel.rotation.y=pvAngle;pvScene.add(pvModel)}
-function renderPreview(dt){const c=$('pv');if(!c||!pvR)return;fitR(pvR,pvCam,c);pvAngle+=dt*.5;if(pvModel)pvModel.rotation.y=faceZoom?Math.sin(performance.now()/1200)*.6:pvAngle;
+function rebuildPreview(){if(!pvScene)return;if(pvModel){pvScene.remove(pvModel);disposeTree(pvModel)}const h=makeHuman(myLook);pvModel=h.g;pvModel.rotation.y=pvAngle;pvScene.add(pvModel);window.pvC={mesh:h.g,legs:h.legs,knees:h.knees,arms:h.arms,elbows:h.elbows,head:h.head,lids:h.lids,torso:h.torso,phase:0,id:1,pose:'idle'}}
+function renderPreview(dt){const c=$('pv');if(!c||!pvR)return;fitR(pvR,pvCam,c);pvAngle+=dt*.5;if(pvModel)pvModel.rotation.y=faceZoom?Math.sin(performance.now()/1200)*.6:pvAngle;if(window.pvC&&pvC.mesh===pvModel){const r=pvModel.rotation.y;try{posePerson(pvC,false,dt)}catch(e){}pvModel.rotation.y=r;pvModel.position.set(0,0,0)}
   const wide=pvCam.aspect>1.1;pvCam.position.y+=((faceZoom?1.56:1.3)-pvCam.position.y)*.1;pvCam.position.z+=((faceZoom?1.15:wide?3.9:4.6)-pvCam.position.z)*.1;pvCam.position.x+=((wide&&!faceZoom?.35:0)-pvCam.position.x)*.1;pvCam.lookAt(0,faceZoom?1.52:1.1,0);pvR.render(pvScene,pvCam)}
 let CASTAB='gender';
 function maker(){

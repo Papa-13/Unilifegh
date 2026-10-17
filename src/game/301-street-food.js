@@ -14,7 +14,7 @@ const hawkOn=k=>()=>{const h=hour();return h>=k.from&&h<k.to};
 (function(){HAWKERS.forEach(k=>{const look=staffLook(k.g,k.g==='f'?{hair:'duku',outfit:pick(['kaba','dress']),pal:pick(['ankara','kente','olive'])}:{hair:'fade',outfit:'tee',pal:pick(['black','olive','maroon']),extra:'cap'});
   const start=k.walk?k.walk[0]:[k.x,k.y],q=T(start[0],start[1]),h=makeHuman(look,{label:k.label,labelColor:'#ffd27a'});scene.add(h.g);
   const path=k.walk&&(t=>{const [a,b]=k.walk,u=(Math.sin(t*.035)+1)/2,r=T(a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u);return r});
-  const v={mesh:h.g,legs:h.legs,knees:h.knees,arms:h.arms,elbows:h.elbows,head:h.head,lids:h.lids,torso:h.torso,x:q.x,y:q.y,face:k.walk?0:k.south?0:Math.PI,pose:k.walk?'walk':'idle',phase:0,id:Math.random()*9,when:hawkOn(k),path,spotY:0,crowd:false};
+  const v={look,label:k.label,labelColor:'#ffd27a',mesh:h.g,legs:h.legs,knees:h.knees,arms:h.arms,elbows:h.elbows,head:h.head,lids:h.lids,torso:h.torso,x:q.x,y:q.y,face:k.walk?0:k.south?0:Math.PI,pose:k.walk?'walk':'idle',phase:0,id:Math.random()*9,when:hawkOn(k),path,spotY:0,crowd:false};
   DECOR.push(v);k.v=v;h.g.rotation.y=v.face;
   /* their stall */
   const P_=new THREE.Group();k.props=P_;scene.add(P_);

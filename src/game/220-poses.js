@@ -99,6 +99,7 @@ function posePerson(c,moving,dt){
   if(c.torso){c.torso.scale.y=1+Math.sin(tt*1.7+cid)*.01;const tw=moving&&pose==='walk'?Math.sin(c.phase)*.11:moving&&pose==='run'?Math.sin(c.phase)*.18:0;c.torso.rotation.y+=(tw-c.torso.rotation.y)*(dt?Math.min(1,dt*12):1)}
   faceExpr(c,pose,tt,dt);if(g.userData.ring){const rg=g.userData.ring;rg.visible=!(pose==='swim'||pose==='dive'||c.lying);rg.rotation.x=-Math.PI/2-g.rotation.x;rg.rotation.y=-g.rotation.z;rg.position.y=.03-(g.position.y-(c.spotY||0))}
   setProp(c,c.gest&&c.gest.k==='phonecall'?'phone':pose,t);
+  if(g.userData.real)realApply(c);
 }
 const EXPR_OF={hungry:'sad',yawn:'surprised',sniff:'frown',laugh:'laugh',facepalm:'frown',sad:'sad',cross:'frown',no:'frown',celebrate:'laugh',cheer:'laugh',dance:'smile',hug:'smile',dap:'smile',handshake:'smile',wave:'smile',clap:'smile',think:'think',shrug:'meh',kiss:'smile'};
 function setGest(c,k,dur=2.2,expr){if(!c)return;const now=performance.now()/1000;c.gest={k,t0:now,end:now+dur};const e=expr||EXPR_OF[k];if(e)setExpr(c,e,dur+.6)}

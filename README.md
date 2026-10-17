@@ -32,6 +32,7 @@ src/
   game/               the game, split by topic (see docs/ARCHITECTURE.md)
     010-world-data.js       the map (MAPR road grid + buildings B), colleges, hostels, shop items…
     285-town-houses.js      houses and shops in the towns around campus
+    022-real-humans.js      realistic characters from public/models/*.glb (Blender + MPFB), driven by the game's poses
     070-time.js             the clock, hourly events, texts you receive
     140-building-actions.js what you can do at each building
     320-needs-mood-tasks-gems.js  needs, moods, daily tasks, milestones, gems
@@ -59,6 +60,7 @@ src/
   styles/             the look, split by screen
   online/             Firebase: sign-in, live rooms, database (website only)
   main.js             website entry: starts Firebase
+public/models/         student_male.glb, student_female.glb (realistic characters, website only)
 api/                  server functions on Vercel (gems.js: the gem bank, momo.js: money and loans)
 firebase/             security rules to paste into the Firebase console
 tools/                build helpers (you rarely need to touch these)

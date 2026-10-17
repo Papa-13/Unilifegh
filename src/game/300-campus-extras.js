@@ -1,7 +1,7 @@
 /* ================= campus extras: vendors, lifeguard, bouncer, swimmers ================= */
 const DECOR=[];
 (function(){const add=(look,x0,y0,face,pose,when,path0,o={})=>{const q=T(x0,y0),x=q.x,y=q.y,path=path0&&(t=>{const r=path0(t);return T(r.x,r.y)});const h=makeHuman(look,{label:o.label||null,labelColor:o.color});scene.add(h.g);h.g.rotation.y=face||0;
-    DECOR.push({mesh:h.g,legs:h.legs,knees:h.knees,arms:h.arms,elbows:h.elbows,head:h.head,lids:h.lids,torso:h.torso,x,y,face,pose,phase:0,id:Math.random()*9,when,path,spotY:o.spotY||0,crowd:!!o.crowd});if(!path&&!o.crowd&&!o.spotY)solidC(x,y,9)};
+    DECOR.push({look,label:o.label||null,labelColor:o.color,mesh:h.g,legs:h.legs,knees:h.knees,arms:h.arms,elbows:h.elbows,head:h.head,lids:h.lids,torso:h.torso,x,y,face,pose,phase:0,id:Math.random()*9,when,path,spotY:o.spotY||0,crowd:!!o.crowd});if(!path&&!o.crowd&&!o.spotY)solidC(x,y,9)};
   const conc=()=>{const e=eventNow();return !!e&&e.id==='concert'},evOn=id=>()=>{const e=eventNow();return !!e&&e.id===id};
   Object.entries(ARTISTS).forEach(([k,a])=>add(Object.assign({},a.look),1980,440,0,'sing',()=>curArtist()===k,null,{label:'🎤 '+a.name,color:'#e8b24a',spotY:1.03}));
   add(staffLook('m',{outfit:'tee',pal:'black',extra:'headphones',hair:'fade'}),2045,402,0,'dj',conc,null,{label:'DJ Kwaku Flames',spotY:1.03});

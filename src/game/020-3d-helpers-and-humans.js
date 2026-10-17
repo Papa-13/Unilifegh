@@ -207,7 +207,8 @@ function afroGeo(key,R,cx,cy,cz,hairY){if(GC[key])return GC[key];const g=new THR
   g.computeVertexNormals();return GC[key]=g}
 function cornrowGeo(){if(GC.corn)return GC.corn;const L=[];for(let i=-3;i<=3;i++){const x=i*.034;for(let k=0;k<15;k++){const t=k/14,ang=-1.3+t*2.55,xx=x*Math.max(.55,Math.cos(ang*.6)),rr=Math.sqrt(.135*.135-xx*xx),y=Math.cos(ang)*rr,z=Math.sin(ang)*rr;
     L.push({geo:new THREE.SphereGeometry(.0125,8,6),m:new THREE.Matrix4().compose(new THREE.Vector3(xx,y,z),new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),-ang),new THREE.Vector3(1,.75,1.7))})}}return GC.corn=mergeGeos(L)}
-function makeHuman(L,{label=null,labelColor='#f6f0e8',ring=false}={}){
+function makeHuman(L,o){return realOn()?makeRealHuman(L,o):makeHumanProc(L,o)}
+function makeHumanProc(L,{label=null,labelColor='#f6f0e8',ring=false}={}){
   const f=L.gender==='f',g=new THREE.Group(),O=L.outfit;g.rotation.order='YXZ';
   const skin=skinM(L.skin),cloth=clothStd(L.pal),hair=hairStd(!!L.grey),gold=stdM(0xd9a537,.3,{metalness:.8});
   const sp=ospec(f,O),topM=sp.solid?stdM(hexN(PAL[L.pal].a),.7):cloth;
@@ -287,7 +288,17 @@ function makeHuman(L,{label=null,labelColor='#f6f0e8',ring=false}={}){
   g.userData.face={brows,ul,ll,mline,mo,teeth,smA,frA,corners,cheeks};
   [-1,1].forEach(s=>{const e=mesh(sph(.03,12,10),skin,s*.119,.002,-.004,head);e.scale.set(.42,1,.72);const ei=mesh(sph(.017,10,8),skinM(darkSkin),s*.126,0,0,head);ei.scale.set(.3,.8,.6);
     if(L.extra==='earrings'){mesh(sph(.012,8,6),gold,s*.124,-.035,.005,head);mesh(new THREE.TorusGeometry(.016,.003,6,14),gold,s*.124,-.055,.005,head)}});
-  // hair
+  hairBlock(L,f,head,hair,cloth,gold);
+  const rg=mesh(new THREE.RingGeometry(.36,.44,32),basic(0xe8b24a),0,.03,0,g);rg.rotation.x=-Math.PI/2;rg.visible=ring;g.userData.ring=ring?rg:null;
+  let tag=null;if(label){tag=sprite(label,labelColor,.7);tag.position.y=2.05;g.add(tag)}
+  if(SHADOWS)g.traverse(o=>{if(o.isMesh){if(!o.geometry.boundingSphere)o.geometry.computeBoundingSphere();const r=o.geometry.boundingSphere.radius*Math.max(o.scale.x,o.scale.y,o.scale.z);if(r<.07||o.parent===head&&o!==head.children[0]){o.castShadow=false;o.receiveShadow=false}}});
+  return {g,legs,knees,arms,elbows,tag,head,lids,torso};
+}
+
+const disposeTree=o=>o.traverse(n=>{if(n.geometry)n.geometry.dispose()});
+
+/* hair, beards, caps, glasses and headphones, built on a head group (also used for the realistic characters) */
+function hairBlock(L,f,head,hair,cloth,gold){
   const H=L.hair,capG=new THREE.SphereGeometry(.134,30,18,0,Math.PI*2,0,Math.PI*.54);
   const capOn=['short','braids','bun','locs','twists','wig','fade','waves','cornrows'].includes(H)&&!(H==='afro');
   if(capOn&&!(L.extra==='cap'&&['short','fade'].includes(H))){const c=mesh(capG,H==='fade'||H==='waves'?(H==='waves'?wavesM():stdM(L.grey?0xa9a49b:0x2a221c,.9)):hair,0,.02,-.012,head);c.scale.set(H==='fade'?.985:1,H==='fade'?1.06:1.1,H==='fade'?1.02:1.06);c.rotation.x=-.52}
@@ -311,10 +322,4 @@ function makeHuman(L,{label=null,labelColor='#f6f0e8',ring=false}={}){
   if(L.extra==='cap'){mesh(new THREE.SphereGeometry(.142,24,12,0,Math.PI*2,0,Math.PI*.5),cloth,0,.035,0,head);const b=mesh(cyl(.11,.11,.012,20),cloth,0,.05,.12,head);b.scale.set(1,1,.9)}
   if(L.extra==='headphones'){const hb=mesh(new THREE.TorusGeometry(.15,.013,8,22,Math.PI),stdM(0x1a1a1a,.4),0,.02,0,head);[-1,1].forEach(s=>{const cp=mesh(cyl(.045,.045,.04,16),stdM(0x1a1a1a,.4),s*.138,0,0,head);cp.rotation.z=Math.PI/2})}
   if(L.extra==='specs'){const fr=stdM(0x111111,.3);[-1,1].forEach(s=>mesh(new THREE.TorusGeometry(.025,.0028,6,18),fr,s*.044,.014,.122,head));box(.03,.004,.004,fr,0,.02,.124,head);[-1,1].forEach(s=>box(.004,.004,.16,fr,s*.1,.02,.05,head))}
-  const rg=mesh(new THREE.RingGeometry(.36,.44,32),basic(0xe8b24a),0,.03,0,g);rg.rotation.x=-Math.PI/2;rg.visible=ring;g.userData.ring=ring?rg:null;
-  let tag=null;if(label){tag=sprite(label,labelColor,.7);tag.position.y=2.05;g.add(tag)}
-  if(SHADOWS)g.traverse(o=>{if(o.isMesh){if(!o.geometry.boundingSphere)o.geometry.computeBoundingSphere();const r=o.geometry.boundingSphere.radius*Math.max(o.scale.x,o.scale.y,o.scale.z);if(r<.07||o.parent===head&&o!==head.children[0]){o.castShadow=false;o.receiveShadow=false}}});
-  return {g,legs,knees,arms,elbows,tag,head,lids,torso};
 }
-
-const disposeTree=o=>o.traverse(n=>{if(n.geometry)n.geometry.dispose()});

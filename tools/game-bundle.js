@@ -27,7 +27,9 @@ export function gameCss() {
     .join('\n');
 }
 
-export const threeJs = () => fs.readFileSync(dir('node_modules/three/build/three.min.js'), 'utf8');
+/* three.js plus the glTF loader and skeleton clone helper (for the realistic characters in public/models) */
+export const threeJs = () => ['build/three.min.js', 'examples/js/loaders/GLTFLoader.js', 'examples/js/utils/SkeletonUtils.js']
+  .map((f) => fs.readFileSync(dir('node_modules/three/' + f), 'utf8')).join('\n;\n');
 
 /* which line of which file does line N of the joined script come from? (used by `npm run check`) */
 export function whereIs(line) {
