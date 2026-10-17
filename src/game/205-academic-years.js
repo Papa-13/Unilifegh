@@ -89,7 +89,7 @@ function graduation(){const p=P(),cum=cumCWA(p),cls=classOf(cum);p.grad=cls;p.gr
     <table><tr><th>Level</th><th>Average</th></tr>${yrs.map(y=>`<tr><td>Level ${y*100}</td><td class="n">${yearAvg(p,y).toFixed(1)}</td></tr>`).join('')}</table>
     <p>Friends: <strong>${friendsN()}</strong>${p.office?` · Held office: <strong>${esc(p.office)}</strong>`:''}${p.biz?` · Business earned <strong>${cedi(p.biz.earned)}</strong>`:''} · MoMo <strong>${cedi(p.money)}</strong></p>
     <p class="hint">Next in Ghana: National Service. Coming soon.</p>`,
-    [['Keep living on campus as a graduate','g',()=>{toast(`🎓 ${p.name}, ${cls}. Lectures are over, enjoy campus life!`)}],['Start a new student (Level 100)','',()=>{saveGame();maker()}]])}
+    [['Keep living on campus as a graduate','g',()=>{try{gradInvite()}catch(e){}toast(`🎓 ${p.name}, ${cls}. Lectures are over, enjoy campus life!`)}],['Start a new student (Level 100)','',()=>{try{gradInvite()}catch(e){}saveGame();maker()}]])}
 
 /* academics card for the phone */
 function acadHTML(){const p=P();ensureAcad();const cum=cumCWA(p);

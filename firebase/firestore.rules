@@ -38,6 +38,28 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // 🗳️ SRC elections (real students). One candidacy and one vote per student per week; nobody can change another's.
+    match /cands/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && id == request.resource.data.c + '_' + request.auth.uid
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['c', 'uid', 'nm', 'slogan', 'at'])
+        && request.resource.data.c is string && request.resource.data.c.size() <= 24
+        && request.resource.data.nm is string && request.resource.data.nm.size() <= 16
+        && request.resource.data.slogan is string && request.resource.data.slogan.size() <= 60;
+      allow update, delete: if false;
+    }
+    match /votes/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && id == request.resource.data.c + '_' + request.auth.uid
+        && request.resource.data.by == request.auth.uid
+        && request.resource.data.keys().hasOnly(['c', 'by', 'for', 'at'])
+        && request.resource.data.c is string && request.resource.data.c.size() <= 24
+        && request.resource.data['for'] is string && request.resource.data['for'] != request.auth.uid
+        && exists(/databases/$(database)/documents/cands/$(request.resource.data.c + '_' + request.resource.data['for']));
+      allow update, delete: if false;
+    }
+
     // 🚩 Reports: players can send one; only the owner reads them (in the Firebase console).
     match /reports/{id} {
       allow create: if signedIn()

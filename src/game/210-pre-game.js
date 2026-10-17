@@ -58,7 +58,7 @@ function hostelPick(next){
     if(next)nextSemester(id);else{PRE.room=id;if(MP.campus)MP.rn=pickRoomNo(id);start()}})};
   draw();
 }
-function showGame(){try{gbSync()}catch(e){}setTimeout(()=>{try{const r=!!S.mbReset;S.mbReset=0;mbSync(r)}catch(e){}},1200);document.body.classList.add('playing');document.body.classList.remove('setup');panelMode('');if(S&&!S.introTip){S.introTip=1;setTimeout(()=>toast('🎯 Tap Tasks for today\'s goals and earn 💎 gems. ▶▶ speeds up time, ❚❚ pauses.'),2500)}$('panel').hidden=true;$('game').hidden=false;$('top').hidden=false;S.paused=false;hud();acts(true);requestAnimationFrame(()=>render(0,true))}
+function showGame(){try{gbSync()}catch(e){}try{if(srcOn())srcPresident()}catch(e){}setTimeout(()=>{try{const r=!!S.mbReset;S.mbReset=0;mbSync(r)}catch(e){}},1200);document.body.classList.add('playing');document.body.classList.remove('setup');panelMode('');if(S&&!S.introTip){S.introTip=1;setTimeout(()=>toast('🎯 Tap Tasks for today\'s goals and earn 💎 gems. ▶▶ speeds up time, ❚❚ pauses.'),2500)}$('panel').hidden=true;$('game').hidden=false;$('top').hidden=false;S.paused=false;hud();acts(true);requestAnimationFrame(()=>render(0,true))}
 function start(){
   NOBOTS=!!MP.campus;newGame();S.mbReset=1;if(MP.campus){campusAlign(0);mpSyncMates();mpWriteMember()}showGame();const rt=roomOf(),p=P();setTimeout(saveGame,1500);const RM=realMates();
   story(`<div class="eyebrow">Move-in day · ${homeB().name}</div><h3>Akwaaba, ${esc(p.name==='You'?'fresher':p.name)}!</h3>

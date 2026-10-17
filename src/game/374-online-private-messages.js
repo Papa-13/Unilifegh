@@ -1,6 +1,6 @@
 /* ---- private messages that wait for you (mail box in the shared database) ---- */
 function mpMailSnap(s){const fresh=[];s.docs.forEach(d=>{if(d.id===MP.uid||!okId(d.id))return;const v=d.data()||{},arr=v.to&&Array.isArray(v.to[MP.uid])?v.to[MP.uid]:[];
-    const ms=arr.slice(-60).filter(m=>m&&typeof m==='object').map(m=>({k:['m','fr','fa','vo',...REL_KINDS,...LOAN_KINDS].includes(m.k)?m.k:'m',tx:mpClean(m.tx),t:+m.t||0,i:String(m.i||'')})).filter(m=>m.t);
+    const ms=arr.slice(-60).filter(m=>m&&typeof m==='object').map(m=>({k:['m','fr','fa','vo',...REL_KINDS,...LOAN_KINDS,...HALL_KINDS].includes(m.k)?m.k:'m',tx:mpClean(m.tx),t:+m.t||0,i:String(m.i||'')})).filter(m=>m.t);
     const sn=v.seen&&typeof v.seen==='object'?+v.seen[MP.uid]||0:0;MP.mailIn[d.id]={nm:mpClean(v.nm,16)||'Student',ms,seen:sn};
     ms.forEach(m=>{const key=d.id+'|'+m.i+'|'+m.t;if(MP.seen.has(key))return;MP.seen.add(key);if(m.t>(MP.lastRead[d.id]||0)&&!MP.blocked[d.id])fresh.push([d.id,m])})});
   fresh.sort((a,b)=>a[1].t-b[1].t);

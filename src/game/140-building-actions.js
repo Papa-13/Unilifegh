@@ -79,11 +79,12 @@ function placeActions(b,inside){
   if(b.id==='court')a.push(['🏀 Play basketball (1h)',()=>sportAsk('basketball')]);
   if(b.id==='night'&&(h>=18||h<1))a.push(['Buy a chilled Malta · GH₵10',()=>{if(!spend(10))return;doAct('Having a drink',15,{fun:6,hunger:5})}]);
   if(b.id==='square')a.push(['Sit on a bench (30m)',()=>doAct('Sitting on a bench',30,{fun:6,energy:5})]);
+  try{hallWeekActs(b,a)}catch(e){console.error(e)}
   if(b.id==='field'){a.push(['⚽ Play football (1h)',()=>sportAsk('football')]);a.push(['Jog (30m)',()=>{p.fit++;doAct('Jogging',30,{fun:10,energy:-8,hygiene:-8})}])}
   if(b.id==='garden')a.push(['Relax by the pond (1h)',()=>doAct('Relaxing in the garden',60,{fun:18,energy:6})]);
   if(b.id==='lake')a.push(['Walk around the lake (1h)',()=>doAct('Walking by the lake',60,{fun:20,energy:4})]);
   if(b.id==='square'&&!fnight())a.push(['Hang out at the square (1h)',()=>{doAct('Hanging out at Akwaaba Square',60,{social:18,fun:12});meetRandom('square')}]);
-  if(b.id==='office'){const cE=EVENTS.find(e=>e.id==='concert');if(day()-S.semStart<=cE.sd&&!myTicket())a.push(['🎟️ SRC Week concert tickets',()=>ticketSheet(),null,'b']);a.push(['🗳️ Elections',()=>elections(),null,'b']);a.push(['💼 Business desk',()=>bizStart(),null,'b']);a.push(['Job board',()=>jobBoard()]);a.push(['Housing desk',()=>housing()]);a.push(['💰 Loans & bursaries',()=>finance()]);
+  if(b.id==='office'){const cE=EVENTS.find(e=>e.id==='concert');if(day()-S.semStart<=cE.sd&&!myTicket())a.push(['🎟️ SRC Week concert tickets',()=>ticketSheet(),null,'b']);if(srcOn())a.push(['🗳️ SRC election (real students)',()=>srcSheet(),null,'b']);a.push([srcOn()?'🗳️ Course rep & college elections':'🗳️ Elections',()=>elections(),null,'b']);a.push(['💼 Business desk',()=>bizStart(),null,'b']);a.push(['Job board',()=>jobBoard()]);a.push(['Housing desk',()=>housing()]);a.push(['💰 Loans & bursaries',()=>finance()]);
     a.push(['Talk to a counsellor (30m)',()=>{doAct('Talking with a counsellor',30,{fun:8,social:5});toast('"University is a lot. Sleep, eat, and ask for help early." 💬')}]);
     if(S.flags.hx===1&&!S.flags.reported)a.push(['Report harassment confidentially',()=>report()])}
   if(b.id==='chapel'){if(w===6&&h>=8.5&&h<12)a.push(['Attend Sunday service (2h)',()=>{doAct('At Sunday service',120,{social:20,fun:10,energy:4});S.npcs.filter(n=>n.ints.includes('Church')).forEach(n=>{n.met=true;n.friend=clamp(n.friend+5)});toast('The choir was 🔥. You met the church crowd. Friendship +5')}]);else a.push(['Pray quietly (20m)',()=>doAct('Quiet time in the chapel',20,{fun:6,energy:3})])}

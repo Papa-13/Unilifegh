@@ -54,7 +54,7 @@ function animFor(label){const L=label.toLowerCase(),sp=(IS&&IS.spots)||{};
   if(/drink|vitamins/.test(L))return{pose:'drink'};
   if(/cooking|shower|shopping|buying/.test(L))return{pose:'idle'};
   return{pose:'idle'}}
-function doAct(label,mins,fx){if(!S||S.busy){applyAct(label,mins,fx);return}const a=Object.assign({},animFor(label),{mins,fx});startBusy(label,a,0,()=>{const r=S.lastGame;applyAct(label,mins,fx);if(r){S.lastGame=null;ev('game',r);if(r.win>0){S.wins++;addBuff('won');P().needs.fun=clamp(P().needs.fun+8)}setTimeout(()=>toast(r.txt),60)}})}
+function doAct(label,mins,fx){if(!S||S.busy){applyAct(label,mins,fx);return}const a=Object.assign({},animFor(label),{mins,fx});startBusy(label,a,0,()=>{const r=S.lastGame;applyAct(label,mins,fx);if(r){S.lastGame=null;ev('game',r);try{if(S.hallFinal&&!S.hallFinal.done&&r.kind==='football')hallFinalResult(r)}catch(e){console.error(e)}if(r.win>0){S.wins++;addBuff('won');P().needs.fun=clamp(P().needs.fun+8)}setTimeout(()=>toast(r.txt),60)}})}
 function startBusy(label,a,dur,done){
   const p=P();S.busy={label,a,dur,t0:performance.now(),done};$('needCard').hidden=true;if(a.mins)S.busy.timed={mins:Math.max(1,a.mins),fx:a.fx||{},start:S.min,ap:0};S.idleT=0;p.target=null;p.itarget=null;p.pose=a.pose;
   const sp=a.spot;if(sp){if(IS){S.busy.glide={k:'i',x0:p.ix,z0:p.iz,x1:sp.x,z1:sp.z,t:0};p.ix=sp.x;p.iz=sp.z}else{S.busy.glide={k:'o',x0:p.x,z0:p.y,x1:sp.x,z1:sp.y,t:0};p.x=sp.x;p.y=sp.y}p.face=sp.ry??null;p.spotY=sp.ly||0}

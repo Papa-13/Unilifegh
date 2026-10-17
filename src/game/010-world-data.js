@@ -148,8 +148,10 @@ const MINPOCKET=600;
 /* SRC Week at the Parade Grounds (sd = day of the semester) */
 const EVENTS=[
  {sd:2,from:16,to:19,id:'fair',name:'Clubs & Societies Fair',emoji:'🎪'},
+ {sd:3,from:19,to:23.5,id:'hallnite',name:'Hall Week Jams',emoji:'🎉'},
  {sd:5,from:6.5,to:9.5,id:'jama',name:'SRC Week Health Walk & Jama',emoji:'🥁'},
  {sd:6,from:14,to:18,id:'games',name:'Inter-Hostel Games',emoji:'🏆'},
+ {sd:7,from:15,to:18,id:'hallfb',name:'Inter-Hall Football Final',emoji:'⚽'},
  {sd:8,from:15,to:21,id:'bazaar',name:'Food Bazaar & Mr & Miss Freshers',emoji:'🍢'},
  {sd:10,from:19,to:23.5,id:'concert',name:'SRC Week Grand Concert',emoji:'🎤'}];
 /* fictional Ghanaian stars */

@@ -35,6 +35,11 @@ The rules (`api/_momo-rules.js`) limit how fast cedis can grow (GH₵2,500 per r
 (GH₵5,000) and how much can be sent per day (GH₵15,000). Change those numbers there.
 Make sure the latest `firebase/firestore.rules` (with the `rep` rule) is pasted into Firebase.
 
+## SRC elections
+
+Real-student SRC elections store candidates in `cands` and votes in `votes` (Firestore). The rules in
+`firebase/firestore.rules` allow one candidacy and one vote per student per week. Paste the latest rules after updating.
+
 ## Reports
 
 Player reports (🚩) are in Firebase → Firestore → `reports`. Only you can read them there.
