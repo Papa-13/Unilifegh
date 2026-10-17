@@ -69,6 +69,7 @@ function lighting(dt=0){const h=hour();const s=Math.max(0,Math.sin((h-5.8)/13*Ma
   WATER_T+=dt;WATER.forEach(w=>{if(w.material.map){w.material.map.offset.x=WATER_T*.03;w.material.map.offset.y=Math.sin(WATER_T*.4)*.05}});
   nightLights.forEach(l=>{l.intensity=night?1.4:0;l.visible=night});if(STAGE.lights)STAGE.lights.forEach(o=>o.l.visible=o.l.intensity>0);const lampOn=h>=18.3||h<6.2;if(SKY.lampGlow)SKY.lampGlow.visible=lampOn;if(LAMPS.groundPool)LAMPS.groundPool.visible=lampOn;if(LAMPS.head)LAMPS.head.emissive.setHex(lampOn?0xffd9a0:0);
   if(lampOn&&LAMPS.pool.length){const cx=camT.x,cz=camT.z;LAMPS.pos.sort((a,b)=>((a.x-cx)**2+(a.z-cz)**2)-((b.x-cx)**2+(b.z-cz)**2));const NL=GFX==='high'?6:GFX==='medium'?3:0;LAMPS.pool.forEach((l,i)=>{const q=LAMPS.pos[i];l.visible=i<NL&&!!q;if(q){l.position.set(q.x,q.y-.3,q.z);l.intensity=1.5}})}else LAMPS.pool.forEach(l=>{l.intensity=0;l.visible=false});
+  try{weatherTick(dt)}catch(e){console.error(e)}
   return sky}
 const camT=new THREE.Vector3(),want=new THREE.Vector3();
 function fitR(rend,cam,el){const w=el.clientWidth,h=el.clientHeight;if(!w||!h)return;const pr=rend.getPixelRatio();

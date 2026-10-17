@@ -115,7 +115,7 @@ function freeWill(){const p=P(),n=p.needs;S.idleT=0;
   if(n.energy<12){if(IS&&IS.mine){const h=hour();toast(`${simN()} is exhausted and lies down (free will)`);h>=20||h<5?sleep():nap();return}if(!IS){toast(`${simN()} is exhausted and walks home (free will). Tap anywhere to take over.`);walkTo(homeB());S.auto={k:'sleep'};return}}
   if(n.hygiene<12&&IS&&IS.mine&&!IS.bathBusy){toast(`${simN()} can't stand the smell any more and showers (free will)`);doAct('Taking a shower',20,{hygiene:100,fun:5,energy:4})}}
 function hud(){if(!S)return;const p=P();
-  $('hDayL').textContent=`${DAYS[wd()].slice(0,3)} · ${p.grad?'Graduate 🎓':`L${levelOf(p)} · Sem ${S.sy||1}`}`;$('hTime').textContent=hm(S.min);$('hMoney').textContent=cedi(p.money).replace('GH₵','');
+  $('hDayL').textContent=`${typeof wxIcon==='function'?wxIcon():''}${DAYS[wd()].slice(0,3)} · ${p.grad?'Graduate 🎓':`L${levelOf(p)} · Sem ${S.sy||1}`}`;$('hTime').textContent=hm(S.min);$('hMoney').textContent=cedi(p.money).replace('GH₵','');
   $('hCwa').textContent=day()<=S.semStart?'–':forecast();$('hFr').textContent=friendsN();
   $('needs').innerHTML=[['hunger','🍛','Hunger'],['energy','⚡','Energy'],['social','💬','Social'],['fun','🎉','Fun'],['hygiene','🚿','Hygiene']].map(([k,ic,l])=>{const v=Math.round(p.needs[k]),c=v<15?'#ff5a4e':v<35?'#ffc24a':'#5fe08f';return `<div class="nrow"><span class="nring${v<15?' crit':''}" style="--v:${v};--c:${c}" title="${l} ${v}"><em>${ic}</em></span><span class="nlab"><b>${l}</b><span class="bar"><i style="width:${v}%;background:${c}"></i></span></span></div>`}).join('');
   const M=moodInfo();$('hMood').textContent=M.name;$('hMoodI').textContent=M.ic;$('hGems').textContent='💎 '+(S.gems||0);fillWhims();$('hTasks').textContent=S.whims.filter(w=>!w.done).length||'';
@@ -144,7 +144,7 @@ function acts0(force){
   if(!S)return;const p=P();
   const inside=!!IS,b=inside?null:locOf(p.x,p.y),n=inside?nearInterior():nearNPC();
   const near=inside?IS.objs.filter(o=>Math.hypot(o.x-p.ix,o.z-p.iz)<o.r).map(o=>o.id).join(','):'';
-  const key=[S.ride&&S.ride.phase+(S.ride.phase==='wait'&&Math.hypot(p.x-S.ride.pos.x,p.y-S.ride.pos.y)<110),S.del&&S.del.phase+(S.del.rider&&dist(p,S.del.rider)<60),S.buddyKey=(buddy()||{}).id,inside,!inside&&nearStop()&&nearStop().i,IS&&IS.bid,p.food&&p.food.length,b&&b.id,near,n&&n.id,Math.floor(hour()*2),p.job,S.flags.hx,S.flags.reported,S.unread>0,p.prov,p.items.length,p.flyers,!!p.race,p.biz&&p.biz.bookings].join('|');if(key===actKey&&!force)return;actKey=key;
+  const key=[typeof hawkerNear==='function'&&(hawkerNear()||{}).id,S.ride&&S.ride.phase+(S.ride.phase==='wait'&&Math.hypot(p.x-S.ride.pos.x,p.y-S.ride.pos.y)<110),S.del&&S.del.phase+(S.del.rider&&dist(p,S.del.rider)<60),S.buddyKey=(buddy()||{}).id,inside,!inside&&nearStop()&&nearStop().i,IS&&IS.bid,p.food&&p.food.length,b&&b.id,near,n&&n.id,Math.floor(hour()*2),p.job,S.flags.hx,S.flags.reported,S.unread>0,p.prov,p.items.length,p.flyers,!!p.race,p.biz&&p.biz.bookings].join('|');if(key===actKey&&!force)return;actKey=key;
   if(b&&b.id!==S._atB){S._atB=b.id;try{ev('at',b.id)}catch(e){}}
   $('where').textContent=inside?IS.title:zoneName(p.x,p.y);$('mini').hidden=inside;
   if(S.shuttleWait!=null&&!p.onBus){const ah=S.Q?Math.max(0,S.Q.list.indexOf('P')):0,wk='wait'+ah+S.pBoard;if(actKey!==wk){actKey=wk;$('acts').innerHTML=`<span class="eyebrow">🚌 ${S.pBoard?'Getting on the shuttle…':`In the queue at ${esc(SH_STOPS[S.shuttleWait].name)} · ${ah?ah+' ahead of you':'you\'re first in line'}`}</span>${S.pBoard?'':'<button class="ghost sm" id="sw">Leave the queue</button>'}`;const sw=$('sw');if(sw)sw.onclick=()=>{S.shuttleWait=null;p.pose=null;p.face=null;acts(true)}}return}
@@ -158,6 +158,7 @@ function acts0(force){
   if(S.busy||rideBusy()||p.onBus){$('where').textContent=inside?IS.title:zoneName(p.x,p.y);const ph=S.ride&&S.ride.phase;$('acts').innerHTML=`<span class="eyebrow">⏳ ${esc(S.busy?S.busy.label+'…':p.onBus?`On the shuttle to ${SH_STOPS[p.onBus.dest].name}…`:ph==='board'?'Opening the door and getting in…':ph==='fill'?'Waiting for the taxi to fill up…':ph==='drop'?'Getting out…':`Riding to ${BID[S.ride.dest].name}…`)}</span>`;actKey='busy';return}
   const list=inside?(IS.kind==='bld'?placeActions(BID[IS.bid]||{id:IS.bid},true):roomActions()):placeActions(b,false);
   try{memActs(list,inside,b)}catch(e){console.error(e)}
+  if(!inside)try{hawkerActs(list)}catch(e){console.error(e)}
   {const rp=mpNear();if(rp)list.unshift([`🌐 ${rp.nm} (real student)`,()=>mpCard(rp),null,'b']);if(!inside&&MP.room&&mpOnline().length)list.push(['🗨️ Say something out loud',()=>mpSay()])}
   const stp=!inside&&nearStop();if(stp)list.unshift([`🚌 Wait for the free shuttle (${stp.name})`,()=>waitShuttle(stp),null,'b']);
   if(p.food&&p.food.length)list.unshift([`🍱 Eat your ${p.food[0].name}`,()=>{const f=p.food.shift();doAct(`Eating ${f.name}`,25,{hunger:f.food,fun:8})},null,'b']);

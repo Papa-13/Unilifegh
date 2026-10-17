@@ -1,6 +1,6 @@
 /* ================= traffic, rides, food delivery ================= */
 const HROADS=[[420,0,MW],[900,0,MW],[1560,0,1600],[2350,0,MW]],HY=HROADS.map(r=>r[0]),VX=[400,1600,2550,3850];
-function makeCar(col,taxi){return makeCarModel(taxi?pick([0x2f6bb5,0x8e2a3a,0x2fa84f,0xd8d8d8,0x222222]):col,taxi)}
+function makeCar(col,taxi){if(taxi===2)return makeOkada();if(taxi===3)return makeTrotro();return makeCarModel(taxi?pick([0x2f6bb5,0x8e2a3a,0x2fa84f,0xd8d8d8,0x222222]):col,taxi)}
 function makeCar_old(col,taxi){const g=new THREE.Group();box(1.9,.45,.9,col,0,.42,0,g);box(1.1,.38,.84,0x1d2a36,-.05,.82,0,g);
   [[-.6,.45],[.6,.45],[-.6,-.45],[.6,-.45]].forEach(([x,z])=>{const w=mesh(cyl(.17,.17,.12,10),lam(0x111111),x,.18,z,g);w.rotation.x=Math.PI/2});
   box(.04,.12,.7,basic(0xfff3c4),.96,.45,0,g);box(.04,.1,.7,basic(0xd33a2a),-.96,.45,0,g);if(taxi){box(.3,.12,.18,0xf4c430,0,1.07,0,g);box(1.92,.08,.92,0x222222,0,.55,0,g)}
@@ -11,7 +11,7 @@ function placeCar(g,x,y,dx,dy){g.position.set(wx(x),0,wz(y));g.rotation.y=Math.a
 const ROUTES=[[[400,420],[1600,420],[1600,900],[400,900]],[[1600,420],[2550,420],[2550,900],[1600,900]],[[2550,420],[3850,420],[3850,900],[2550,900]],[[2550,900],[3850,900],[3850,2350],[2550,2350]],[[400,900],[1600,900],[1600,2350],[400,2350]],[[1600,2350],[2550,2350],[2550,900],[1600,900]],[[400,1560],[1600,1560],[1600,2350],[400,2350]]];const ROUTES_OLD=[[[1470,615],[1800,615],[1800,975],[1470,975]],[[365,975],[1170,975],[1170,1274],[365,1274]],[[1170,615],[365,615],[365,280],[1170,280]],[[1470,615],[1170,615],[1170,975],[1470,975]]];
 const perim=rt=>{let s=0;for(let i=0;i<rt.length;i++){const a=rt[i],b=rt[(i+1)%rt.length];s+=Math.hypot(b[0]-a[0],b[1]-a[1])}return s};
 function along(rt,d){d=((d%perim(rt))+perim(rt))%perim(rt);for(let i=0;i<rt.length;i++){const a=rt[i],b=rt[(i+1)%rt.length],L=Math.hypot(b[0]-a[0],b[1]-a[1]);if(d<=L){const t=d/L;return{x:a[0]+(b[0]-a[0])*t,y:a[1]+(b[1]-a[1])*t,dx:(b[0]-a[0])/L,dy:(b[1]-a[1])/L}}d-=L}return{x:rt[0][0],y:rt[0][1],dx:1,dy:0}}
-const TRAFFIC=[[0,0,0xf4c430,1],[0,.5,0x2f6bb5,0],[1,.3,0xd8d8d8,0],[2,.1,0xf4c430,1],[2,.6,0x8e2a3a,0],[3,.2,0x222222,0],[3,.7,0xf4c430,1],[4,.4,0x2fa84f,0],[5,.1,0xf4c430,1],[5,.6,0xd8d8d8,0],[6,.3,0x2f6bb5,0]].map(([r,o,c,t])=>({route:ROUTES[r],d:o*perim(ROUTES[r]),g:makeCar(c,t),sp:R(110,150)}));
+const TRAFFIC=[[0,0,0xf4c430,1],[0,.5,0x2f6bb5,0],[1,.3,0xd8d8d8,2],[2,.1,0xf4c430,1],[2,.6,0x8e2a3a,3],[3,.2,0x222222,0],[3,.7,0xf4c430,1],[4,.4,0x2fa84f,3],[5,.1,0xf4c430,1],[5,.6,0xd8d8d8,2],[1,.8,0xd8d8d8,2],[6,.75,0xd8d8d8,3],[6,.3,0x2f6bb5,0]].map(([r,o,c,t])=>({route:ROUTES[r],d:o*perim(ROUTES[r]),g:makeCar(c,t),sp:R(110,150)}));
 function blockedAhead(x,y,dx,dy,look,self){const ax=x+dx*look,ay=y+dy*look,p=P();if(self){self.byCar=false;self.byP=null}
   if(!p.inCar&&!IS&&Math.hypot(p.x-ax,p.y-ay)<30){if(self)self.byP=p;return 'p'}
   for(const n of S.npcs)if(!n.hidden&&Math.hypot(n.x-ax,n.y-ay)<26){if(self)self.byP=n;return 'p'}
