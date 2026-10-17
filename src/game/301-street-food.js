@@ -3,11 +3,13 @@
    morning, fruit at midday, kelewele by the coal pot at night, and a pure water seller walking the
    hostel road. Walk up to one and buy from the Actions menu. */
 const HAWKERS=[
- {id:'waakye',name:'Auntie Adjoa',x:790,y:2458,g:'f',from:6,to:11,label:'🍛 Waakye',buy:[['Waakye with egg & wele',18,{hunger:55,fun:8}],['Waakye special (gari, spaghetti, fish)',28,{hunger:72,fun:12}]],prop:'bowls'},
- {id:'koko',name:'Hajia Fati',x:680,y:300,south:1,g:'f',from:6,to:10,label:'🥣 Koko & koose',buy:[['Koko with koose',8,{hunger:28,fun:5}],['Hausa koko, bread & groundnuts',10,{hunger:34,fun:6}]],prop:'pot'},
- {id:'fruit',name:'Maame Esi',x:1450,y:300,south:1,g:'f',from:9,to:17,label:'🍍 Cut fruits',buy:[['Pineapple & watermelon',10,{hunger:20,fun:6,energy:4}],['Fresh coconut',8,{hunger:12,fun:6,energy:6}]],prop:'fruit'},
- {id:'kelewele',name:'Kwame Kelewele',x:1200,y:2458,g:'m',from:17.5,to:23.5,label:'🔥 Kelewele',buy:[['Kelewele & groundnuts',12,{hunger:30,fun:10}],['Roasted plantain (kofi brokeman)',8,{hunger:26,fun:6}]],prop:'coal'},
- {id:'water',name:'Pure water boy',walk:[[520,2436],[2000,2436]],g:'m',from:10,to:18,label:'💧 Pure water',buy:[['Pure water sachet',1,{hunger:3,energy:3,fun:1}],['Ice cream',7,{hunger:8,fun:10}]],prop:'cooler'}];
+ {id:'waakye',name:'Auntie Adjoa',x:3500,y:2943,g:'f',from:6,to:11,label:'🍛 Waakye',buy:[['Waakye with egg & wele',18,{hunger:55,fun:8}],['Waakye special (gari, spaghetti, fish)',28,{hunger:72,fun:12}]],prop:'bowls'},
+ {id:'koko',name:'Hajia Fati',x:985,y:880,south:1,g:'f',from:6,to:10,label:'🥣 Koko & koose',buy:[['Koko with koose',8,{hunger:28,fun:5}],['Hausa koko, bread & groundnuts',10,{hunger:34,fun:6}]],prop:'pot'},
+ {id:'fruit',name:'Maame Esi',x:2430,y:473,g:'f',from:9,to:17,label:'🍍 Cut fruits',buy:[['Pineapple & watermelon',10,{hunger:20,fun:6,energy:4}],['Fresh coconut',8,{hunger:12,fun:6,energy:6}]],prop:'fruit'},
+ {id:'kelewele',name:'Kwame Kelewele',x:2550,y:2943,g:'m',from:17.5,to:23.5,label:'🔥 Kelewele',buy:[['Kelewele & groundnuts',12,{hunger:30,fun:10}],['Roasted plantain (kofi brokeman)',8,{hunger:26,fun:6}]],prop:'coal'},
+ {id:'indomie',name:'Bra Kojo',x:1250,y:2943,g:'m',from:18,to:24,label:'🍜 Indomie joint',buy:[['Indomie & egg',15,{hunger:40,fun:6}],['Fried rice & chicken',30,{hunger:60,fun:8}]],prop:'pot'},
+ {id:'kenkey',name:'Auntie Akos',x:975,y:473,g:'f',from:11,to:19,label:'🐟 Kenkey & fish',buy:[['Ga kenkey, fish & shito',15,{hunger:50,fun:6}],['Fanti kenkey & fried fish',18,{hunger:55,fun:7}]],prop:'bowls'},
+ {id:'water',name:'Pure water boy',walk:[[700,2935],[4600,2935]],g:'m',from:10,to:18,label:'💧 Pure water',buy:[['Pure water sachet',1,{hunger:3,energy:3,fun:1}],['Ice cream',7,{hunger:8,fun:10}]],prop:'cooler'}];
 const hawkOn=k=>()=>{const h=hour();return h>=k.from&&h<k.to};
 (function(){HAWKERS.forEach(k=>{const look=staffLook(k.g,k.g==='f'?{hair:'duku',outfit:pick(['kaba','dress']),pal:pick(['ankara','kente','olive'])}:{hair:'fade',outfit:'tee',pal:pick(['black','olive','maroon']),extra:'cap'});
   const start=k.walk?k.walk[0]:[k.x,k.y],q=T(start[0],start[1]),h=makeHuman(look,{label:k.label,labelColor:'#ffd27a'});scene.add(h.g);

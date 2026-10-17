@@ -1,56 +1,59 @@
 /* ================= world data ================= */
-const MW=4000,MH=2800,U=0.028,MINPS=1,SPEEDS=[0,1,3,8];
+const MW=5400,MH=4000,U=0.028,MINPS=1,SPEEDS=[0,1,3,8];
 const wx=x=>(x-MW/2)*U, wz=y=>(y-MH/2)*U;
+/* the road grid: h = [y, from x, to x] (y=330 is the Accra–Kumasi Road, 2800 the Ayeduase–Kotei Road, 3400 the town road), v = x of full-height roads */
+const MAPR={h:[[330,0,MW],[1000,600,4700],[2150,600,4700],[2800,0,MW],[3400,0,MW]],v:[600,2000,3400,4700]};
 const B=[
- /* FACULTY AREA (north) */
- {id:'coe',name:'CoE · Engineering',x:470,y:100,w:260,h:170,ht:3.4,c:0xd6d2c8,roof:0x8e2a3a,door:[600,288],zone:'f'},
- {id:'senate',name:'Senate & Registry',x:820,y:100,w:300,h:170,ht:3.6,c:0xe6dcc6,roof:0x2f4e6b,door:[970,288],zone:'f',deco:1},
- {id:'lib',name:'University Library',x:1220,y:100,w:280,h:170,ht:3.6,c:0xcfc3a5,roof:0x5b4636,door:[1360,288],zone:'f'},
- {id:'canr',name:'CANR · Agriculture',x:1700,y:100,w:240,h:170,ht:3,c:0xd8d0b4,roof:0x3c7a3a,door:[1820,288],zone:'f'},
- {id:'cos',name:'CoS · Science',x:2060,y:100,w:260,h:180,ht:3.8,c:0xd2dce2,roof:0x2a5f8b,door:[2190,298],zone:'f'},
- {id:'cohss',name:'CoHSS · Humanities',x:2680,y:100,w:240,h:180,ht:3.4,c:0xe2d8c8,roof:0x7a4a2a,door:[2800,298],zone:'f'},
- {id:'cabe',name:'CABE · Built Env.',x:3060,y:100,w:240,h:180,ht:3.4,c:0xd8d8d8,roof:0x4a4a6a,door:[3180,298],zone:'f'},
- {id:'garden',name:'Botanical Garden',x:470,y:540,w:260,h:200,open:1,c:0x4f8a3e,door:[600,640],zone:'f'},
- {id:'office',name:'Student Affairs & SRC',x:840,y:560,w:220,h:150,ht:2.4,c:0xe9e3d6,roof:0x3c6e58,door:[950,542],zone:'f'},
- {id:'canteen',name:'Bush Canteen',x:1180,y:560,w:180,h:150,ht:2.2,c:0xc9a27a,roof:0x7a5a2a,door:[1270,542],zone:'f'},
- {id:'print',name:'Print & Type',x:1700,y:560,w:160,h:150,ht:2.2,c:0xd8e1e6,roof:0x2a6f9b,door:[1780,542],zone:'f'},
- {id:'clinic',name:'Health Centre',x:1960,y:560,w:200,h:150,ht:2.6,c:0xf3f3f0,roof:0xb83a3a,door:[2060,542],zone:'f'},
- {id:'chs',name:'CHS · Health Sciences',x:2680,y:560,w:260,h:150,ht:3.2,c:0xeef0ee,roof:0x2a7b7b,door:[2810,542],zone:'f'},
- {id:'greathall',name:'Great Hall',x:3060,y:550,w:300,h:180,ht:4.2,c:0xe9dfc9,roof:0x8e2a3a,door:[3210,532],zone:'f',deco:1},
- /* CENTRAL PARK */
- {id:'lake',name:'Campus Lake',x:1930,y:1000,w:290,h:200,open:1,c:0x6f9a4c,door:[2070,1100],zone:'p'},
- {id:'parade',name:'Parade Grounds',x:1935,y:1290,w:280,h:870,open:1,c:0x6f9e4f,door:[2075,1520],zone:'p'},
- /* COMMERCIAL AREA (west) */
- {id:'taxi',name:'Taxi Station',x:60,y:1000,w:260,h:150,open:1,c:0x6d665e,door:[190,1075],zone:'c'},
- {id:'trotro',name:'Trotro Station',x:60,y:1300,w:260,h:170,open:1,c:0x7a7166,door:[190,1385],zone:'c'},
- {id:'terminal',name:'Shuttle Terminal',x:5,y:1660,w:320,h:150,open:1,c:0x8a8378,door:[165,1735],zone:'c'},
- {id:'mall',name:'Campus Mall',x:480,y:1000,w:260,h:155,ht:3.4,c:0xece4d8,roof:0x9b4a2e,door:[610,982],zone:'c'},
- {id:'unity',name:'Unity Bank',x:850,y:1000,w:260,h:170,ht:3.2,c:0xe8e4da,roof:0x1f4f8b,door:[980,982],zone:'c'},
- {id:'bank',name:'Akwaaba Savings Bank',x:1220,y:1000,w:250,h:150,ht:3,c:0xf2efe6,roof:0x2f6b3a,door:[1345,982],zone:'c'},
- {id:'salon',name:'Barber & Salon',x:480,y:1300,w:200,h:150,ht:2.4,c:0xf0d6e2,roof:0x9b3a6e,door:[580,1468],zone:'c'},
- {id:'phonehub',name:'Phone & Laptop Hub',x:780,y:1300,w:180,h:150,ht:2.4,c:0xdfe6ee,roof:0x2a2a2a,door:[870,1468],zone:'c',deco:1},
- {id:'pharm',name:'Campus Pharmacy',x:1060,y:1300,w:230,h:150,ht:2.4,c:0xf3f3f0,roof:0x2f8a4a,door:[1175,1468],zone:'c',deco:1},
- {id:'shawarma',name:'Shawarma & Pizza Spot',x:480,y:1660,w:260,h:150,ht:2.4,c:0xf0e2c8,roof:0xc2572e,door:[610,1642],zone:'c',deco:1},
- {id:'books',name:'Campus Bookshop',x:840,y:1660,w:280,h:150,ht:2.6,c:0xe6dcc8,roof:0x5b4636,door:[980,1642],zone:'c',deco:1},
- {id:'club',name:'Club Vibes',x:1220,y:1660,w:240,h:150,ht:3.4,c:0x221d2e,roof:0x7a2ea0,door:[1340,1642],zone:'c'},
- {id:'market',name:'Campus Market',x:480,y:1960,w:320,h:150,open:1,c:0x8a7458,door:[640,2050],zone:'c'},
- {id:'night',name:'Night Market',x:840,y:1950,w:320,h:200,open:1,c:0x6b5a46,door:[1000,2050],zone:'c'},
- {id:'square',name:'Akwaaba Square',x:1210,y:1950,w:320,h:200,open:1,c:0xbfae90,door:[1370,2050],zone:'c'},
- /* SPORTS COMPLEX (east) */
- {id:'field',name:'Sports Field',x:2700,y:1000,w:360,h:240,open:1,c:0x3f8a3a,door:[2880,1120],zone:'s'},
- {id:'pavilion',name:'Sports Pavilion',x:3140,y:1050,w:170,h:140,ht:2.6,c:0xe9e3d6,roof:0x8e2a3a,door:[3225,1208],zone:'s',deco:1},
- {id:'court',name:'Basketball Court',x:3420,y:1000,w:240,h:200,open:1,c:0xb5653a,door:[3540,1100],zone:'s'},
- {id:'pool',name:'Swimming Pool',x:2700,y:1420,w:240,h:150,open:1,c:0xd9d4c7,door:[2820,1428],zone:'s'},
- {id:'gym',name:'Campus Gym',x:3040,y:1420,w:240,h:170,ht:2.8,c:0x9aa3ab,roof:0x2b2b2b,door:[3160,1608],zone:'s'},
- {id:'hall',name:'Indoor Sports Hall',x:3400,y:1420,w:280,h:170,ht:4,c:0xc9d2d8,roof:0x2a6f9b,door:[3540,1608],zone:'s',deco:1},
- /* RESIDENTIAL AREA (south) */
- {id:'lodge',name:'Akwaaba Lodge',x:480,y:2460,w:260,h:170,ht:3.2,c:0xd9c9a8,roof:0x8a5a2a,door:[610,2442],home:1,zone:'r'},
- {id:'sunrise',name:'Sunrise Hostel',x:850,y:2460,w:300,h:170,ht:4,c:0xf0dcc4,roof:0xc2572e,door:[1000,2442],home:1,zone:'r'},
- {id:'royal',name:'Royal Crest Towers',x:1260,y:2460,w:240,h:170,ht:6.4,c:0x2f3640,roof:0xd9a537,door:[1380,2442],home:1,zone:'r'},
- {id:'bayview',name:'Bay View Hostel',x:1720,y:2460,w:320,h:180,ht:4.6,c:0xdfe9ee,roof:0x1f6f8b,door:[1880,2442],home:1,zone:'r'},
- {id:'chapel',name:'University Chapel',x:2160,y:2460,w:220,h:170,ht:4,c:0xf2efe8,roof:0x4a3a6a,door:[2270,2442],zone:'r'},
- {id:'heights',name:'Ayeduase Heights (private)',x:2700,y:2460,w:310,h:175,ht:5,c:0xe8d8c4,roof:0x6b4a2e,door:[2855,2442],home:1,zone:'r',deco:1},
- {id:'kotei',name:'Kotei Court (private)',x:3140,y:2460,w:300,h:175,ht:4.4,c:0xdfe2d8,roof:0x3c6e58,door:[3290,2442],home:1,zone:'r',deco:1}];
+ /* KNUST-style: Accra–Kumasi Road on top, campus core in the middle, hostels out in the towns */
+ {id:'coe',name:'CoE · Engineering',x:700,y:685,w:260,h:170,ht:3.4,c:0xd6d2c8,roof:0x8e2a3a,door:[830,873],zone:'f'},
+ {id:'senate',name:'Senate & Registry',x:2100,y:475,w:300,h:170,ht:3.6,c:0xe6dcc6,roof:0x2f4e6b,door:[2250,457],zone:'f',deco:1},
+ {id:'lib',name:'University Library',x:2460,y:475,w:280,h:170,ht:3.6,c:0xcfc3a5,roof:0x5b4636,door:[2600,457],zone:'f'},
+ {id:'greathall',name:'Great Hall',x:2800,y:475,w:300,h:180,ht:4.2,c:0xe9dfc9,roof:0x8e2a3a,door:[2950,457],zone:'f',deco:1},
+ {id:'office',name:'Student Affairs & SRC',x:2100,y:705,w:220,h:150,ht:2.4,c:0xe9e3d6,roof:0x3c6e58,door:[2210,873],zone:'f'},
+ {id:'print',name:'Print & Type',x:2380,y:705,w:160,h:150,ht:2.2,c:0xd8e1e6,roof:0x2a6f9b,door:[2460,873],zone:'f'},
+ {id:'canteen',name:'Bush Canteen',x:2600,y:705,w:180,h:150,ht:2.2,c:0xc9a27a,roof:0x7a5a2a,door:[2690,873],zone:'f'},
+ {id:'clinic',name:'Health Centre',x:2840,y:705,w:200,h:150,ht:2.6,c:0xf3f3f0,roof:0xb83a3a,door:[2940,873],zone:'f'},
+ {id:'cos',name:'CoS · Science',x:3500,y:475,w:260,h:180,ht:3.8,c:0xd2dce2,roof:0x2a5f8b,door:[3630,457],zone:'f'},
+ {id:'canr',name:'CANR · Agriculture',x:3820,y:475,w:240,h:170,ht:3,c:0xd8d0b4,roof:0x3c7a3a,door:[3940,457],zone:'f'},
+ {id:'chs',name:'CHS · Health Sciences',x:4120,y:475,w:260,h:150,ht:3.2,c:0xeef0ee,roof:0x2a7b7b,door:[4250,457],zone:'f'},
+ {id:'cohss',name:'CoHSS · Humanities',x:3500,y:675,w:240,h:180,ht:3.4,c:0xe2d8c8,roof:0x7a4a2a,door:[3620,873],zone:'f'},
+ {id:'cabe',name:'CABE · Built Env.',x:3800,y:675,w:240,h:180,ht:3.4,c:0xd8d8d8,roof:0x4a4a6a,door:[3920,873],zone:'f'},
+ {id:'garden',name:'Botanical Garden',x:4100,y:655,w:260,h:200,open:1,c:0x4f8a3e,door:[4230,755],zone:'f'},
+ {id:'taxi',name:'Tech Junction Taxi Rank',x:700,y:475,w:260,h:150,open:1,c:0x6d665e,door:[830,550],zone:'g'},
+ {id:'trotro',name:'Tech Junction Trotro Station',x:1000,y:475,w:260,h:170,open:1,c:0x7a7166,door:[1130,560],zone:'g'},
+ {id:'terminal',name:'Main Gate Shuttle Terminal',x:1300,y:475,w:320,h:150,open:1,c:0x8a8378,door:[1460,550],zone:'g'},
+ {id:'phonehub',name:'Phone & Laptop Hub',x:1010,y:705,w:180,h:150,ht:2.4,c:0xdfe6ee,roof:0x2a2a2a,door:[1100,873],zone:'c',deco:1},
+ {id:'salon',name:'Barber & Salon',x:1240,y:705,w:200,h:150,ht:2.4,c:0xf0d6e2,roof:0x9b3a6e,door:[1340,873],zone:'c'},
+ {id:'pharm',name:'Campus Pharmacy',x:1500,y:705,w:230,h:150,ht:2.4,c:0xf3f3f0,roof:0x2f8a4a,door:[1615,873],zone:'c',deco:1},
+ {id:'mall',name:'Campus Mall',x:700,y:1145,w:260,h:155,ht:3.4,c:0xece4d8,roof:0x9b4a2e,door:[830,1127],zone:'c'},
+ {id:'unity',name:'Unity Bank',x:1000,y:1145,w:260,h:170,ht:3.2,c:0xe8e4da,roof:0x1f4f8b,door:[1130,1127],zone:'c'},
+ {id:'bank',name:'Akwaaba Savings Bank',x:1300,y:1145,w:250,h:150,ht:3,c:0xf2efe6,roof:0x2f6b3a,door:[1425,1127],zone:'c'},
+ {id:'books',name:'Campus Bookshop',x:1590,y:1145,w:280,h:150,ht:2.6,c:0xe6dcc8,roof:0x5b4636,door:[1730,1127],zone:'c',deco:1},
+ {id:'night',name:'Night Market',x:700,y:1450,w:320,h:200,open:1,c:0x6b5a46,door:[860,1550],zone:'c'},
+ {id:'square',name:'Akwaaba Square',x:1100,y:1450,w:320,h:200,open:1,c:0xbfae90,door:[1260,1550],zone:'c'},
+ {id:'market',name:'Campus Market',x:1500,y:1450,w:320,h:150,open:1,c:0x8a7458,door:[1660,1540],zone:'c'},
+ {id:'shawarma',name:'Shawarma & Pizza Spot',x:700,y:1855,w:260,h:150,ht:2.4,c:0xf0e2c8,roof:0xc2572e,door:[830,2023],zone:'c',deco:1},
+ {id:'club',name:'Club Vibes',x:1000,y:1855,w:240,h:150,ht:3.4,c:0x221d2e,roof:0x7a2ea0,door:[1120,2023],zone:'c'},
+ {id:'lake',name:'Campus Lake',x:2120,y:1200,w:290,h:200,open:1,c:0x6f9a4c,door:[2260,1300],zone:'p'},
+ {id:'parade',name:'Parade Grounds',x:2950,y:1135,w:280,h:870,open:1,c:0x6f9e4f,door:[3090,1365],zone:'p'},
+ {id:'chapel',name:'University Chapel',x:2120,y:1835,w:220,h:170,ht:4,c:0xf2efe8,roof:0x4a3a6a,door:[2230,2023],zone:'p'},
+ {id:'field',name:'Sports Field',x:3500,y:1150,w:360,h:240,open:1,c:0x3f8a3a,door:[3680,1270],zone:'s'},
+ {id:'pavilion',name:'Sports Pavilion',x:3900,y:1145,w:170,h:140,ht:2.6,c:0xe9e3d6,roof:0x8e2a3a,door:[3985,1127],zone:'s',deco:1},
+ {id:'court',name:'Basketball Court',x:4150,y:1150,w:240,h:200,open:1,c:0xb5653a,door:[4270,1250],zone:'s'},
+ {id:'pool',name:'Swimming Pool',x:3500,y:1520,w:240,h:150,open:1,c:0xd9d4c7,door:[3620,1528],zone:'s'},
+ {id:'gym',name:'Campus Gym',x:3800,y:1835,w:240,h:170,ht:2.8,c:0x9aa3ab,roof:0x2b2b2b,door:[3920,2023],zone:'s'},
+ {id:'hall',name:'Indoor Sports Hall',x:4150,y:1835,w:280,h:170,ht:4,c:0xc9d2d8,roof:0x2a6f9b,door:[4290,2023],zone:'s',deco:1},
+ {id:'sunrise',name:'Sunrise Hostel · Kotei',x:2150,y:2945,w:300,h:170,ht:4,c:0xf0dcc4,roof:0xc2572e,door:[2300,2927],home:1,zone:'r'},
+ {id:'kotei',name:'Kotei Court (private)',x:2650,y:2945,w:300,h:175,ht:4.4,c:0xdfe2d8,roof:0x3c6e58,door:[2800,2927],home:1,zone:'r',deco:1},
+ {id:'lodge',name:'Akwaaba Lodge · Ayeduase',x:3550,y:2945,w:260,h:170,ht:3.2,c:0xd9c9a8,roof:0x8a5a2a,door:[3680,2927],home:1,zone:'r'},
+ {id:'heights',name:'Ayeduase Heights (private)',x:4000,y:2945,w:310,h:175,ht:5,c:0xe8d8c4,roof:0x6b4a2e,door:[4155,2927],home:1,zone:'r',deco:1},
+ {id:'royal',name:'Royal Crest Towers · Tech Junction',x:200,y:15,w:240,h:170,ht:6.4,c:0x2f3640,roof:0xd9a537,door:[320,203],home:1,zone:'r'},
+ {id:'bayview',name:'Bay View Hostel · Bomso',x:900,y:5,w:320,h:180,ht:4.6,c:0xdfe9ee,roof:0x1f6f8b,door:[1060,203],home:1,zone:'r'},
+ {id:'sankofa',name:'Sankofa Hall',x:760,y:2295,w:300,h:180,ht:4.8,c:0xe8dcc0,roof:0x8e2a3a,door:[910,2277],zone:'r',hall:1},
+ {id:'adinkra',name:'Adinkra Hall',x:1300,y:2295,w:300,h:180,ht:4.4,c:0xdfe6ea,roof:0x1f4f8b,door:[1450,2277],zone:'r',hall:1},
+ {id:'volta',name:'Volta Hall',x:2150,y:2295,w:320,h:180,ht:5,c:0xf0e4cc,roof:0x2f6b3a,door:[2310,2277],zone:'r',hall:1},
+ {id:'yaa',name:'Queen Yaa Asantewaa Hall',x:2700,y:2295,w:320,h:180,ht:4.6,c:0xf3e1e6,roof:0x9b3a6e,door:[2860,2277],zone:'r',hall:1},
+ {id:'gyin',name:'Gyinyaase Gardens (private)',x:900,y:2945,w:300,h:175,ht:3.8,c:0xe9e0d0,roof:0x2f6b3a,door:[1050,2927],zone:'r',home:1,deco:1}];
 /* where open areas and decorated places used to be (their props are built there, then moved) */
 const ORIG={garden:[60,370,260,200],night:[420,690,320,200],field:[820,690,360,240],trotro:[60,1040,260,170],square:[420,1040,320,200],lake:[1200,1040,290,200],court:[1520,1040,240,200],
   taxi:[60,1310,260,150],terminal:[420,1310,320,150],market:[820,1310,320,150],pool:[1200,1310,240,150],parade:[1840,370,280,870],club:[1520,1310,240,150]};
@@ -107,10 +110,10 @@ const BG={
  poor:{name:'Struggling home',emoji:'🛖',fund:4800,allow:200,momo:1200,agg:[7,22],story:'Your mum sells tomatoes at the market and you have three younger siblings. The whole family contributed for your hostel. You will have to hustle, and you qualify for the student loan.'}};
 /* hostels: prices per academic year (2 semesters), inspired by real rates around KNUST */
 const HOSTELS=[
- {id:'lodge',name:'Akwaaba Lodge',tier:0,blurb:'Budget. Bunk beds, ceiling fans and a bathroom in every room. Most rooms use the shared kitchen; the 3-in-a-room with a kitchenette costs a bit more. Water sometimes goes off.',rooms:[{beds:4,price:3900},{beds:3,price:4700},{beds:3,price:5400,kitchen:true}]},
- {id:'sunrise',name:'Sunrise Hostel',tier:1,blurb:'Mid-range. Wooden beds, wardrobes, generator and a tiled bathroom in every room. Choose the shared kitchen, or pay a little more for your own kitchenette. The large 2-in-a-room has extra floor space.',rooms:[{beds:2,price:5800},{beds:2,price:6300,large:true},{beds:2,price:6600,kitchen:true},{beds:1,price:6400},{beds:1,price:7400,kitchen:true}]},
- {id:'bayview',name:'Bay View Hostel',tier:2,blurb:'Comfortable. Air conditioning, Wi-Fi and your own bathroom. Rooms with a kitchenette cost a bit more than those that share the hostel kitchen.',rooms:[{beds:2,price:7900,ac:true},{beds:2,price:8800,ac:true,kitchen:true},{beds:1,price:10400,ac:true},{beds:1,price:11600,ac:true,kitchen:true},{beds:1,price:12600,ac:true,kitchen:true,large:true}]},
- {id:'royal',name:'Royal Crest Towers',tier:3,blurb:'Premium. AC, smart TV, kitchenette, en-suite with a bathtub, free gym and pool.',rooms:[{beds:2,price:12400,ac:true,tv:true,kitchen:true},{beds:1,price:17500,ac:true,tv:true,kitchen:true},{beds:1,price:20500,ac:true,tv:true,kitchen:true,large:true}]}];
+ {id:'lodge',name:'Akwaaba Lodge · Ayeduase',tier:0,blurb:'Budget, in busy Ayeduase town just outside the Ayeduase Gate. Bunk beds, ceiling fans and a bathroom in every room. Most rooms use the shared kitchen; the 3-in-a-room with a kitchenette costs a bit more. Water sometimes goes off.',rooms:[{beds:4,price:3900},{beds:3,price:4700},{beds:3,price:5400,kitchen:true}]},
+ {id:'sunrise',name:'Sunrise Hostel · Kotei',tier:1,blurb:'Mid-range, in Kotei, a short walk to the Kotei gate. Wooden beds, wardrobes, generator and a tiled bathroom in every room. Choose the shared kitchen, or pay a little more for your own kitchenette. The large 2-in-a-room has extra floor space.',rooms:[{beds:2,price:5800},{beds:2,price:6300,large:true},{beds:2,price:6600,kitchen:true},{beds:1,price:6400},{beds:1,price:7400,kitchen:true}]},
+ {id:'bayview',name:'Bay View Hostel · Bomso',tier:2,blurb:'Comfortable, in Bomso across the Accra–Kumasi Road. Air conditioning, Wi-Fi and your own bathroom. Rooms with a kitchenette cost a bit more than those that share the hostel kitchen.',rooms:[{beds:2,price:7900,ac:true},{beds:2,price:8800,ac:true,kitchen:true},{beds:1,price:10400,ac:true},{beds:1,price:11600,ac:true,kitchen:true},{beds:1,price:12600,ac:true,kitchen:true,large:true}]},
+ {id:'royal',name:'Royal Crest Towers · Tech Junction',tier:3,blurb:'Premium, right at Tech Junction by the main gate. AC, smart TV, kitchenette, en-suite with a bathtub, free gym and pool.',rooms:[{beds:2,price:12400,ac:true,tv:true,kitchen:true},{beds:1,price:17500,ac:true,tv:true,kitchen:true},{beds:1,price:20500,ac:true,tv:true,kitchen:true,large:true}]}];
 const ROOMS={};HOSTELS.forEach(h=>h.rooms.forEach(r=>{r.id=h.id+r.beds+(r.kitchen?'k':'')+(r.large?'L':'');r.hostel=h.id;r.tier=h.tier;r.name=`${r.large?(r.beds===1?'Large single room':r.beds+' in a large room'):r.beds===1?'Single room':r.beds+' in a room'}${r.kitchen?' + kitchenette':''}`;
   r.W=+((r.beds>=4?6.9:r.beds===3?6.4:r.beds===2?5.8:5.1)+h.tier*.3+(r.kitchen?.5:0)+(r.large?1.2:0)).toFixed(2);r.D=+(4.9+h.tier*.2+(r.large?.7:0)+(r.beds>=3?.3:0)).toFixed(2);r.m2=Math.round(r.W*r.D*.92);ROOMS[r.id]=r}));
 const SHOP=[

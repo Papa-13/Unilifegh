@@ -104,12 +104,12 @@ const solidC=(x,y,r)=>SOLIDS.push({t:0,x,y,r}),solidR=(x1,y1,x2,y2)=>SOLIDS.push
   const road=(x,y,w,h,c=0x56514b)=>{const r=mesh(new THREE.PlaneGeometry(w*U,h*U),lam(c),wx(x+w/2),0,wz(y+h/2),s);r.rotation.x=-Math.PI/2};
   ROADS.forEach(r=>road(...r));
   {const dash=(()=>{const c=document.createElement('canvas');c.width=64;c.height=8;const g=c.getContext('2d');g.fillStyle='#f2c230';g.fillRect(0,0,36,8);const t=new THREE.CanvasTexture(c);t.wrapS=THREE.RepeatWrapping;return t})();
-   const CX=[400,1600,2550,3850],CY=[420,900,2350,1560],edgeM=basic(0xe9e6df),curbM=lam(0xb9b2a6);
+   const CX=MAPR.v,CY=MAPR.h.map(r=>r[0]),edgeM=basic(0xe9e6df),curbM=lam(0xb9b2a6);
    const seg=(a,b,cross,fn)=>{const cuts=cross.filter(c=>c>a&&c<b).sort((p,q)=>p-q);let s0=a;cuts.concat([b+RHW]).forEach(c=>{const e=Math.min(b,c-RHW);if(e-s0>20)fn(s0,e);s0=c+RHW})};
    const strip=(x1,y1,x2,y2,mat,h=0)=>{const w=x2-x1,d=y2-y1;if(h){box(w*U,h,d*U,mat,wx(x1+w/2),h/2,wz(y1+d/2),s)}else{const m=mesh(new THREE.PlaneGeometry(w*U,d*U),mat,wx(x1+w/2),.006,wz(y1+d/2),s);m.rotation.x=-Math.PI/2;return m}};
    ROADS.forEach(([x,y,w,h])=>{const hz=w>h;if(hz){const cy=y+h/2;seg(x,x+w,CX,(a,b)=>{const m=strip(a,cy-1.5,b,cy+1.5,new THREE.MeshBasicMaterial({map:(()=>{const t=dash.clone();t.needsUpdate=true;t.repeat.set((b-a)/70,1);return t})(),transparent:true}));
         [-1,1].forEach(sd=>{strip(a,cy+sd*(RHW-6)-1.2,b,cy+sd*(RHW-6)+1.2,edgeM);strip(a,sd<0?y-5:y+h,b,sd<0?y:y+h+5,curbM,.07)})})}
-     else{const cx=x+w/2;seg(y,y+h,CY.filter(c=>c<1600||x<1600),(a,b)=>{const t=dash.clone();t.needsUpdate=true;t.repeat.set((b-a)/70,1);const m=mesh(new THREE.PlaneGeometry((b-a)*U,3*U),new THREE.MeshBasicMaterial({map:t,transparent:true}),wx(cx),.006,wz((a+b)/2),s);m.rotation.x=-Math.PI/2;m.rotation.z=Math.PI/2;
+     else{const cx=x+w/2;seg(y,y+h,MAPR.h.filter(r=>x+w/2>=r[1]&&x+w/2<=r[2]).map(r=>r[0]),(a,b)=>{const t=dash.clone();t.needsUpdate=true;t.repeat.set((b-a)/70,1);const m=mesh(new THREE.PlaneGeometry((b-a)*U,3*U),new THREE.MeshBasicMaterial({map:t,transparent:true}),wx(cx),.006,wz((a+b)/2),s);m.rotation.x=-Math.PI/2;m.rotation.z=Math.PI/2;
         [-1,1].forEach(sd=>{strip(cx+sd*(RHW-6)-1.2,a,cx+sd*(RHW-6)+1.2,b,edgeM);strip(sd<0?x-5:x+w,a,sd<0?x:x+w+5,b,curbM,.07)})})}})}
   B.forEach(b=>{if(b.open)return;const [dx,dy]=b.door;const bot=dy>b.y+b.h/2;let y1=bot?b.y+b.h:dy-8,y2=bot?dy+10:b.y;
     ROADS.forEach(([rx,ry,rw,rh])=>{if(rw<rh||dx<rx||dx>rx+rw)return;if(bot&&ry>=y2&&ry-y2<160)y2=ry;if(!bot&&ry+rh<=y1&&y1-(ry+rh)<160)y1=ry+rh});road(dx-20,y1,40,y2-y1,0x8a8378)});
@@ -160,7 +160,7 @@ const solidC=(x,y,r)=>SOLIDS.push({t:0,x,y,r}),solidR=(x1,y1,x2,y2)=>SOLIDS.push
   solidE(1345,1140,101,55);solidC(1535,1140,6);solidC(1745,1140,6);
   [[110,1340],[110,1395],[250,1340],[250,1395]].forEach(([x,y])=>solidBox(x,y,90,44));solidBox(185,1440,74,14);[-1,1].forEach(k=>solidC(185+k*36,1440,5));
   for(let i=0;i<6;i++)solidC(440+i*56,1345,5);for(let i=0;i<4;i++)solidBox(460+i*70,1322,48,16);[[500,1420],[680,1420]].forEach(([x,y])=>solidBox(x,y,123,43));
-  [[580,775],[190,300],[1000,620],[1400,640],[960,990]].forEach(([x,y])=>{const L=new THREE.PointLight(0xffc77a,0,10,1.6);L.position.set(wx(x),2.6,wz(y));s.add(L);nightLights.push(L)});
+  
   // Campus Market: stalls with produce
   {const stallC=[0xe0483a,0x2f7a4a,0xe8b24a,0x5aa9e6];
    for(let i=0;i<4;i++){const x=865+i*80,y=1365,X=wx(x),Z=wz(y);solidBox(x,y,64,34);

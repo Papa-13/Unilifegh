@@ -30,7 +30,8 @@ npm run dev      # opens http://localhost:5173 — the page reloads when you sav
 index.html            the page: the HTML for menus, HUD and panels
 src/
   game/               the game, split by topic (see docs/ARCHITECTURE.md)
-    010-world-data.js       buildings, colleges, hostels, shop items, characters…
+    010-world-data.js       the map (MAPR road grid + buildings B), colleges, hostels, shop items…
+    285-town-houses.js      houses and shops in the towns around campus
     070-time.js             the clock, hourly events, texts you receive
     140-building-actions.js what you can do at each building
     320-needs-mood-tasks-gems.js  needs, moods, daily tasks, milestones, gems

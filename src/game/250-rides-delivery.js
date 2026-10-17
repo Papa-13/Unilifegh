@@ -1,5 +1,5 @@
 /* ================= traffic, rides, food delivery ================= */
-const HROADS=[[420,0,MW],[900,0,MW],[1560,0,1600],[2350,0,MW]],HY=HROADS.map(r=>r[0]),VX=[400,1600,2550,3850];
+const HROADS=MAPR.h.map(r=>r.slice()),HY=HROADS.map(r=>r[0]),VX=MAPR.v.slice();
 function makeCar(col,taxi){if(taxi===2)return makeOkada();if(taxi===3)return makeTrotro();return makeCarModel(taxi?pick([0x2f6bb5,0x8e2a3a,0x2fa84f,0xd8d8d8,0x222222]):col,taxi)}
 function makeCar_old(col,taxi){const g=new THREE.Group();box(1.9,.45,.9,col,0,.42,0,g);box(1.1,.38,.84,0x1d2a36,-.05,.82,0,g);
   [[-.6,.45],[.6,.45],[-.6,-.45],[.6,-.45]].forEach(([x,z])=>{const w=mesh(cyl(.17,.17,.12,10),lam(0x111111),x,.18,z,g);w.rotation.x=Math.PI/2});
@@ -8,10 +8,11 @@ function makeCar_old(col,taxi){const g=new THREE.Group();box(1.9,.45,.9,col,0,.4
 function makeBike(){const g=new THREE.Group();box(.9,.25,.2,0xc8322b,0,.45,0,g);[-.38,.38].forEach(x=>{const w=mesh(cyl(.2,.2,.08,12),lam(0x111111),x,.2,0,g);w.rotation.x=Math.PI/2});
   mesh(cyl(.13,.15,.5,10),lam(0x2f7a4a),-.05,.85,0,g);mesh(sph(.13,10,8),lam(0x2f7a4a),-.05,1.22,0,g);box(.4,.4,.4,0x2f7a4a,-.42,.85,0,g);scene.add(g);return g}
 function placeCar(g,x,y,dx,dy){g.position.set(wx(x),0,wz(y));g.rotation.y=Math.atan2(dx,dy)-Math.PI/2}
-const ROUTES=[[[400,420],[1600,420],[1600,900],[400,900]],[[1600,420],[2550,420],[2550,900],[1600,900]],[[2550,420],[3850,420],[3850,900],[2550,900]],[[2550,900],[3850,900],[3850,2350],[2550,2350]],[[400,900],[1600,900],[1600,2350],[400,2350]],[[1600,2350],[2550,2350],[2550,900],[1600,900]],[[400,1560],[1600,1560],[1600,2350],[400,2350]]];const ROUTES_OLD=[[[1470,615],[1800,615],[1800,975],[1470,975]],[[365,975],[1170,975],[1170,1274],[365,1274]],[[1170,615],[365,615],[365,280],[1170,280]],[[1470,615],[1170,615],[1170,975],[1470,975]]];
+/* traffic loops: every block of the grid that has roads on all four sides */
+const ROUTES=(()=>{const R=[];for(let i=0;i<HROADS.length-1;i++){const [y0,a0,b0]=HROADS[i],[y1,a1,b1]=HROADS[i+1];for(let k=0;k<VX.length-1;k++){const x0=VX[k],x1=VX[k+1];if(x0>=a0&&x1<=b0&&x0>=a1&&x1<=b1)R.push([[x0,y0],[x1,y0],[x1,y1],[x0,y1]])}}return R})();
 const perim=rt=>{let s=0;for(let i=0;i<rt.length;i++){const a=rt[i],b=rt[(i+1)%rt.length];s+=Math.hypot(b[0]-a[0],b[1]-a[1])}return s};
 function along(rt,d){d=((d%perim(rt))+perim(rt))%perim(rt);for(let i=0;i<rt.length;i++){const a=rt[i],b=rt[(i+1)%rt.length],L=Math.hypot(b[0]-a[0],b[1]-a[1]);if(d<=L){const t=d/L;return{x:a[0]+(b[0]-a[0])*t,y:a[1]+(b[1]-a[1])*t,dx:(b[0]-a[0])/L,dy:(b[1]-a[1])/L}}d-=L}return{x:rt[0][0],y:rt[0][1],dx:1,dy:0}}
-const TRAFFIC=[[0,0,0xf4c430,1],[0,.5,0x2f6bb5,0],[1,.3,0xd8d8d8,2],[2,.1,0xf4c430,1],[2,.6,0x8e2a3a,3],[3,.2,0x222222,0],[3,.7,0xf4c430,1],[4,.4,0x2fa84f,3],[5,.1,0xf4c430,1],[5,.6,0xd8d8d8,2],[1,.8,0xd8d8d8,2],[6,.75,0xd8d8d8,3],[6,.3,0x2f6bb5,0]].map(([r,o,c,t])=>({route:ROUTES[r],d:o*perim(ROUTES[r]),g:makeCar(c,t),sp:R(110,150)}));
+const TRAFFIC=[[0,0,0xf4c430,1],[0,.5,0x2f6bb5,0],[1,.3,0xd8d8d8,2],[2,.1,0xf4c430,1],[2,.6,0x8e2a3a,3],[3,.2,0x222222,0],[4,.7,0xf4c430,1],[5,.4,0x2fa84f,3],[6,.1,0xf4c430,1],[7,.6,0xd8d8d8,2],[8,.3,0x2f6bb5,0],[9,.2,0xd8d8d8,2],[10,.5,0xf4c430,1],[11,.75,0xd8d8d8,3],[9,.7,0x8e2a3a,2],[11,.25,0xf4c430,1]].map(([r,o,c,t])=>({route:ROUTES[r],d:o*perim(ROUTES[r]),g:makeCar(c,t),sp:R(110,150)}));
 function blockedAhead(x,y,dx,dy,look,self){const ax=x+dx*look,ay=y+dy*look,p=P();if(self){self.byCar=false;self.byP=null}
   if(!p.inCar&&!IS&&Math.hypot(p.x-ax,p.y-ay)<30){if(self)self.byP=p;return 'p'}
   for(const n of S.npcs)if(!n.hidden&&Math.hypot(n.x-ax,n.y-ay)<26){if(self)self.byP=n;return 'p'}
@@ -42,7 +43,7 @@ function yieldSpeed(o,blocked,sp,dt){if(blocked==='p'){if(!o.pb){o.pb=1;nearMiss
   if(o.ov>0&&blocked!=='p')blocked=o.lo>-12;
   const stop=o.ov>0&&blocked!=='p'?blocked:blocked&&(blocked==='p'||!(o.ign>0));if(o.v==null)o.v=sp;o.v+=((stop?0:sp)-o.v)*Math.min(1,dt*(stop?7:1.3));return o.v}
 /* traffic lights: junction x,y + half-widths of the vertical (vhw) and horizontal (hhw) roads */
-const JUNCS=[[400,420,30,30],[1600,420,30,30],[2550,420,30,30],[3850,420,30,30],[400,900,30,30],[1600,900,30,30],[2550,900,30,30],[3850,900,30,30],[400,2350,30,30],[1600,2350,30,30],[2550,2350,30,30],[3850,2350,30,30],[400,1560,30,30],[1600,1560,30,30]].map(([x,y,vhw,hhw],i)=>({x,y,vhw:RHW,hhw:RHW,off:i*4.3}));
+const JUNCS=HROADS.flatMap(([y,a,b])=>VX.filter(x=>x>=a&&x<=b).map(x=>[x,y,30,30])).map(([x,y,vhw,hhw],i)=>({x,y,vhw:RHW,hhw:RHW,off:i*4.3}));
 let TL_T=0;const TL_CYC=18;
 function lightState(J,axis){const t=(TL_T+J.off)%TL_CYC,ph=t<7?'EWg':t<9?'EWa':t<16?'NSg':'NSa';return ph[0]===axis[0]?(ph[2]==='g'?'green':'amber'):'red'}
 function redAhead(x,y,dx,dy,front=0){for(const J of JUNCS){const rx=J.x-x,ry=J.y-y,al=rx*dx+ry*dy-front,lat=Math.abs(rx*dy-ry*dx);if(lat>48)continue;

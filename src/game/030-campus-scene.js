@@ -28,7 +28,7 @@ const WINLIT=PBR?new THREE.MeshStandardMaterial({color:0x34495e,roughness:.25,me
 const WATER=[];
 const nightLights=[];
 const RHW=65,LANE=30,CURB=52,BUSDOCK=40,CS=1.6,BS=1.4;/* road half-width, lane centre offset (drive on the right), pulled-over offset */
-const ROADS=[[0,420,MW],[0,900,MW],[0,2350,MW],[0,1560,1600]].map(([x,y,w])=>[x,y-RHW,w,RHW*2]).concat([400,1600,2550,3850].map(x=>[x-RHW,0,RHW*2,MH]));
+const ROADS=MAPR.h.map(([y,a,b])=>[a,y-RHW,b-a,RHW*2]).concat(MAPR.v.map(x=>[x-RHW,0,RHW*2,MH]));
 const laneOf=(x,y,dx,dy,o=LANE)=>({x:x-dy*o,y:y+dx*o});
 const VMAT={};const vmat=(k,f)=>VMAT[k]||(VMAT[k]=f());
 const paint=c=>vmat('p'+c,()=>new THREE.MeshStandardMaterial({color:c,roughness:.32,metalness:.45}));

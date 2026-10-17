@@ -3,7 +3,7 @@ const PCAT={learn:['🎓','Study','#5aa9e6'],food:['🍛','Food','#e8823a'],shop
 const PINFO={coe:['⚙️','learn'],senate:['🏛️','learn'],lib:['📚','learn'],canr:['🌾','learn'],cos:['🔬','learn'],cohss:['📖','learn'],cabe:['📐','learn'],chs:['🩺','learn'],office:['🗳️','learn'],print:['🖨️','learn'],greathall:['🎤','learn'],
   canteen:['🍛','food'],shawarma:['🌯','food'],market:['🧺','food'],night:['🌙','food'],mall:['🛍️','shop'],unity:['🏦','shop'],bank:['🏦','shop'],salon:['💈','shop'],phonehub:['📱','shop'],pharm:['💊','shop'],books:['📘','shop'],
   club:['🪩','fun'],square:['🌳','fun'],parade:['🎪','fun'],lake:['🦆','fun'],garden:['🌺','fun'],field:['⚽','sport'],pavilion:['🏟️','sport'],court:['🏀','sport'],pool:['🏊','sport'],gym:['🏋️','sport'],hall:['🏐','sport'],
-  lodge:['🏠','home'],sunrise:['🏠','home'],royal:['🏠','home'],bayview:['🏠','home'],heights:['🏠','home'],kotei:['🏠','home'],taxi:['🚕','go'],trotro:['🚐','go'],terminal:['🚌','go'],clinic:['🏥','care'],chapel:['⛪','care']};
+  lodge:['🏠','home'],sunrise:['🏠','home'],royal:['🏠','home'],bayview:['🏠','home'],heights:['🏠','home'],kotei:['🏠','home'],gyin:['🏠','home'],sankofa:['🏛️','home'],adinkra:['🏛️','home'],volta:['🏛️','home'],yaa:['🏛️','home'],taxi:['🚕','go'],trotro:['🚐','go'],terminal:['🚌','go'],clinic:['🏥','care'],chapel:['⛪','care']};
 const PSHORT={coe:'CoE',senate:'Senate',lib:'Library',canr:'CANR',cos:'CoS',cohss:'CoHSS',cabe:'CABE',chs:'CHS',office:'SRC Office',print:'Print & Type',greathall:'Great Hall',canteen:'Canteen',shawarma:'Shawarma',market:'Market',night:'Night Market',mall:'Mall',unity:'Unity Bank',bank:'Savings Bank',salon:'Salon',phonehub:'Phone Hub',pharm:'Pharmacy',books:'Bookshop',club:'Club Vibes',square:'Square',parade:'Parade',lake:'Lake',garden:'Garden',field:'Field',pavilion:'Pavilion',court:'Court',pool:'Pool',gym:'Gym',hall:'Sports Hall',lodge:'Akwaaba Lodge',sunrise:'Sunrise',royal:'Royal Crest',bayview:'Bay View',heights:'Ayeduase',kotei:'Kotei Court',taxi:'Taxis',trotro:'Trotro',terminal:'Shuttle',clinic:'Clinic',chapel:'Chapel'};
 const pIcon=b=>(PINFO[b.id]||['📍'])[0],pCat=b=>(PINFO[b.id]||[0,'learn'])[1];
 const doorPt=b=>({x:b.door[0],y:b.door[1]+(b.door[1]>b.y?10:-10)});
@@ -48,10 +48,10 @@ function cmDraw(){const cv2=$('cmc'),g=cv2.getContext('2d'),k=CM.s,X=x=>CM.ox+x*
   g.fillStyle='#4d6b3a';g.fillRect(X(0),Y(0),MW*k,MH*k);
   Object.values(ZONES).forEach(z=>{g.fillStyle=z.mini;z.rects.forEach(([x,y,w,h])=>g.fillRect(X(x),Y(y),w*k,h*k))});
   g.fillStyle='#6f6a62';ROADS.forEach(([x,y,w,h])=>g.fillRect(X(x),Y(y),w*k,h*k));g.strokeStyle='rgba(255,220,120,.6)';g.setLineDash([6,6]);g.lineWidth=1;
-  HROADS.forEach(([y,a,b2])=>{g.beginPath();g.moveTo(X(a),Y(y));g.lineTo(X(b2),Y(y));g.stroke()});VX.forEach(x=>{g.beginPath();g.moveTo(X(x),Y(420));g.lineTo(X(x),Y(2350));g.stroke()});g.setLineDash([]);
+  HROADS.forEach(([y,a,b2])=>{g.beginPath();g.moveTo(X(a),Y(y));g.lineTo(X(b2),Y(y));g.stroke()});VX.forEach(x=>{g.beginPath();g.moveTo(X(x),Y(0));g.lineTo(X(x),Y(MH));g.stroke()});g.setLineDash([]);
   // zone names
   g.textAlign='center';g.textBaseline='middle';g.font=`800 ${Math.max(11,Math.min(22,k*140))}px Figtree, system-ui`;g.fillStyle='rgba(255,255,255,.22)';
-  [['FACULTY AREA',MW/2,30],['COMMERCIAL AREA',800,1250],['CENTRAL PARK',2080,1560],['SPORTS COMPLEX',3300,1300],['RESIDENTIAL AREA',MW/2,2720]].forEach(([t,x,y])=>g.fillText(t,X(x),Y(y)));
+  [['ACCRA–KUMASI ROAD',2700,250],['TECH JUNCTION',300,120],['BOMSO',1500,120],['KENTINKRONO',4200,120],['ACADEMIC AREA',2650,700],['COMMERCIAL AREA',1300,1700],['CENTRAL PARK',2500,1900],['SPORTS COMPLEX',4050,1700],['HALLS',2650,2600],['AYIGYA',300,1500],['BOADI',5050,1500],['GYINYAASE',1100,3700],['KOTEI',2700,3700],['AYEDUASE',4300,3700]].forEach(([t,x,y])=>g.fillText(t,X(x),Y(y)));
   // shuttle stops
   SH_STOPS.forEach(st=>{g.fillStyle='#fff';g.beginPath();g.arc(X(st.sx),Y(st.sy),Math.max(2.5,k*14),0,7);g.fill();g.fillStyle='#8e2a3a';g.beginPath();g.arc(X(st.sx),Y(st.sy),Math.max(1.5,k*9),0,7);g.fill()});
   // buildings
