@@ -84,6 +84,7 @@ function enterRoom0(owner){fadeIn();
   if(rt.ac)box(.9,.28,.22,lam(0xf4f4f4),-.6,2.35,-D/2+.2,s);
   else{const fan=new THREE.Group();fan.position.set(0,2.55,0);for(let i=0;i<3;i++){const pv=new THREE.Group();box(.9,.02,.12,lam(0xf0ebe0),.45,0,0,pv);pv.rotation.y=i*2.1;fan.add(pv)}mesh(cyl(.08,.08,.1,10),lam(0xf0ebe0),0,0,0,fan);s.add(fan);IS.fan=fan}
   IS.tv=!!(rt.tv||(mine&&P().items.includes('tv')));
+  IS.tvSpot=IS.tv?{x:W/2-1.55,z:1.9,ry:Math.PI/2}:null;
   if(IS.tv){box(1.3,.75,.05,lam(0x111111),W/2-.05,1.45,1.9,s).rotation.y=Math.PI/2;const scr=box(1.2,.66,.01,basic(0x1d3a5a),W/2-.08,1.45,1.9,s);scr.rotation.y=Math.PI/2;if(!rt.tv){box(.4,.5,1.1,lam(0x3a2a20),W/2-.25,.25,1.9,s);IS.obst.push({x1:W/2-.45,x2:W/2,z1:1.35,z2:2.45})}IS.objs.push({id:'tv',label:'TV',x:W/2-1.3,z:1.9,r:1})}
   if(mine){
     const cb=slots[0],cupb=tier>=1||P().items.includes('cupboard');

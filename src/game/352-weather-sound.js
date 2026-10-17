@@ -3,7 +3,7 @@
    same rain at the same time. Semester 1 is the rainy season (afternoon storms, thunder);
    semester 2 is harmattan (dusty haze in the mornings, almost no rain).
    Sound is made in the browser (no audio files): birds by day, crickets at night, rain, thunder,
-   distant traffic, footsteps and soft taps on buttons. 🔊 on the right turns it on and off. */
+   distant traffic and soft taps on buttons. 🔊 on the right turns it on and off. */
 const WX={ri:0,haze:0,flash:0,thunderAt:0,was:0,umbT:0,rainG:null,base:{near:34,far:100}};
 function wxHash(s){let h=2166136261;s=String(s);for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return (h>>>0)/4294967296}
 function wxSeed(){return (typeof MP!=='undefined'&&MP.campus)||'solo'}
@@ -74,7 +74,7 @@ SND.thunder=function(){if(!this.ready||!this.on)return;const A=ACX,t=A.currentTi
   const g=A.createGain();const v=IS?.35:.7;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.06);g.gain.setTargetAtTime(v*.5,t+.3,.4);g.gain.exponentialRampToValueAtTime(.0001,t+4);s.connect(fl);fl.connect(g);g.connect(this.nodes.master);s.start(t);s.stop(t+4.2)};
 SND.bird=function(){const f=R(2200,3800),n=RI(2,5);for(let i=0;i<n;i++)setTimeout(()=>this.blip(f*R(.9,1.15),R(.06,.12),.035,'sine',f*R(1.2,1.6)),i*R(90,160))};
 SND.cricket=function(){const f=R(4300,4900);for(let i=0;i<3;i++)setTimeout(()=>this.blip(f,.035,.018,'triangle'),i*55)};
-SND.step=function(wet,inside){this.burst(wet?.09:.05,wet?.09:inside?.05:.06,wet?'lowpass':'highpass',wet?900:inside?1200:1800)};
+SND.step=function(){};SND._stepOld=function(wet,inside){this.burst(wet?.09:.05,wet?.09:inside?.05:.06,wet?'lowpass':'highpass',wet?900:inside?1200:1800)};
 SND.tick=function(dt){if(!this.ready)return;const live=this.on&&!document.hidden&&!$('game').hidden&&S&&!S.paused;const h=hour(),night=h>=19||h<5.5,out=!IS,ri=WX.ri;
   if(!this.nodes)return;
   this.set('rain',live?(out?.32:.1)*ri:0);this.nodes.rain.fl.frequency.value=out?1400:520;this.set('drops',live&&out?.06*ri:0);

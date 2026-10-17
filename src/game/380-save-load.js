@@ -1,5 +1,5 @@
 /* ================= saving your student's life ================= */
-const SKIPK=new Set(['mesh','legs','knees','arms','elbows','head','lids','torso','path','ipath','target','itarget','gest','plan','with','tag','ring']);
+const SKIPK=new Set(['walkTo','mesh','legs','knees','arms','elbows','head','lids','torso','path','ipath','target','itarget','gest','plan','with','tag','ring']);
 const SKIPS=new Set(['p','npcs','lecs','mates','busy','ride','del','Q','pending','auto','goDo','talkN','sportRoster','lastNear','pendTalk','typing','paused','hangIv','_busyK','_vk','lastGame']);
 function ser(v,d=0,own){if(d>14)return undefined;if(v==null)return v;const t=typeof v;if(t==='function')return undefined;if(t!=='object')return t==='number'&&!isFinite(v)?0:v;
   if(v.isObject3D||v.isMaterial||v.isTexture||(typeof HTMLElement!=='undefined'&&v instanceof HTMLElement))return undefined;

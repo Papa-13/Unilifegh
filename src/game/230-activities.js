@@ -4,7 +4,7 @@ function animFor(label){const L=label.toLowerCase(),sp=(IS&&IS.spots)||{};
   if(/scrolling in bed/.test(L))return{pose:'lie',spot:sp.bed};
   if(/beanbag/.test(L))return{pose:'sit',spot:sp.bean};
   if(/fifa/.test(L))return{pose:'type',spot:(IS&&IS.tv&&sp.bean)||sp.desk};
-  if(/watching (tv|a movie)/.test(L))return{pose:'sit',spot:sp.bean||sp.desk};
+  if(/watching (tv|a movie)/.test(L))return tvAct(sp);
   if(/novel/.test(L))return{pose:'sit',spot:sp.bean||sp.desk};
   if(/cold drink/.test(L))return{pose:'drink'};
   if(/in the office/.test(L))return{pose:'sitTalk',spot:sp.seat};
@@ -47,7 +47,7 @@ function animFor(label){const L=label.toLowerCase(),sp=(IS&&IS.spots)||{};
   if(/typing|printing/.test(L))return{pose:'type',spot:sp.seat};
   if(/counsellor/.test(L))return{pose:'sit',spot:sp.seat};
   if(/vibing/.test(L))return{pose:'dance'};
-  if(/watching tv/.test(L))return{pose:'sit',spot:sp.desk};
+  if(/watching tv/.test(L))return tvAct(sp);
   if(/sharing flyers|serving/.test(L))return{pose:'talk'};
   if(/rally/.test(L))return{pose:'cheer'};
   if(/nap/.test(L))return{pose:'lie',spot:sp.bed};
@@ -56,6 +56,7 @@ function animFor(label){const L=label.toLowerCase(),sp=(IS&&IS.spots)||{};
   return{pose:'idle'}}
 function doAct(label,mins,fx){if(!S||S.busy){applyAct(label,mins,fx);return}const a=Object.assign({},animFor(label),{mins,fx});startBusy(label,a,0,()=>{const r=S.lastGame;applyAct(label,mins,fx);if(r){S.lastGame=null;ev('game',r);try{if(S.hallFinal&&!S.hallFinal.done&&r.kind==='football')hallFinalResult(r)}catch(e){console.error(e)}if(r.win>0){S.wins++;addBuff('won');P().needs.fun=clamp(P().needs.fun+8)}setTimeout(()=>toast(r.txt),60)}})}
 function startBusy(label,a,dur,done){
+  if(walkFirst(label,a,dur,done))return;
   const p=P();S.busy={label,a,dur,t0:performance.now(),done};$('needCard').hidden=true;if(a.mins)S.busy.timed={mins:Math.max(1,a.mins),fx:a.fx||{},start:S.min,ap:0};S.idleT=0;p.target=null;p.itarget=null;p.pose=a.pose;
   const sp=a.spot;if(sp){if(IS){S.busy.glide={k:'i',x0:p.ix,z0:p.iz,x1:sp.x,z1:sp.z,t:0};p.ix=sp.x;p.iz=sp.z}else{S.busy.glide={k:'o',x0:p.x,z0:p.y,x1:sp.x,z1:sp.y,t:0};p.x=sp.x;p.y=sp.y}p.face=sp.ry??null;p.spotY=sp.ly||0}
   if(a.water&&IS&&IS.water)IS.water.visible=true;
@@ -81,3 +82,17 @@ function busyStep(dt=.016){const b=S.busy;if(!b)return;const p=P();let k;
   if(b.a.path){const q=pathPos(b.a.path,k);p.x=q.x;p.y=q.y}
   if(b.buddy&&b.a.path){const q=pathPos(b.a.path,Math.max(0,k*(b.a.path==='pool'?1:1)-.03));b.buddy.x=q.x;b.buddy.y=q.y}
   if(k>=1)finishBusy()}
+
+/* ---------- real actions indoors: walk to the thing first, then use it ----------
+   Watching TV: sit on the couch/beanbag facing the TV if there is one, otherwise stand in front of it.
+   Eating, studying, sleeping, cooking, showering...: the character walks over to the table, desk,
+   bed, stove or shower, and only then sits down / lies down / starts. */
+function tvAct(sp){if(sp.bean)return{pose:'sit',spot:sp.bean};if(IS&&IS.tv&&IS.tvSpot){let t=IS.tvSpot;try{const G=iGrid();if(G.bl[gIdx(G,t.x,t.z)]){const q=approachPt(t);if(q)t={x:q.x,z:q.z,ry:Math.atan2(IS.W/2-q.x,1.9-q.z)}}}catch(e){}return{pose:'idle',spot:t}}return{pose:'sit',spot:sp.seat||sp.desk}}
+function approachPt(sp){const G=iGrid(),free=(x,z)=>!G.bl[gIdx(G,x,z)];if(free(sp.x,sp.z))return{x:sp.x,z:sp.z};const p=P();let best=null,bd=1e9;
+  for(const r of[.45,.6,.75,.9])for(let k=0;k<16;k++){const a=k/16*Math.PI*2,x=sp.x+Math.cos(a)*r,z=sp.z+Math.sin(a)*r;if(!free(x,z))continue;const d=Math.hypot(x-p.ix,z-p.iz)+r*.6;if(d<bd){bd=d;best={x,z}}}return best}
+function walkFirst(label,a,dur,done){if(!IS||!S||!a||!a.spot||a._walked||a.game)return false;const p=P(),sp=a.spot;if(Math.hypot(p.ix-sp.x,p.iz-sp.z)<.55)return false;
+  const ap=approachPt(sp);if(!ap||Math.hypot(p.ix-ap.x,p.iz-ap.z)<.3)return false;
+  const t={x:ap.x,z:ap.z};S.walkTo={label,a:Object.assign({},a,{_walked:1}),dur,done,t,t0:performance.now()};p.target=null;p.pose=null;p.lying=false;p.spotY=0;p.face=null;p.itarget=t;return true}
+function walkToTick(){const w=S&&S.walkTo;if(!w)return;const p=P();if(!IS){S.walkTo=null;return}
+  if(p.itarget&&p.itarget!==w.t){S.walkTo=null;return}                       // the player tapped somewhere else: cancel
+  if(!p.itarget||performance.now()-w.t0>9000){S.walkTo=null;p.itarget=null;startBusy(w.label,w.a,w.dur,w.done)}}
