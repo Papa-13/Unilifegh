@@ -31,7 +31,9 @@ function phone(tab='home'){
     ...(srcOn()?[{k:'src',n:'SRC Vote',ic:'🗳️',c:'#8e2a3a',go:()=>srcSheet()}]:[]),
     {k:'hustle',n:'Hustles',ic:'💼',c:'#2f7a4a',go:()=>hustleSheet()},
     {k:'homemart',n:'HomeMart',ic:'🛋️',c:'#b5653a',go:()=>decorate('items')},
-    {k:'music',n:MUS.phone.on?'Music ▶':'Music',ic:'🎵',c:'#fc3c44',go:()=>musSongs('phone')}];
+    {k:'music',n:MUS.phone.on?'Music ▶':'Music',ic:'🎵',c:'#fc3c44',go:()=>musSongs('phone')},
+    {k:'gems',n:'Gem Shop',ic:'💎',c:'linear-gradient(135deg,#3a8dde,#7b2fbe)',go:()=>gemShop()},
+    {k:'backup',n:'Backup',ic:'💾',c:'#3a3f47',go:()=>progressSheet()}];
   const DOCK=['msgs','money','ride','food'];
   const icon=a=>{const n=a.b?a.b():0;return `<button class="phApp" data-app="${a.k}"><i style="background:${a.c};color:${a.fg||'#fff'}">${a.ic}</i><span>${esc(a.n)}</span>${n?`<em class="bd">${n>9?'9+':n}</em>`:''}</button>`};
   const bar=()=>`<div class="phBar"><span>${hm(S.min)}</span><span class="nt"></span><span>${(()=>{try{return dataStr()+' 🔋'+Math.round(P().batt)+'%'}catch(e){return '📶 4G 🔋'}})()}</span></div>`;

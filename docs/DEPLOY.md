@@ -70,3 +70,15 @@ Plenty for testing. When players grow, switch to the pay-as-you-go **Blaze** pla
 Live positions are split into 900×900 map cells (`rooms/<campus>/f/<cell>/<uid>`) and each player only receives the cells around them; indoor places are their own cell. Far-away players are shown from a rough position in their `slow` record, which is written at most every 1.2 s. The lobby is only listened to on the menu and campus picker. Friends see each other online through tiny `status/<uid>` records.
 These paths need the current `firebase/database.rules.json`. With older rules the game falls back to the old layout automatically (it still works, just costs more).
 To lift the 100 simultaneous connection limit, switch the Firebase project to the Blaze plan and set a budget alert.
+
+## Selling gems (Paystack)
+1. Create a Paystack business account for Ghana (paystack.com), finish the business verification (Ghana Card / business registration) and enable **Mobile Money**.
+2. Paystack → **Settings → API Keys & Webhooks**: copy the **Secret key** (sk_live_…; use sk_test_… while testing).
+3. Vercel → Project → **Settings → Environment Variables**: add `PAYSTACK_SECRET_KEY` = that key, then **Redeploy**.
+4. In the same Paystack page set the **Webhook URL** to `https://<your site>/api/paystack-webhook`.
+5. Paste the updated `firebase/firestore.rules` (adds `payments`) into Firestore → Rules → Publish.
+Packs (api/_pay-rules.js): GH₵1 → 5 · GH₵2 → 11 · GH₵5 → 30 · GH₵10 → 65 · GH₵20 → 140 · GH₵50 → 380 gems.
+Until the key is set, the in-game Gem Shop shows "coming soon".
+
+## Saves
+Signed-in players (Google or guest) are saved to Firestore every 5 minutes and when they leave the game; everyone is saved in the browser every 30 s. Players can also copy a backup code / download a backup file (💾 Backup in the phone, or on the main menu) and restore it on any device.

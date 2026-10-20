@@ -9,7 +9,8 @@ function deser(v){if(v==null||typeof v!=='object')return v;if(Array.isArray(v))r
 function makeSave(){if(!S||!S.p)return null;const sv={v:1,map2:1,map3:1,ts:Date.now(),campus:MP.campus,cn:MP.campus?campName(MP.campus):null,rn:MP.rn,look:ser(myLook),pre:ser(PRE),p:ser(S.p),npcs:S.npcs.map(n=>ser(n,0,true)),S:{},mp:{friends:MP.friends,lastRead:MP.lastRead,blocked:MP.blocked,rel:relGet(),relSeen:[...relSeen()].slice(-300)}};
   for(const k in S){if(SKIPS.has(k))continue;const v=ser(S[k]);if(v===undefined)continue;if(k==='msgs'&&Array.isArray(v)){sv.S[k]=v.slice(0,80);continue}try{if(JSON.stringify(v).length<40000)sv.S[k]=v}catch(e){}}return sv}
 let SAVING=false;async function saveGame(){const sv=makeSave();if(!sv)return;try{localStorage.setItem('freshers-save',JSON.stringify(sv))}catch(e){}
-  if(MP.db&&MP.uid&&!SAVING){SAVING=true;try{await MP.db.doc('data/users/'+MP.uid+'/save').set(sv)}catch(e){}SAVING=false}
+  /* the cloud copy (your account) is written every 5 minutes and when you leave the game, not every 30 s, to stay inside Firebase's free daily writes */
+  if(MP.db&&MP.uid&&!SAVING&&(saveGame.force||!saveGame.cloudT||Date.now()-saveGame.cloudT>300000)){SAVING=true;saveGame.force=false;try{await MP.db.doc('data/users/'+MP.uid+'/save').set(sv);saveGame.cloudT=Date.now();saveGame.cloudOK=Date.now()}catch(e){}SAVING=false}
   if(MP.campus&&MP.db&&(!MP.memT||Date.now()-MP.memT>120000)){MP.memT=Date.now();mpWriteMember()}}
 async function findSave(){let a=null,b=null;try{a=JSON.parse(localStorage.getItem('freshers-save')||'null')}catch(e){}
   if(MP.db&&MP.uid)try{const d=await MP.db.doc('data/users/'+MP.uid+'/save').get();if(d.exists)b=d.data()}catch(e){}
@@ -29,5 +30,5 @@ async function loadGame(sv){if(sv&&sv.campus&&sv.cn&&String(sv.campus)[0]==='u')
   mpSyncMates();showGame();setTimeout(()=>{toast(`Welcome back, ${p.name}! Day ${day()+1} · ${hm(S.min)}${MP.campus?' · '+campName(MP.campus):''}`);if(MP.pendingWelcome){toast(`📬 ${MP.pendingWelcome} new message${MP.pendingWelcome>1?'s':''} while you were away. Tap 🌐`);MP.pendingWelcome=0}},900);
   if(MP.campus)mpWriteMember()}
 setInterval(()=>{if(S&&S.p&&!$('game').hidden)saveGame()},30000);
-addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&S&&S.p)saveGame()});
+addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&S&&S.p){saveGame.force=true;saveGame()}});
 addEventListener('pagehide',()=>{if(S&&S.p){const sv=makeSave();try{localStorage.setItem('freshers-save',JSON.stringify(sv))}catch(e){}}});

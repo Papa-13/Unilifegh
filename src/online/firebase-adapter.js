@@ -4,7 +4,7 @@
    - db    -> Cloud Firestore (campus members, private messages, saved student lives)
    - user  -> Firebase Authentication (Google or guest sign-in)                          */
 import {initializeApp} from 'firebase/app';
-import {getAuth,onAuthStateChanged,signInAnonymously,GoogleAuthProvider,signInWithPopup,signInWithRedirect,signOut} from 'firebase/auth';
+import {getAuth,onAuthStateChanged,signInAnonymously,GoogleAuthProvider,signInWithPopup,signInWithRedirect,signOut,linkWithPopup,signInWithCredential} from 'firebase/auth';
 import {getFirestore,doc as fsDoc,collection as fsColl,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot,query,where,orderBy,limit,getDocs} from 'firebase/firestore';
 import {getDatabase,ref,set,remove,onDisconnect,onValue,onChildAdded,onChildChanged,onChildRemoved,serverTimestamp,goOffline,push,query as rtQuery,limitToLast} from 'firebase/database';
 import cfg from './firebase-config.js';
@@ -15,6 +15,12 @@ else start().catch(e=>{console.error(e);window.__fbResolve(null)});
 async function start(){
   const app=initializeApp(cfg),auth=getAuth(app),fs=getFirestore(app),rtdb=getDatabase(app);
   const user=await new Promise(res=>{const un=onAuthStateChanged(auth,u=>{un();res(u)})});
+  /* account helpers for the game (cloud save card): who am I, and "keep my progress with Google" */
+  const google=async()=>{const pr=new GoogleAuthProvider(),cu=auth.currentUser;
+    try{if(cu&&cu.isAnonymous){try{await linkWithPopup(cu,pr)}catch(e){if(e&&e.code==='auth/credential-already-in-use'){const c=GoogleAuthProvider.credentialFromError(e);if(c)await signInWithCredential(auth,c);else throw e}else throw e}}
+      else await signInWithPopup(auth,pr);location.reload()}
+    catch(e){if(/popup/i.test(e.code||''))return signInWithRedirect(auth,pr);throw e}};
+  window.fbAccount={info:()=>{const c=auth.currentUser;return c?{uid:c.uid,google:!c.isAnonymous,name:c.displayName||'',email:c.email||''}:null},google};
   const u=user||await signInScreen(auth);
   if(!u){goOffline(rtdb);window.__fbResolve(null);return}
   window.fbSignOut=async()=>{await signOut(auth);location.reload()};

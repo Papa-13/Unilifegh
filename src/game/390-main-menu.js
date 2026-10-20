@@ -12,8 +12,10 @@ async function welcome(soft){MENU='welcome';document.body.classList.remove('play
       ${sv===undefined?'<p class="looking">Looking for your saved student…</p>':sv?`<button class="sbtn" id="wCont"><span class="ph" style="background:${svPal?svPal.a:'#fbf3e2'};border:3px solid #120a12;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font:400 20px var(--sign);flex:none">${esc((mpClean(sv.p.name,16)||'Y')[0])}</span><span>Continue as ${esc(mpClean(sv.p.name,16))}<small>${esc(sv.p.prog||'')} · ${svLvl}${sv.campus?' · 🌐 '+esc(campName(sv.campus)):' · solo'}</small></span></button>`:''}
       <button class="sbtn${sv?' alt':''}" id="wOn" ${MP.lobby?'':'disabled'}><span class="ic">🌐</span><span>${sv?'New student, online':'Play online'}<small>${MP.lobby?`${on} student${on===1?'':'s'} online now · ${cl.length} campus${cl.length===1?'':'es'} with space`:MP.ready?'Online play isn\'t available here':'Connecting…'}</small></span></button>
       <button class="sbtn dim" id="wSolo"><span class="ic">🎮</span><span>${sv?'New student, solo':'Play solo'}<small>Offline, with computer-run classmates</small></span></button>
+      <button class="ghost sm" id="wProg" style="align-self:flex-start;margin-top:4px">💾 ${(()=>{try{return saveWhere().t}catch(e){return 'Your progress'}})()} · Back up / restore</button>
     </div></div>`;
   if($('wCont'))$('wCont').onclick=()=>{MENU=null;loadGame(sv)};
+  if($('wProg'))$('wProg').onclick=()=>progressSheet();
   $('wOn').onclick=()=>{if(sv&&!confirm('Start a new student? Your saved student will be replaced.'))return;campusPick()};
   $('wSolo').onclick=()=>{if(sv&&!confirm('Start a new student? Your saved student will be replaced.'))return;MENU=null;MP.campus=null;if(MP.croom){MP.croom.leave().catch(()=>{});MP.croom=null}maker()}}
 function campusPick(soft){MENU='campus';const cl=campList(),total=MP.lobbyPeers.length;panelMode('intro');

@@ -57,7 +57,7 @@ function ev(type,d){if(!S||!S.whims)return;let changed=false;S.whims.forEach(w=>
 function checkMiles(){MILES.forEach(([t,g,f],i)=>{if(S.miles[i])return;let ok=false;try{ok=f()}catch(e){}if(ok){S.miles[i]=1;gemsEarn('mile',i,g);setTimeout(()=>toast(`🏅 Milestone: ${t} · +${g} 💎`),1800);gemPop(g)}});if(S.whims.length)ev('tick')}
 function gemPop(g){const b=$('gemBtn');if(!b)return;b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop')}
 function gemCost(){const b=S.busy;if(!b||!b.timed)return 0;const rem=b.timed.start+b.timed.mins-S.min;return Math.max(1,Math.ceil(rem/60))}
-async function gemFinish(){const b=S.busy;if(!b||!b.timed)return;const c=gemCost();if((S.gems||0)<c){toast(`You need ${c} 💎 to finish this now. Complete tasks (🎯) to earn gems, or speed up time ▶▶`);return}if(!(await gemsSpend(c))||S.busy!==b)return;b.skip=true;busyStep(0);if(S.busy===b&&b.game){b.timed.ap=1;finishBusy()}hud()}
+async function gemFinish(){const b=S.busy;if(!b||!b.timed)return;const c=gemCost();if((S.gems||0)<c){toast(`You need ${c} 💎 to finish this now. Earn them from 🎯 tasks, or tap 💎 to get more from GH₵1.`);return}if(!(await gemsSpend(c))||S.busy!==b)return;b.skip=true;busyStep(0);if(S.busy===b&&b.game){b.timed.ap=1;finishBusy()}hud()}
 function busyHud(){const b=S.busy;if(!b||!b.timed)return;const T=b.timed,k=clamp((S.min-T.start)/T.mins,0,1),rem=Math.max(0,Math.ceil(T.start+T.mins-S.min));
   const bar=$('busyBar');if(bar)bar.style.width=(k*100).toFixed(1)+'%';const r=$('busyRem');if(r)r.textContent=rem>=60?`${Math.floor(rem/60)}h ${rem%60}m left`:`${rem}m left`;
   const g=$('gemSkip');if(g){const c=gemCost();g.textContent=innerWidth<700?`⚡ Finish · 💎${c}`:`⚡ Finish now · 💎${c}`;g.classList.toggle('dim',(S.gems||0)<c)}}
@@ -65,7 +65,7 @@ function taskSheet(){S.paused=true;openSheet();const p=P(),M=moodInfo();
   const rows=S.whims.map(w=>{const W=WHIMS.find(x=>x.id===w.id);if(!W)return'';const n=W.n||1;return `<div class="task${w.done?' done':''}"><span class="tic">${W.ic}</span><div class="grow"><b>${esc(W.t)}</b>${n>1?`<div class="bar"><i style="width:${Math.min(100,w.prog/n*100)}%"></i></div><small>${Math.min(n,Math.round(w.prog))}/${n}${W.id==='study'?' min':''}</small>`:''}</div><span class="tag y">${w.done?'✓':'+'+W.g+' 💎'}</span></div>`}).join('');
   const nextM=MILES.map((m,i)=>[m,i]).filter(([m,i])=>!S.miles[i]).slice(0,4);
   $('sheetIn').innerHTML=`<div id="taskSheet"></div><div class="row" style="justify-content:space-between;align-items:center"><h3>🎯 Tasks</h3><span class="tag y" style="font-size:15px">💎 ${S.gems}</span></div>
-   <p style="font-size:13px;color:var(--muted);margin:6px 0 10px">Finish tasks to earn gems. Spend gems on <b>⚡ Finish now</b> to complete any activity instantly. New tasks arrive each morning.</p>
+   <p style="font-size:13px;color:var(--muted);margin:6px 0 10px">Finish tasks to earn gems. Spend gems on <b>⚡ Finish now</b> to complete any activity instantly. New tasks arrive each morning. <a href="#" id="tsShop" style="color:var(--gold,#e8b24a);font-weight:700">💎 Get more gems from GH₵1</a></p>
    <div class="eyebrow">Today</div><div class="tasks">${rows}</div>
    <button class="ghost sm" id="swapT" ${S.swapDay===day()?'disabled':''}>🎲 Swap one task${S.swapDay===day()?' (used today)':' (free once a day)'}</button>
    <div class="eyebrow" style="margin-top:14px">Campus Legend milestones</div><div class="tasks">${nextM.map(([m])=>`<div class="task"><span class="tic">🏅</span><div class="grow"><b>${esc(m[0])}</b></div><span class="tag">+${m[1]} 💎</span></div>`).join('')||'<p>All milestones complete. Legend! 👑</p>'}</div>
@@ -74,7 +74,7 @@ function taskSheet(){S.paused=true;openSheet();const p=P(),M=moodInfo();
    <label class="row" style="gap:8px;font-size:14px;margin:8px 0"><input type="checkbox" id="fwT" ${S.freeWill?'checked':''}> Free will: your Sim takes care of urgent needs on their own when you leave them idle</label>
    <button class="btn sm" id="bye">Close</button>`;
   $('swapT').onclick=()=>{const i=S.whims.findIndex(w=>!w.done);if(i<0)return;S.whims.splice(i,1);S.swapDay=day();fillWhims();taskSheet()};
-  $('fwT').onchange=e=>{S.freeWill=e.target.checked};$('bye').onclick=closeSheet}
+  $('fwT').onchange=e=>{S.freeWill=e.target.checked};$('bye').onclick=closeSheet;if($('tsShop'))$('tsShop').onclick=e=>{e.preventDefault();closeSheet();gemShop()}}
 function moodSheet(){taskSheet()}
 /* prompts when needs get low, thought bubble, and free will */
 const THOUGHT=(()=>{const cache={};const make=ic=>{if(cache[ic])return cache[ic];const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');g.fillStyle='rgba(255,255,255,.95)';g.beginPath();g.ellipse(64,56,50,44,0,0,7);g.fill();g.beginPath();g.arc(40,108,9,0,7);g.fill();g.beginPath();g.arc(26,122,5,0,7);g.fill();g.font='54px system-ui, Apple Color Emoji, Segoe UI Emoji';g.textAlign='center';g.textBaseline='middle';g.fillText(ic,64,58);return cache[ic]=new THREE.CanvasTexture(c)};

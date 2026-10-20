@@ -32,6 +32,11 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // 💳 Gem purchases (Paystack): only the server writes them; nobody reads them from the game.
+    match /payments/{ref} {
+      allow read, write: if false;
+    }
+
     // Loan records (✅ paid back / ⚠️ late): everyone can read, only the server writes.
     match /rep/{uid} {
       allow read: if signedIn();
