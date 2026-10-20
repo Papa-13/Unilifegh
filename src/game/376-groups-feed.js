@@ -28,10 +28,10 @@ function groupChat(gid){const g=myGroups().find(x=>x.id===gid);if(!g)return;gfSt
 /* ---- campus feed ---- */
 function feedShot(){try{render(0,true)}catch(e){}const src=cv,w=src.width,h=src.height,s=Math.min(w,h),c=document.createElement('canvas');c.width=c.height=360;
   c.getContext('2d').drawImage(src,(w-s)/2,(h-s)/2,s,s,0,0,360,360);let q=.62,d=c.toDataURL('image/jpeg',q);while(d.length>68000&&q>.25){q-=.1;d=c.toDataURL('image/jpeg',q)}return d}
-async function feedPost(cap,shot){if(!gfOn())return toast('The campus feed works on online campuses on the Chale website.');if(Date.now()-GF.lastPost<90000)return toast('📸 Wait a minute before posting again.');
+async function feedPost(cap,shot){if(!gfOn())return toast('The campus feed works on online campuses on the Unilife GH website.');if(Date.now()-GF.lastPost<90000)return toast('📸 Wait a minute before posting again.');
   const img=shot||feedShot(),c=MP.campus;try{const id=await window.fbRT.push('feed/'+c+'/posts',{by:MP.uid,nm:mpClean(P().name,16),cap:mpClean(cap||'',120),at:Date.now()});await window.fbRT.set('feed/'+c+'/img/'+id,img);GF.lastPost=Date.now();toast('📸 Posted to the campus feed!');try{ev('post',1)}catch(e){}P().needs.social=clamp(P().needs.social+5);return id}
   catch(e){toast('Couldn\'t post. The game owner may need to update the database rules.');return null}}
-function feedSheet(){if(!gfOn()){S.paused=true;openSheet();$('sheetIn').innerHTML='<h3>📸 Campus feed</h3><p>The campus feed works on online campuses on the Chale website.</p><button class="ghost sm" id="bye">Close</button>';$('bye').onclick=closeSheet;return}
+function feedSheet(){if(!gfOn()){S.paused=true;openSheet();$('sheetIn').innerHTML='<h3>📸 Campus feed</h3><p>The campus feed works on online campuses on the Unilife GH website.</p><button class="ghost sm" id="bye">Close</button>';$('bye').onclick=closeSheet;return}
   gfStop();S.paused=true;openSheet();GF.view='feed';const c=MP.campus,posts=[],imgs={};let likes={};
   $('sheetIn').innerHTML=`<div class="eyebrow">${esc(campName(MP.campus))}</div><h3>📸 Campus feed</h3><div class="row" style="gap:6px"><button class="btn sm" id="fdNew">📸 Post a photo</button><button class="ghost sm" id="fdBye">Close</button></div><div id="fdL" style="margin-top:8px;display:flex;flex-direction:column;gap:12px"></div>`;
   const draw=()=>{const L=$('fdL');if(!L)return;const me=MP.uid;L.innerHTML=posts.length?posts.map(p=>{const lk=likes[p.id]||{},n=Object.keys(lk).length,mine=!!lk[me];

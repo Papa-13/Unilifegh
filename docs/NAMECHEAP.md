@@ -1,4 +1,4 @@
-# Hosting Chale on Namecheap (cPanel "Setup Node.js App")
+# Hosting Unilife GH on Namecheap (cPanel "Setup Node.js App")
 
 The game and its server (gem shop, gem bank, MoMo bank, Paystack webhook) run as one small Node.js app.
 

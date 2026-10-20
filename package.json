@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Chale: a Ghanaian student life game with real players",
+  "description": "Unilife GH: a Ghanaian student life game with real players",
   "scripts": {
     "dev": "vite",
     "build": "npm run check && vite build",

@@ -7,4 +7,4 @@ export async function initAnalytics(app){
     const send=(n,p)=>{try{logEvent(an,n,p||{})}catch(e){}};
     window.track=send;(window.__tq||[]).splice(0).forEach(([n,p])=>send(n,p));
     window.trackUser=props=>{try{setUserProperties(an,props)}catch(e){}};
-  }catch(e){console.warn('Chale: analytics off',e&&e.message)}}
+  }catch(e){console.warn('Unilife GH: analytics off',e&&e.message)}}

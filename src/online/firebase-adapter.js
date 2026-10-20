@@ -1,4 +1,4 @@
-/* Chale web build: gives the game the same online features it gets on claude.ai
+/* Unilife GH web build: gives the game the same online features it gets on claude.ai
    (live rooms, a small document database, a player id), backed by Firebase.
    - room  -> Firebase Realtime Database (who is on a campus, where they walk, campus chat)
    - db    -> Cloud Firestore (campus members, private messages, saved student lives)
@@ -14,7 +14,7 @@ import {initAnalytics} from './analytics.js';
    Database, so the free plan's 100-connection limit never matters. */
 const ONLINE=String(import.meta.env.VITE_ONLINE||'').toLowerCase()==='on';window.__onlineOff=!ONLINE;
 
-if(!cfg||!cfg.apiKey||String(cfg.apiKey).includes('PASTE')){console.warn('Chale: no Firebase config, playing offline');window.__fbResolve(null)}
+if(!cfg||!cfg.apiKey||String(cfg.apiKey).includes('PASTE')){console.warn('Unilife GH: no Firebase config, playing offline');window.__fbResolve(null)}
 else start().catch(e=>{console.error(e);window.__fbResolve(null)});
 
 async function start(){
@@ -52,7 +52,7 @@ async function start(){
 /* ---------- sign-in screen ---------- */
 function signInScreen(auth){return new Promise(res=>{
   const o=document.createElement('div');o.id='fbSign';
-  o.innerHTML=`<div class="fbs-in"><div class="fbs-eye">A GHANAIAN STUDENT LIFE</div><h2>CHA<span style="color:#e8b24a">LE</span> 🎓</h2><p>${ONLINE?'Sign in to join an online campus with real students. Your student and your chats are saved to your account.':'Sign in with Google to save your student to your account and continue on any phone. Online campuses with real students are coming soon.'}</p>
+  o.innerHTML=`<div class="fbs-in"><div class="fbs-eye">A GHANAIAN STUDENT LIFE</div><h2>UNI<span style="color:#e8b24a">LIFE</span> <span style="font-size:.5em;vertical-align:.5em;background:#ce1126;color:#fff;padding:.1em .3em;border-radius:.2em">GH</span> 🎓</h2><p>${ONLINE?'Sign in to join an online campus with real students. Your student and your chats are saved to your account.':'Sign in with Google to save your student to your account and continue on any phone. Online campuses with real students are coming soon.'}</p>
    <button id="fbG" class="fbs-btn fbs-main">Continue with Google</button><button id="fbA" class="fbs-btn">Play as a guest</button><button id="fbO" class="fbs-btn fbs-ghost">Play offline</button>
    <small>Guest students are saved on this device only. Use Google to play from any device.</small><div id="fbErr"></div></div>`;
   const st=document.createElement('style');st.textContent=`#fbSign{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:radial-gradient(circle at 50% 0,#3a1d22,#0f0c0a 70%);color:#f6efe6;font:16px/1.5 Figtree,system-ui,sans-serif;padding:20px}
@@ -128,7 +128,7 @@ function roomApi(rtdb,uid,name,opts={}){
     for(const c of want){if(cellSubs.has(c))continue;const r=ref(rtdb,legacy?`${base}/fast`:`${base}/f/${c}`);
       const put=s=>{const v=s.val()||{},u=legacy?v.by:s.key;if(!u||u===uid)return;fastBy.set(u,{v,c,t:Date.now()});fire()};
       cellSubs.set(c,[onChildAdded(r,put),onChildChanged(r,put),onChildRemoved(r,s=>{const v=s.val()||{},u=legacy?v.by:s.key;const cur=fastBy.get(u);if(cur&&cur.c===c){fastBy.delete(u);fire()}})])}};
-  const goLegacy=()=>{if(legacy)return;legacy=window.__fbLegacyFast=true;console.warn('Chale: old database rules, using the old live-position layout');
+  const goLegacy=()=>{if(legacy)return;legacy=window.__fbLegacyFast=true;console.warn('Unilife GH: old database rules, using the old live-position layout');
     if(fastR){remove(fastR).catch(()=>{})}fastR=null;fastCell=null;for(const [,un] of cellSubs)un.forEach(f=>{try{f()}catch(e){}});cellSubs.clear();fastBy.clear();lastFast='';subCells();push()};
   let connected=false;unsubs.push(onValue(ref(rtdb,'.info/connected'),s=>{connected=!!s.val();if(connected&&!dead){onDisconnect(slowR).remove();if(fastR)onDisconnect(fastR).remove();lastSlow='';lastFast='';push()}ch.forEach(h=>h(connected))}));
   const fastNow=()=>{const o={};FAST.forEach(k=>{if(mine[k]!=null)o[k]=typeof mine[k]==='number'?Math.round(mine[k]*(k==='ix'||k==='iz'||k==='f'?100:1))/(k==='ix'||k==='iz'||k==='f'?100:1):mine[k]});return o};

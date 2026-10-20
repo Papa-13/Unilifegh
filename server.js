@@ -1,4 +1,4 @@
-/* Chale web server for hosts that run Node.js (Namecheap cPanel "Setup Node.js App", a VPS, Render, ...).
+/* Unilife GH web server for hosts that run Node.js (Namecheap cPanel "Setup Node.js App", a VPS, Render, ...).
    Serves the built game from dist/ and runs the same /api functions that Vercel runs (gem shop, gem bank,
    MoMo bank, Paystack webhook). No extra packages: only Node's own http module plus firebase-admin.
    Settings come from environment variables:
@@ -12,7 +12,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const ROOT = path.dirname(fileURLToPath(import.meta.url)), DIST = path.join(ROOT, 'dist');
 if (!process.env.FIREBASE_SERVICE_ACCOUNT && process.env.FIREBASE_SERVICE_ACCOUNT_FILE) {
-  try { process.env.FIREBASE_SERVICE_ACCOUNT = fs.readFileSync(process.env.FIREBASE_SERVICE_ACCOUNT_FILE, 'utf8'); } catch (e) { console.error('Chale: cannot read FIREBASE_SERVICE_ACCOUNT_FILE', e.message); }
+  try { process.env.FIREBASE_SERVICE_ACCOUNT = fs.readFileSync(process.env.FIREBASE_SERVICE_ACCOUNT_FILE, 'utf8'); } catch (e) { console.error('Unilife GH: cannot read FIREBASE_SERVICE_ACCOUNT_FILE', e.message); }
 }
 const API = { gems: './api/gems.js', momo: './api/momo.js', pay: './api/pay.js', 'paystack-webhook': './api/paystack-webhook.js' }, loaded = {};
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.webp': 'image/webp', '.woff2': 'font/woff2', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.webmanifest': 'application/manifest+json', '.txt': 'text/plain; charset=utf-8' };
@@ -51,4 +51,4 @@ const server = http.createServer((req, res) => {
   if (!p.startsWith(DIST)) { res.statusCode = 403; return res.end(); }
   serveFile(req, res, u.pathname === '/' ? path.join(DIST, 'index.html') : p);
 });
-server.listen(process.env.PORT || 3000, () => console.log('Chale running on port', process.env.PORT || 3000));
+server.listen(process.env.PORT || 3000, () => console.log('Unilife GH running on port', process.env.PORT || 3000));
