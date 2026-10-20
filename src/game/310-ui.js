@@ -12,7 +12,7 @@ function doEmote(k){const p=P(),dur={dance:7,hug:2.6,stretch:2.4,think:3,cross:3
     if(k==='wave'){if(met||Math.random()<.5){setGest(b,n.pers==='shy'?'nod':'wave',1.6);if(n._wv!==td){n._wv=td;n.friend=clamp(fr+1);if(!met&&Math.random()<.4)n.met=true}}}
     else if(k==='dance'){setGest(b,fr>40?'dance':pick(['clap','laugh','cheer']),3.5);if(i===0)p.needs.fun=clamp(p.needs.fun+6)}
     else if(k==='laugh'||k==='celebrate')setExpr(b,'smile',3);
-    else if(k==='hug'&&i===0){if(fr>=55||p.partner===n){setGest(b,'hug',2.6);n.friend=clamp(fr+2);p.needs.social=clamp(p.needs.social+6);toast(`You hug ${n.name} 🤗`)}else{setGest(b,'cross',2.4);n.friend=clamp(fr-2);toast(`${n.name} steps back. "Ehh, we're not there yet 😅"`)}}
+    else if(k==='hug'&&i===0){if(fr>=55||p.partner===n){hugPair(p,b,2.6);n.friend=clamp(fr+2);p.needs.social=clamp(p.needs.social+6);toast(`You hug ${n.name} 🤗`)}else{setGest(b,'cross',2.4);n.friend=clamp(fr-2);toast(`${n.name} steps back. "Ehh, we're not there yet 😅"`)}}
     else if(k==='facepalm'||k==='sad'){if(fr>35){setGest(b,'pockets',1.5,'sad');if(i===0&&k==='sad')toast(`${n.name}: "Ei, what's wrong? You good?"`)}}
     else if(k==='point')setGest(b,'lookaround',1.6,'surprised');
     else if(k==='bow')setGest(b,'nod',1.4,'smile');

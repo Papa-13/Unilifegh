@@ -5,7 +5,7 @@ function animFor(label){const L=label.toLowerCase(),sp=(IS&&IS.spots)||{};
   if(/beanbag/.test(L))return{pose:'sit',spot:sp.bean};
   if(/fifa/.test(L))return{pose:'type',spot:(IS&&IS.tv&&sp.bean)||sp.desk};
   if(/watching (tv|a movie)/.test(L))return tvAct(sp);
-  if(/novel/.test(L))return{pose:'sit',spot:sp.bean||sp.desk};
+  if(/novel|past questions|reading/.test(L))return{pose:(sp.bean||sp.desk||sp.seat)?'sitRead':'read',spot:sp.bean||sp.desk||sp.seat};
   if(/cold drink/.test(L))return{pose:'drink'};
   if(/in the office/.test(L))return{pose:'sitTalk',spot:sp.seat};
   if(/at the concert/.test(L))return{pose:'cheer',spot:concertSpot()};

@@ -12,7 +12,7 @@ const LINES={
 function talkMenu(n){
   S.paused=true;openSheet();const p=P();S.talkN=n;n.pose='talk';p.pose='talk';if(!IS){n.face=Math.atan2(p.x-n.x,p.y-n.y);p.face=Math.atan2(n.x-p.x,n.y-p.y)}
   const q=IS&&IS.people.find(q=>q.n===n);if(q&&!q.lying){q.pose='talk';q.mesh.rotation.y=Math.atan2(p.ix-q.x,p.iz-q.z);p.face=Math.atan2(q.x-p.ix,q.z-p.iz)}
-  {const T=(IS&&IS.people.find(q=>q.n===n))||n,gk=p.partner===n||n.friend>=70?'hug':n.friend>=35?'dap':n.met?'handshake':null;if(gk){setGest(T,gk,gk==='hug'?2.2:1.7);setGest(p,gk,gk==='hug'?2.2:1.7)}else setExpr(T,'surprised',.8)}
+  {const T=(IS&&IS.people.find(q=>q.n===n))||n,gk=p.partner===n||n.friend>=70?'hug':n.friend>=35?'dap':n.met?'handshake':null;if(gk==='hug')hugPair(p,T,2.2);else if(gk){setGest(T,gk,1.7);setGest(p,gk,1.7)}else setExpr(T,'surprised',.8)}
   const shared=n.ints.filter(i=>p.interests.includes(i));const role=n.gender==='f'?'girlfriend':'boyfriend';
   const draw=(said)=>{
     let opts=[['chat','Chat'],['joke','Tell a joke'],['interest',`Talk about ${shared[0]||n.ints[0]}`],['compliment','Compliment their style']];
@@ -54,7 +54,7 @@ function reactTalk(n,a,b4){const p=P(),T=talkBody(n),d=(n.friend-b4.f)+(n.romanc
   if(a==='bye'){Me('wave',1.6);later(()=>G('wave',1.6),250);return}
   if(a==='number'){Me('phonecall',1.6,'smile');G('nod',1.3,'smile');return}
   if(a==='come'){d>=0&&n.with>S.min?G('nod',1.3,'smile'):G('shrug',1.6);return}
-  if(a==='ask'){if(p.partner===n){G('hug',3.2);Me('hug',3.2);later(()=>{setExpr(T,'laugh',2);setExpr(p,'laugh',2)},900)}else{G('no',2,'sad');Me('sad',2.4)}return}
+  if(a==='ask'){if(p.partner===n){hugPair(p,T,3.2);later(()=>{setExpr(T,'laugh',2);setExpr(p,'laugh',2)},900)}else{G('no',2,'sad');Me('sad',2.4)}return}
   if(a==='study'){Me('explain',2);later(()=>G('think',2.2));return}
   Me(a==='joke'?'explain':pick(['explain','explain','point']),1.5);
   later(()=>{if(a==='joke'){d>4?(G('laugh',2.6),setExpr(p,'laugh',2.4)):d<0?G('facepalm',2.2):G('shrug',1.7);return}

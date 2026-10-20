@@ -56,7 +56,7 @@ function breakUp(n,byThem){const p=P();if(p.partner===n)p.partner=null;n.side=fa
   if(a==='breakup'){closeSheet();story(`<div class="eyebrow">💔</div><h3>Break up with ${esc(n.name)}?</h3><p class="scene">${esc(n.name)} goes quiet. "${esc(pick(['Are you serious right now?','Is it because of somebody else?','Wow… okay. Say it.']))}"</p>`,[['💔 Yes, it\'s over','g',()=>breakUp(n,false)],['No, I didn\'t mean it','',()=>{n.romance=clamp(n.romance-6)}]]);return null}
   if(a==='kiss'){advance(5);const ok=p.partner===n||n.side||Math.random()<n.romance/110;
     if(!ok){n.romance=clamp(n.romance-10);n.friend=clamp(n.friend-5);setGest(talkBody(n),'cross',2.2);return say(pick(['Ehh! Slow down 😳','Not here, people are watching 😅','We\'re not there yet o.']))}
-    n.romance=clamp(n.romance+6);addBuff('loved');setGest(talkBody(n),'hug',2.6);setGest(p,'hug',2.6);cheatRisk(n,'kiss');return say(pick(['😳❤️','Mmm… you\'re trouble 😏','Okay, that was nice 🙈']))}
+    n.romance=clamp(n.romance+6);addBuff('loved');hugPair(p,talkBody(n),2.6,'kiss');cheatRisk(n,'kiss');return say(pick(['😳❤️','Mmm… you\'re trouble 😏','Okay, that was nice 🙈']))}
   if(a==='ask'&&n.side&&!p.partner){p.partner=n;n.side=false;n.romance=100;addBuff('loved');msg(n.name,'Official official?! 🥺❤️ Finally.');return say('Finally! No more hiding 🥰')}
   if(a==='ask'&&p.partner&&p.partner!==n){advance(15);const knows=n.knowsTaken||(n.home===p.partner.home||n.prog===p.partner.prog)&&Math.random()<.5;
     if(knows){n.knowsTaken=true;n.romance=clamp(n.romance-15);return say(pick([`Don't you have a ${gfbf(p.partner)}? ${p.partner.name}, abi? Abeg 🙄`,`Ah! And ${p.partner.name}? You think I don't know? 😒`]))}

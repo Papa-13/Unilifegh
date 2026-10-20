@@ -1,5 +1,14 @@
 /* ================= poses & animation ================= */
-function posePerson(c,moving,dt){
+/* a bite of food, step by step: scoop from the plate, lift to the mouth, bite, lower, chew */
+const ss=(a,b,x)=>{const k=clamp((x-a)/(b-a),0,1);return k*k*(3-2*k)};
+function eatArms(c,t,A,Az,E){const u=(t*.42+(c.id||0)*.13)%1,up=ss(.28,.5,u)-ss(.66,.86,u);
+  A[0]=-.8;Az[0]=.32;E[0]=-.95;                                        // left hand holds the plate in front of the chest
+  A[1]=-.72-.08*up;Az[1]=.36+.1*up;E[1]=-.95-1.4*up;                  // right hand: spoon from plate up to the mouth
+  if(u<.28)E[1]+=Math.sin(u/.28*Math.PI*2)*.08;                          // scooping
+  c._mouth=u>.47&&u<.62?.75:u>.66?Math.max(0,Math.sin(u*44))*.22:0;     // open for the bite, then chew
+  return u>.47&&u<.62?.12:.22}                                           // head dips to the spoon
+function poseX(c){c._mouth=null}
+function posePerson(c,moving,dt){poseX(c);
   const t=performance.now()/1000+(c.id||0)*1.7,g=c.mesh;
   let pose=moving&&c.pose!=='dive'&&c.pose!=='climb'?(c.pose==='swim'?'swim':(c.pose==='run'||c.fast)?'run':'walk'):(c.pose||'idle');
   if(!moving&&(pose==='run'||pose==='walk'))c.phase+=dt*(pose==='run'?14:9);
@@ -8,17 +17,19 @@ function posePerson(c,moving,dt){
     case 'idle':{const q=Math.sin(t*.8);L=[q*.03,-q*.03];A=[.03+Math.sin(t*1.1)*.03,.03-Math.sin(t*1.1)*.03];Az=[.07,-.07];E=[-.14,-.14];rz=q*.012;break}
     case 'walk':L=[sw*.5*amp,-sw*.5*amp];K=[Math.max(0,sw)*.75,Math.max(0,-sw)*.75];A=[-sw*.5*amp,sw*.5*amp];Az=[.06,-.06];E=[-.3,-.3];y=Math.abs(sw)*.025;rz=sw*.02;break;
     case 'run':L=[sw*.95,-sw*.95];K=[Math.max(0,sw)*1.3+.2,Math.max(0,-sw)*1.3+.2];A=[-sw,sw];Az=[.1,-.1];E=[-1.5,-1.5];y=Math.abs(sw)*.09;break;
-    case 'sit':case 'sitWrite':case 'sitEat':case 'type':case 'sitDrink':case 'sitTalk':L=[-1.5,-1.5];K=[1.5,1.5];y=-.34;A=[-.35,-.35];E=[-.7,-.7];
-      if(pose==='sitWrite'){A=[-.55,-.7];E=[-1,-1.1+Math.sin(t*9)*.08]}
+    case 'sit':case 'sitWrite':case 'sitEat':case 'type':case 'sitDrink':case 'sitTalk':case 'sitRead':L=[-1.5,-1.5];K=[1.5,1.5];y=-.34;A=[-.35,-.35];E=[-.7,-.7];
+      if(pose==='sitWrite'){A=[-.62,-.66];Az=[.3,.24];E=[-1.0,-1.08+Math.sin(t*9)*.06];Az[1]+=Math.sin(t*1.3)*.06;hx=.3}
       if(pose==='type'){A=[-.6,-.6];E=[-.95+Math.sin(t*12)*.06,-.95+Math.cos(t*11)*.06]}
-      if(pose==='sitEat'){const k=(Math.sin(t*2.2)+1)/2;A=[-.5,-.45-.5*k];E=[-.9,-1.2-.9*k]}
+      if(pose==='sitEat'){hx=eatArms(c,t,A,Az,E)}
+      if(pose==='sitRead'){A=[-.72,-.8];Az=[.5,-.22];E=[-1.5,-1.45];hx=.38;const u=(t*.18+(c.id||0)*.3)%1;if(u>.9){const k=Math.sin((u-.9)/.1*Math.PI);Az[0]=.38+.2*k;E[0]=-1.35-.3*k}}
       if(pose==='sitTalk'){A=[-.4+Math.sin(t*3)*.22,-.55+Math.sin(t*2.3+1)*.3];Az=[.1,-.1-Math.sin(t*2.6)*.1];E=[-.9+Math.sin(t*3.3)*.2,-1.1+Math.sin(t*2.1)*.3];rz=Math.sin(t*1.3)*.012}
-      if(pose==='sitDrink'){const k=(Math.sin(t*1.4)+1)/2;A=[-.35,-.5-.45*k];E=[-.7,-1.7-.7*k]}break;
-    case 'eat':{const k=(Math.sin(t*2.2)+1)/2;A=[-.5,-.45-.5*k];E=[-1.1,-1.2-.9*k];break}
-    case 'drink':{const k=(Math.sin(t*1.4)+1)/2;A=[0,-.5-.45*k];E=[-.1,-1.7-.7*k];break}
+      if(pose==='sitDrink'){const u=(t*.32+(c.id||0)*.2)%1,k=ss(.15,.35,u)-ss(.6,.8,u);A=[-.35,-.45-.35*k];Az=[.06,.12+.2*k];E=[-.7,-1.1-1.15*k];hx=.05-.32*k;c._mouth=k>.8?.35:0}break;
+    case 'eat':{hx=eatArms(c,t,A,Az,E);break}
+    case 'read':{A=[-.72,-.8];Az=[.5,-.22];E=[-1.5,-1.45];hx=.38;const u=(t*.18+(c.id||0)*.3)%1;if(u>.9){const k=Math.sin((u-.9)/.1*Math.PI);Az[0]=.38+.2*k;E[0]=-1.35-.3*k}break}
+    case 'drink':{const u=(t*.32+(c.id||0)*.2)%1,k=ss(.15,.35,u)-ss(.6,.8,u);A=[.02,-.5-.5*k];Az=[.06,.12+.3*k];E=[-.15,-1.1-1.25*k];hx=.05-.32*k;c._mouth=k>.8?.35:0;break}
     case 'phone':A=[-.2,-.7];E=[-.3,-1.5];rz=Math.sin(t*.7)*.01;break;
     case 'talk':A=[-.35+Math.sin(t*3)*.25,-.5+Math.sin(t*2.3+1)*.35];Az=[.1+Math.sin(t*2)*.1,-.12-Math.sin(t*2.6)*.12];E=[-.8+Math.sin(t*3.3)*.2,-1+Math.sin(t*2.1)*.3];rz=Math.sin(t*1.3)*.015;break;
-    case 'pray':A=[-1,-1];Az=[.32,-.32];E=[-1.25,-1.25];break;
+    case 'pray':A=[-.62,-.62];Az=[.42,.42];E=[-1.55,-1.55];hx=.38;break;
     case 'dance':A=[-2.6+Math.sin(t*5)*.5,-2.6+Math.sin(t*5+3)*.5];E=[-.5,-.5];L=[Math.sin(t*5)*.2,-Math.sin(t*5)*.2];K=[.25,.25];y=Math.abs(Math.sin(t*5))*.08;rz=Math.sin(t*2.5)*.05;break;
     case 'dance2':{const q=Math.sin(t*4.2);L=[q*.35,-q*.35];K=[.3+Math.max(0,q)*.45,.3+Math.max(0,-q)*.45];A=[-.6+q*.35,-.6-q*.35];Az=[.25,-.25];E=[-1.4,-1.4];y=-.04+Math.abs(q)*.04;rz=q*.06;break}
     case 'dance3':{const q=Math.sin(t*3);A=[-2.8,-2.8];Az=[.2+q*.3,-.2+q*.3];E=[-.25,-.25];K=[.25+Math.abs(q)*.2,.25+Math.abs(q)*.2];L=[-.1,-.1];y=-.04+Math.abs(Math.sin(t*6))*.05;rz=q*.08;break}
@@ -51,7 +62,9 @@ function posePerson(c,moving,dt){
       case 'shrug':A=[-.15,-.15];Az=[.5,-.5];E=[-1.55,-1.55];rz=.06;hx=.05;break;
       case 'handshake':A[0]=-1.05;Az[0]=-.1;E[0]=-.35+Math.sin(u*11)*.12;break;
       case 'dap':{const k=u<.5?u*2:1;A[0]=-1.1-(u>.7?.5:0);E[0]=-.4-(u>.7?1:0);Az[0]=-.1;if(u>.7&&u<.85)hx=.08;break}
-      case 'hug':A=[-1.45,-1.45];Az=[-.42,.42];E=[-1.15,-1.15];hy=.25;lean=.06;break;
+      case 'hug':A=[-1.35,-1.2];Az=[-.28,-.32];E=[-1.55,-1.65];hy=.42;hx=.08;lean=.07;rz=Math.sin(u*2.2)*.035;break;
+      case 'hug2':A=[-1.0,-1.1];Az=[-.38,-.32];E=[-1.65,-1.55];hy=-.42;hx=.05;lean=.07;rz=-Math.sin(u*2.2)*.035;break;
+      case 'kiss2':A=[-.95,-.95];Az=[-.32,-.32];E=[-1.6,-1.6];hy=.22;hx=-.08;lean=.11;break;
       case 'facepalm':A[0]=-1.5;Az[0]=-.32;E[0]=-2.25;hx=.32;break;
       case 'point':A[1]=-1.5;Az[1]=-.05;E[1]=-.08;break;
       case 'explain':A=[-.75+Math.sin(u*5)*.15,-.85+Math.sin(u*4+1)*.2];Az=[.15,-.15];E=[-1.1,-1.25+Math.sin(u*6)*.2];break;
@@ -108,11 +121,13 @@ function faceExpr(c,pose,tt,dt){const F=c.mesh&&c.mesh.userData.face;if(!F)retur
   if(c.expr&&tt>c.expr.end)c.expr=null;
   let e=c.expr?c.expr.e:null;
   if(!e){if(['dance','dance2','dance3','cheer','sing','hop'].includes(pose))e=pose==='sing'?'sing':'smile';else if(pose==='talk'||pose==='sitTalk')e='talk';else if(c.lying)e='sleep';else if(c.mood!=null)e=c.mood<35?'sad':c.mood>70?'content':null}
+  if(c._mouth!=null&&!e)e='eat';
   const talk=e==='talk'||e==='sing'?Math.max(0,Math.sin(tt*11+(c.id||0))*Math.sin(tt*4.3)):0;
   let open=0,smile=0,frown=0,brow=0,browIn=0;
   if(e==='smile'||e==='content'){smile=e==='smile'?1:.6}
   if(e==='laugh'){smile=1;open=.55+Math.abs(Math.sin(tt*14))*.35;brow=.004}
   if(e==='talk'){open=talk*.55;smile=.25}
+  if(c._mouth!=null)open=Math.max(open,c._mouth);
   if(e==='sing'){open=.4+talk*.5;brow=.005}
   if(e==='frown'){frown=1;browIn=.22;brow=-.003}
   if(e==='sad'){frown=.7;browIn=-.25;brow=.002}
@@ -127,8 +142,13 @@ function faceExpr(c,pose,tt,dt){const F=c.mesh&&c.mesh.userData.face;if(!F)retur
   if(F.cheeks)F.cheeks.forEach(c=>{c.visible=smile>.3;c.position.y=-.037+smile*.006;c.position.z=.084+smile*.006;c.scale.set(.6+smile*.35,.45+smile*.3,.45+smile*.2)});
   F.brows.forEach(b=>{const s=b.userData.s;b.position.y=.024+brow*1.6-(browIn>0?browIn*.012:0);b.rotation.z=s*browIn*1.4})}
 function setProp(c,pose,t){
-  c._props=c._props||{};const want={drink:'bottle',sitDrink:'bottle',phone:'phone',kick:'ball',dribble:'bball',lift:'bar',sitEat:'plate',eat:'plate',brush:'brush',cook:'spoon',sing:'mic',sweep:'broom'}[pose]||null;
-  for(const k in c._props)c._props[k].visible=k===want;
+  c._props=c._props||{};const want={drink:'bottle',sitDrink:'bottle',phone:'phone',kick:'ball',dribble:'bball',lift:'bar',sitEat:'plate',eat:'plate',brush:'brush',cook:'spoon',sing:'mic',sweep:'broom',read:'book',sitRead:'book',sitWrite:'notebook'}[pose]||null;
+  const also={plate:'eatspoon',notebook:'pen'}[want]||null;
+  for(const k in c._props)c._props[k].visible=k===want||k===also;
+  if(also&&!c._props[also]){let q;if(also==='eatspoon'){q=new THREE.Group();box(.012,.15,.016,cm('#c9ced6'),0,0,0,q);mesh(sph(.022,8,6),cm('#c9ced6'),0,-.08,.01,q).scale.set(1,.5,1.3);q.position.set(0,-.34,.05);q.rotation.x=-.9}
+    else{q=box(.01,.12,.01,cm('#1f3b73'),0,-.34,.05,c.elbows[1]);q.rotation.x=-.5}if(also==='eatspoon')c.elbows[1].add(q);c._props[also]=q}
+  /* keep held things level whatever the forearm is doing */
+  const lvl=(pr,tilt=0)=>{pr.rotation.x=-(c.arms[0].rotation.x+c.elbows[0].rotation.x)+tilt};
   if(!want)return;let pr=c._props[want];
   if(!pr){
     if(want==='bottle'){pr=new THREE.Group();mesh(cyl(.03,.032,.17,10),lam(0x3a7a2a),0,0,0,pr);mesh(cyl(.012,.02,.05,8),lam(0xd9a537),0,.1,0,pr);pr.position.set(0,-.36,.06);c.elbows[1].add(pr)}
@@ -137,13 +157,25 @@ function setProp(c,pose,t){
     else if(want==='brush'){pr=box(.014,.17,.014,cm('#e8f2ff'),0,-.36,.05,c.elbows[1]);pr.rotation.x=-.4}
     else if(want==='spoon'){pr=box(.016,.32,.022,cm('#8a6a4a'),0,-.4,.07,c.elbows[1]);pr.rotation.x=-.5}
     else if(want==='phone'){pr=box(.075,.14,.012,cm('#111111'),0,-.36,.06,c.elbows[1]);pr.rotation.x=-.6}
-    else if(want==='plate'){pr=new THREE.Group();mesh(cyl(.13,.11,.025,16),lam(0xf4f4f0),0,0,0,pr);mesh(sph(.08,10,6),lam(0xd9542b),0,.03,0,pr).scale.set(1,.35,1);pr.position.set(0,-.36,.1);c.elbows[0].add(pr)}
+    else if(want==='plate'){pr=new THREE.Group();const inner=new THREE.Group();pr.add(inner);mesh(cyl(.11,.09,.022,16),lam(0xf4f4f0),0,0,0,inner);mesh(sph(.08,10,6),lam(pick([0xd9542b,0x8a5a2a,0xe8c27a])),0,.03,0,inner).scale.set(1,.35,1);mesh(sph(.03,8,6),lam(0xb5651d),.05,.04,.03,inner);inner.position.set(.06,0,.05);pr.position.set(0,-.36,.04);c.elbows[0].add(pr)}
+    else if(want==='book'){pr=new THREE.Group();const pg=cm('#f6f1e4'),cv=cm(pick(['#8e2a3a','#1f3b73','#2f7a4a']));[-1,1].forEach(sd=>{const h=new THREE.Group();h.rotation.z=sd*.32;box(.11,.005,.16,cv,sd*.055,0,0,h);box(.1,.012,.15,pg,sd*.052,.008,0,h);pr.add(h)});pr.position.set(0,-.38,.07);pr.rotation.x=2.2;c.elbows[1].add(pr)}
+    else if(want==='notebook'){pr=new THREE.Group();box(.2,.008,.15,cm('#f6f1e4'),0,0,0,pr);box(.2,.006,.15,cm('#2f6bb5'),0,-.006,0,pr);for(let k=0;k<5;k++)box(.17,.002,.003,cm('#9bb0d0'),0,.005,-.05+k*.025,pr);pr.position.set(.1,-.36,.06);c.elbows[0].add(pr)}
     else if(want==='ball'){pr=mesh(sph(.11,12,10),lam(0xf4f4f4),0,.11,.3,c.mesh)}
     else if(want==='bball'){pr=mesh(sph(.12,12,10),lam(0xd9661f),.3,.5,.22,c.mesh)}
     else if(want==='bar'){pr=new THREE.Group();const b=mesh(cyl(.02,.02,1.1,8),lam(0x888888),0,0,0,pr);b.rotation.z=Math.PI/2;[-.5,.5].forEach(x=>{const w=mesh(cyl(.13,.13,.06,14),lam(0x222222),x,0,0,pr);w.rotation.z=Math.PI/2});c.mesh.add(pr)}
     c._props[want]=pr}
+  if(want==='plate')lvl(pr);if(want==='notebook')lvl(pr,-.2);
   if(want==='ball'){const k=Math.max(0,Math.sin(t*3));pr.position.set(.1,.11,.32+k*.6);pr.rotation.x+=.15}
   if(want==='bball')pr.position.set(.3,.13+.55*Math.abs(Math.sin(t*4.5)),.22);
   if(want==='bar'){const k=(Math.sin(t*2.5)+1)/2;pr.position.set(0,1.3+.62*k,.14)}
 }
 function ambientPose(b){if(b==='parade'){const e=eventNow();return !e?['idle','phone','talk']:e.id==='concert'?['cheer','dance','dance3','phone','cheer']:e.id==='games'?['cheer','cheer','talk']:e.id==='jama'?['dance','dance2','cheer']:['eat','talk','phone']}return({field:['kick','kick','cheer','idle'],court:['dribble','dribble','cheer'],volley:['cheer','cheer','idle','talk'],night:['eat','drink','talk','phone'],square:['talk','talk','phone','dance'],canteen:['eat','talk','phone'],lake:['phone','idle','talk'],garden:['phone','idle','talk'],trotro:['phone','idle'],taxi:['phone','talk','idle'],terminal:['phone','talk','idle'],market:['talk','phone','idle','talk'],pool:['phone','idle','talk'],square2:[]}[b]||['idle','phone','talk','talk'])}
+
+/* two people actually hug: they step in close, face each other and wrap their arms round (one over, one under) */
+function bodyPos(c){if(IS){if(c===P())return{x:c.ix,z:c.iz};const q=c.mesh&&IS.people.includes(c)?c:IS.people.find(x=>x.n===c);if(q)return{x:q.mesh.position.x,z:q.mesh.position.z,q}}return{x:wx(c.x),z:wz(c.y)}}
+function bodySet(c,x,z,face){if(IS){if(c===P()){c.ix=x;c.iz=z;c.face=face;c.itarget=null;return}const q=c.mesh&&IS.people.includes(c)?c:IS.people.find(y=>y.n===c);if(q){q.x=x;q.z=z;q.mesh.position.x=x;q.mesh.position.z=z;q.mesh.rotation.y=face}return}
+  c.x=x/U+MW/2;c.y=z/U+MH/2;c.face=face;c.target=null;c.path=null;c.needPath=false}
+function hugPair(a,b,dur=2.6,kind='hug'){if(!a||!b)return;const A=bodyPos(a),B=bodyPos(b);let dx=B.x-A.x,dz=B.z-A.z,d=Math.hypot(dx,dz)||1;dx/=d;dz/=d;
+  const mx=(A.x+B.x)/2,mz=(A.z+B.z)/2,h=kind==='kiss'?.17:.19,fa=Math.atan2(dx,dz),fb=Math.atan2(-dx,-dz);
+  bodySet(a,mx-dx*h,mz-dz*h,fa);bodySet(b,mx+dx*h,mz+dz*h,fb);const bb=B.q||b;
+  setGest(a,kind==='kiss'?'kiss2':'hug',dur,'smile');setGest(bb,kind==='kiss'?'kiss2':'hug2',dur,'smile');if(a===P())a.pose=null}
