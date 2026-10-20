@@ -52,13 +52,21 @@ async function start(){
 /* ---------- sign-in screen ---------- */
 function signInScreen(auth){return new Promise(res=>{
   const o=document.createElement('div');o.id='fbSign';
-  o.innerHTML=`<div class="fbs-in"><div class="fbs-eye">A GHANAIAN STUDENT LIFE</div><h2>UNI<span style="color:#e8b24a">LIFE</span> <span style="font-size:.5em;vertical-align:.5em;background:#ce1126;color:#fff;padding:.1em .3em;border-radius:.2em">GH</span> 🎓</h2><p>${ONLINE?'Sign in to join an online campus with real students. Your student and your chats are saved to your account.':'Sign in with Google to save your student to your account and continue on any phone. Online campuses with real students are coming soon.'}</p>
-   <button id="fbG" class="fbs-btn fbs-main">Continue with Google</button><button id="fbA" class="fbs-btn">Play as a guest</button><button id="fbO" class="fbs-btn fbs-ghost">Play offline</button>
-   <small>Guest students are saved on this device only. Use Google to play from any device.</small><div id="fbErr"></div></div>`;
-  const st=document.createElement('style');st.textContent=`#fbSign{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:radial-gradient(circle at 50% 0,#3a1d22,#0f0c0a 70%);color:#f6efe6;font:16px/1.5 Figtree,system-ui,sans-serif;padding:20px}
-   .fbs-in{max-width:380px;width:100%;display:flex;flex-direction:column;gap:10px}.fbs-eye{font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.14em;opacity:.7}#fbSign h2{font:800 42px/1.05 'Bricolage Grotesque',system-ui;margin:0}#fbSign p{margin:0 0 6px;opacity:.85}
-   .fbs-btn{padding:14px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:inherit;font:700 16px Figtree,system-ui;cursor:pointer;text-align:left}.fbs-main{background:#e8b24a;color:#1b1206;border-color:#e8b24a}.fbs-ghost{background:transparent}
-   #fbSign small{opacity:.6}#fbErr{color:#ff8f8f;font-size:14px}`;
+  o.innerHTML=`${typeof introScene==='function'?introScene():''}<div class="fbs-in">
+   <h2 class="yolo" aria-label="Unilife GH"><span>U</span><span>N</span><span>I</span><span>L</span><span>I</span><span>F</span><span>E</span><span class="gh">GH</span></h2>
+   <p class="fbs-lead">${ONLINE?'Sign in to join an online campus with real students. Your student and your chats are saved to your account.':'Choose how to play. Sign in with Google and your student follows you to any phone.'}</p>
+   <button id="fbG" class="sbtn"><span class="ic">G</span><span>Continue with Google<small>Your student is saved to your account</small></span></button>
+   <button id="fbA" class="sbtn alt"><span class="ic">🎒</span><span>Play as a guest<small>Saved on this device only</small></span></button>
+   <button id="fbO" class="sbtn dim"><span class="ic">📴</span><span>Play offline<small>No account, nothing synced</small></span></button>
+   <div id="fbErr"></div></div>`;
+  const st=document.createElement('style');st.textContent=`#fbSign{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;overflow:auto;padding:24px 16px calc(24px + min(30vh,260px));
+   background:linear-gradient(180deg,#2b1433 0%,#5a2340 46%,#b2453a 74%,#f08a3c 100%);color:#fbf3e2;font:16px/1.5 Figtree,system-ui,sans-serif}
+   #fbSign .skyline{position:fixed}#fbSign .sunball{position:fixed}
+   .fbs-in{position:relative;z-index:1;max-width:440px;width:100%;display:flex;flex-direction:column;gap:12px}
+   #fbSign .yolo{font-size:clamp(50px,14vw,92px);margin:0 0 4px}
+   .fbs-lead{margin:0 0 8px;color:#f3e3d6;max-width:40ch}
+   #fbSign .sbtn .ic{font:800 20px Figtree,system-ui}
+   #fbErr{color:#ffd0c8;font-size:14px;font-weight:700}`;
   document.head.appendChild(st);document.body.appendChild(o);
   const done=u=>{o.remove();res(u)},err=e=>{o.querySelector('#fbErr').textContent=e&&e.message?e.message.replace('Firebase: ',''):'Sign-in failed. Try again.'};
   o.querySelector('#fbG').onclick=async()=>{const p=new GoogleAuthProvider();try{done((await signInWithPopup(auth,p)).user)}catch(e){if(/popup/i.test(e.code||''))signInWithRedirect(auth,p);else err(e)}};
