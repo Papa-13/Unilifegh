@@ -86,3 +86,9 @@ Signed-in players (Google or guest) are saved to Firestore every 5 minutes and w
 ## Multiplayer on/off switch
 Online campuses are **off** unless the Vercel environment variable `VITE_ONLINE` is `on`. While off, "Play online" shows "Coming soon", nothing connects to the Realtime Database, and sign-in still works for cloud saves and the Gem Shop.
 To switch multiplayer on: Vercel → Settings → Environment Variables → add `VITE_ONLINE` = `on` → Redeploy. To switch it off again, delete it (or set `off`) and redeploy.
+
+## Player numbers (Google Analytics)
+1. Firebase console → Project settings → Integrations → Google Analytics → Enable (link or create a GA account).
+2. Nothing else to configure: the website picks up the analytics ID from Firebase automatically.
+3. See numbers in Firebase console → Analytics (or analytics.google.com): Realtime = people playing now; Reports → Engagement → Events.
+Events sent: game_start, character_created, playing_5min, date, eat, play_fifa, attend_lecture, minigame, socialize, text_message, caught_cheating, break_up, open_gem_shop, purchase, graduate.

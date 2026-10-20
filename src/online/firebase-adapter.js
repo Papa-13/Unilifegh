@@ -8,6 +8,7 @@ import {getAuth,onAuthStateChanged,signInAnonymously,GoogleAuthProvider,signInWi
 import {getFirestore,doc as fsDoc,collection as fsColl,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot,query,where,orderBy,limit,getDocs} from 'firebase/firestore';
 import {getDatabase,ref,set,remove,onDisconnect,onValue,onChildAdded,onChildChanged,onChildRemoved,serverTimestamp,goOffline,push,query as rtQuery,limitToLast} from 'firebase/database';
 import cfg from './firebase-config.js';
+import {initAnalytics} from './analytics.js';
 /* Multiplayer switch: live online campuses only run when the Vercel environment variable VITE_ONLINE is 'on'.
    While it's off, sign-in still works for cloud saves and the Gem Shop, but nothing connects to the Realtime
    Database, so the free plan's 100-connection limit never matters. */
@@ -18,6 +19,7 @@ else start().catch(e=>{console.error(e);window.__fbResolve(null)});
 
 async function start(){
   const app=initializeApp(cfg),auth=getAuth(app),fs=getFirestore(app),rtdb=getDatabase(app);
+  initAnalytics(app);
   const user=await new Promise(res=>{const un=onAuthStateChanged(auth,u=>{un();res(u)})});
   /* account helpers for the game (cloud save card): who am I, and "keep my progress with Google" */
   const google=async()=>{const pr=new GoogleAuthProvider(),cu=auth.currentUser;

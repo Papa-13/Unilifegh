@@ -26,6 +26,7 @@ async function payReturn(){let ref=null;try{const u=new URL(location.href);ref=u
   if(!ref)try{ref=localStorage.getItem('chale-pay')}catch(e){}if(!ref)return;
   for(let i=0;i<6;i++){const j=await payCall({op:'check',ref},true);
     if(j&&typeof j.gems==='number'&&!j.error){try{localStorage.removeItem('chale-pay')}catch(e){}if(typeof GB!=='undefined'){GB.bal=j.gems;GB.on=true}if(S)S.gems=j.gems;try{hud()}catch(e){}
+      if(j.added)try{const PR={5:1,11:2,30:5,65:10,140:20,380:50};window.track&&window.track('purchase',{currency:'GHS',value:PR[j.added]||0,items:[{item_name:j.added+' gems'}]})}catch(e){}
       if(j.added)toast(`💎 Payment received! +${j.added} gems${j.cash?` and ${cedi(j.cash)} cash`:''}. Thank you 🙏`);setTimeout(payClaim,1500);return}
     if(j&&j.pending){await new Promise(r=>setTimeout(r,4000));continue}
     if(j&&(j.signin||j.offline)){await new Promise(r=>setTimeout(r,3000));continue}
