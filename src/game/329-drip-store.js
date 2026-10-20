@@ -1,4 +1,4 @@
-/* ================= 💎 Drip & Flex: what gems buy =================
+/* ================= 💎 Drip & Flex: what gems buy (room flex and gifts) =================
    Fair by design: gems never buy grades, exam passes or a better story. They buy looks, room flex,
    gifts and saved time, so free players can still get everything that matters, and paying players
    get to show off. A weekly drop rotates three items at 25% off (changes every Monday, real time). */
@@ -11,16 +11,16 @@ const DRIP={
     {id:'gchair',kind:'room',name:'Gaming chair',g:18,ic:'🪑',desc:'Comfy desk sessions: +8% study at your desk'}],
   gifts:[{id:'roses',kind:'gift',name:'Roses & chocolate',g:4,ic:'🌹',love:12,fr:5},{id:'cake',kind:'gift',name:'Surprise cake',g:6,ic:'🎂',love:6,fr:12},
     {id:'teddy',kind:'gift',name:'Giant teddy bear',g:8,ic:'🧸',love:20,fr:6},{id:'kicks',kind:'gift',name:'Fresh sneakers for them',g:15,ic:'👟',love:18,fr:18}]};
-const dripAll=()=>[...DRIP.prints,...DRIP.room];
+const dripAll=()=>[...DRIP.room];/* prints are switched off for now; anyone who already bought one keeps it */
 function dripWeek(){const d=new Date(),day=(d.getUTCDay()+6)%7,mon=Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()-day);return{n:Math.floor(mon/(7*864e5)),ends:mon+7*864e5}}
 function dripDrop(){const {n}=dripWeek(),all=dripAll(),out=[];let h=n*2654435761>>>0;while(out.length<3){h=(h*1103515245+12345)>>>0;const it=all[h%all.length];if(!out.includes(it))out.push(it)}return out}
 const dripPrice=it=>dripDrop().includes(it)?Math.ceil(it.g*.75):it.g;
 const dripOwned=it=>it.kind==='print'?(P().prem||[]).includes(it.k):it.kind==='room'?P().items.includes(it.id):false;
 function dripStore(tab){S.paused=true;openSheet();const p=P();tab=tab||'drop';const {ends}=dripWeek(),left=ends-Date.now(),dd=Math.floor(left/864e5),hh=Math.floor(left%864e5/36e5);
   const row=it=>{const own=dripOwned(it),pr=dripPrice(it),sale=pr<it.g;return `<div class="item"><span style="font-size:24px">${it.kind==='print'?`<i class="sw2" style="display:inline-block;width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,${PAL[it.k].a} 50%,${PAL[it.k].b} 50%)"></i>`:it.ic}</span><div class="grow"><b>${esc(it.name)}</b><small>${esc(it.desc||'')}</small></div>${own?'<span class="tag g">Yours</span>':`<button class="btn sm" data-dp="${it.id}">${sale?`<s style="opacity:.6">${it.g}</s> `:''}${pr} 💎</button>`}</div>`};
-  const tabs=[['drop','🔥 This week'],['print','👕 Prints'],['room','🏠 Room'],['gift','🎁 Gifts']];
+  const tabs=[['drop','🔥 This week'],['room','🏠 Room'],['gift','🎁 Gifts']];if(tab==='print')tab='room';
   let body='';
-  if(tab==='drop')body=`<p style="font-size:13px;margin:0 0 6px">Three items, 25% off. New drop in <b>${dd}d ${hh}h</b>.</p><div class="list">${dripDrop().map(row).join('')}</div>`;
+  if(tab==='drop')body=`<p style="font-size:13px;margin:0 0 6px">Three room items, 25% off. New drop in <b>${dd}d ${hh}h</b>.</p><div class="list">${dripDrop().map(row).join('')}</div>`;
   if(tab==='print')body=`<p style="font-size:13px;margin:0 0 6px">Limited prints nobody gets for free. Wear them on any outfit from your wardrobe.</p><div class="list">${DRIP.prints.map(row).join('')}</div>`;
   if(tab==='room')body=`<p style="font-size:13px;margin:0 0 6px">Delivered to your room straight away.</p><div class="list">${DRIP.room.map(row).join('')}</div>`;
   if(tab==='gift'){const ppl=S.npcs.filter(n=>n.met&&(n.contact||n===p.partner||n.side)&&!n.ex).sort((a,b)=>(isLove(b)-isLove(a))||b.romance-a.romance||b.friend-a.friend).slice(0,12);
