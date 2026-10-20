@@ -20,40 +20,39 @@ function moodInfo(){const p=P(),n=p.needs,ks=Object.keys(NEEDN),low=ks.filter(k=
   return{ic:'🙂',name:'Fine',study:1,key:'ok',why:[]}}
 const WHIMS=[
  {id:'meal',t:'Eat a proper meal',g:1,ic:'🍛',ev:(e,d)=>e==='act'&&/eating|cooking|having a drink|cold drink/i.test(d.l),pri:()=>P().needs.hunger<50},
- {id:'lecture',t:'Attend a lecture',g:2,ic:'📚',ev:e=>e==='lecture',when:()=>{const t=TT[day()%7];return t&&t.some(([c,st])=>st+2>hour())}},
- {id:'chat3',t:'Chat with 3 people',g:2,ic:'💬',n:3,ev:e=>e==='talk',pri:()=>P().needs.social<45},
- {id:'joke',t:'Make someone laugh with a joke',g:2,ic:'😂',ev:(e,d)=>e==='talk'&&d.a==='joke'&&d.good},
+ {id:'lecture',t:'Attend a lecture',g:1,ic:'📚',ev:e=>e==='lecture',when:()=>{const t=TT[day()%7];return t&&t.some(([c,st])=>st+2>hour())}},
+ {id:'chat3',t:'Chat with 3 people',g:1,ic:'💬',n:3,ev:e=>e==='talk',pri:()=>P().needs.social<45},
+ {id:'joke',t:'Make someone laugh with a joke',g:1,ic:'😂',ev:(e,d)=>e==='talk'&&d.a==='joke'&&d.good},
  {id:'shower',t:'Take a shower or bath',g:1,ic:'🚿',ev:(e,d)=>e==='act'&&/shower|bath/i.test(d.l),pri:()=>P().needs.hygiene<50},
- {id:'workout',t:'Work out, jog or run on the treadmill',g:2,ic:'🏋️',ev:(e,d)=>e==='act'&&/working out|treadmill|jogging/i.test(d.l)},
- {id:'ball',t:'Play football or basketball',g:2,ic:'⚽',ev:(e,d)=>e==='game'&&d.kind!=='swim'},
- {id:'win',t:'Win a pickup game',g:3,ic:'🏆',ev:(e,d)=>e==='game'&&d.win>0},
- {id:'swim',t:'Go for a swim',g:2,ic:'🏊',ev:(e,d)=>e==='game'&&d.kind==='swim',when:()=>hour()<17},
- {id:'study',t:'Study for 2 hours in total',g:3,ic:'📖',n:120,ev:(e,d)=>e==='act'&&d.fx&&d.fx.study?d.mins:0},
+ {id:'workout',t:'Work out, jog or run on the treadmill',g:1,ic:'🏋️',ev:(e,d)=>e==='act'&&/working out|treadmill|jogging/i.test(d.l)},
+ {id:'ball',t:'Play football or basketball',g:1,ic:'⚽',ev:(e,d)=>e==='game'&&d.kind!=='swim'},
+ {id:'win',t:'Win a pickup game',g:1,ic:'🏆',ev:(e,d)=>e==='game'&&d.win>0},
+ {id:'swim',t:'Go for a swim',g:1,ic:'🏊',ev:(e,d)=>e==='game'&&d.kind==='swim',when:()=>hour()<17},
+ {id:'study',t:'Study for 2 hours in total',g:1,ic:'📖',n:120,ev:(e,d)=>e==='act'&&d.fx&&d.fx.study?d.mins:0},
  {id:'night',t:'Visit the Night Market',g:1,ic:'🌙',ev:(e,d)=>e==='at'&&d==='night',when:()=>hour()>=14},
  {id:'lib',t:'Visit the library',g:1,ic:'🏛️',ev:(e,d)=>e==='at'&&d==='lib'},
  {id:'vn',t:'Send someone a voice note',g:1,ic:'🎙️',ev:(e,d)=>e==='chat'&&d.vn,when:()=>!NOBOTS},
  {id:'mum',t:'Text home',g:1,ic:'🏠',ev:(e,d)=>e==='chat'&&d.fam},
- {id:'friend',t:'Introduce yourself to someone new',g:2,ic:'🤝',ev:(e,d)=>e==='talk'&&(d.a==='intro'||d.a==='hi')},
- {id:'hang',t:'Walk or sit with a friend',g:2,ic:'🪑',ev:(e,d)=>(e==='act'&&/^walking with|sitting with/i.test(d.l))||e==='walkreal',when:()=>friendsN()>0},
- {id:'clean',t:'Tidy up your room',g:2,ic:'🧹',ev:(e,d)=>e==='act'&&/tidying/i.test(d.l),when:()=>(P().mess||0)>=30},
+ {id:'friend',t:'Introduce yourself to someone new',g:1,ic:'🤝',ev:(e,d)=>e==='talk'&&(d.a==='intro'||d.a==='hi')},
+ {id:'hang',t:'Walk or sit with a friend',g:1,ic:'🪑',ev:(e,d)=>(e==='act'&&/^walking with|sitting with/i.test(d.l))||e==='walkreal',when:()=>friendsN()>0},
+ {id:'clean',t:'Tidy up your room',g:1,ic:'🧹',ev:(e,d)=>e==='act'&&/tidying/i.test(d.l),when:()=>(P().mess||0)>=30},
  {id:'sleep',t:'Get a full night\'s sleep (7h+)',g:2,ic:'😴',ev:(e,d)=>e==='sleep'&&d>=7,when:()=>hour()>=12},
  {id:'dance',t:'Dance where people can see you',g:1,ic:'💃',ev:(e,d)=>e==='emote'&&d.k==='dance'&&d.n>0},
- {id:'club',t:'Dance at Club Vibes',g:2,ic:'🪩',ev:(e,d)=>e==='act'&&/dancing at/i.test(d.l),when:()=>hour()>=16},
- {id:'cook',t:'Cook your own food',g:2,ic:'🍳',ev:(e,d)=>e==='act'&&/^cooking/i.test(d.l)},
+ {id:'club',t:'Dance at Club Vibes',g:1,ic:'🪩',ev:(e,d)=>e==='act'&&/dancing at/i.test(d.l),when:()=>hour()>=16},
+ {id:'cook',t:'Cook your own food',g:1,ic:'🍳',ev:(e,d)=>e==='act'&&/^cooking/i.test(d.l)},
  {id:'fun',t:'Get your Fun above 80',g:1,ic:'🎉',ev:()=>P().needs.fun>=80,state:1},
- {id:'happy',t:'Be in a Happy mood',g:2,ic:'😄',ev:()=>['Happy','Focused','Playful','Flirty'].includes(moodInfo().name),state:1},
+ {id:'happy',t:'Be in a Happy mood',g:1,ic:'😄',ev:()=>['Happy','Focused','Playful','Flirty'].includes(moodInfo().name),state:1},
  {id:'emote',t:'Wave at someone',g:1,ic:'👋',ev:(e,d)=>e==='emote'&&d.k==='wave'&&d.n>0}];
 const MILES=[
- ['Make 3 friends',4,()=>friendsN()>=3],['Attend 5 lectures',4,()=>P().att.reduce((a,b)=>a+b,0)>=5],['Complete 5 daily tasks',4,()=>S.tasksDone>=5],
- ['Decorate your room with 4 items',5,()=>P().items.length>=4],['Win a pickup game',4,()=>S.wins>=1],['Have GH₵2,000 on MoMo',5,()=>P().money>=2000],
- ['Make 10 friends',8,()=>friendsN()>=10],['Get into a relationship',6,()=>!!P().partner||!!relGet()],['Score 70+ in an exam',8,()=>Object.values(P().exams||{}).some(r=>r.score>=70)],
- ['Reach Level 200',6,()=>(P().yr||1)>=2],['Complete 20 daily tasks',10,()=>S.tasksDone>=20],['Reach your final year',10,()=>isFinalYear(P())],['Graduate',20,()=>!!P().grad],['Graduate with First Class',30,()=>P().grad==='First Class'],['Win 5 pickup games',8,()=>S.wins>=5],['Attend 20 lectures',10,()=>P().att.reduce((a,b)=>a+b,0)>=20]];
+ ['Make 3 friends',2,()=>friendsN()>=3],['Attend 5 lectures',2,()=>P().att.reduce((a,b)=>a+b,0)>=5],['Complete 5 daily tasks',2,()=>S.tasksDone>=5],
+ ['Decorate your room with 4 items',3,()=>P().items.length>=4],['Win a pickup game',2,()=>S.wins>=1],['Have GH₵2,000 on MoMo',3,()=>P().money>=2000],
+ ['Make 10 friends',4,()=>friendsN()>=10],['Get into a relationship',3,()=>!!P().partner||!!relGet()],['Score 70+ in an exam',4,()=>Object.values(P().exams||{}).some(r=>r.score>=70)],
+ ['Reach Level 200',3,()=>(P().yr||1)>=2],['Complete 20 daily tasks',5,()=>S.tasksDone>=20],['Reach your final year',5,()=>isFinalYear(P())],['Graduate',10,()=>!!P().grad],['Graduate with First Class',15,()=>P().grad==='First Class'],['Win 5 pickup games',4,()=>S.wins>=5],['Attend 20 lectures',5,()=>P().att.reduce((a,b)=>a+b,0)>=20]];
 function fillWhims(){if(!S||!S.whims)return;S.whims=S.whims.filter(w=>!w.done||performance.now()-w.doneT<6000);
   while(S.whims.filter(w=>!w.done).length<3){const have=new Set(S.whims.map(w=>w.id)),pool=WHIMS.filter(w=>!have.has(w.id)&&(!w.when||w.when()));if(!pool.length)break;
     const pri=pool.filter(w=>w.pri&&w.pri()),W=pick(pri.length&&Math.random()<.7?pri:pool);S.whims.push({id:W.id,prog:0,done:false})}}
 function ev(type,d){if(!S||!S.whims)return;let changed=false;S.whims.forEach(w=>{if(w.done)return;const W=WHIMS.find(x=>x.id===w.id);if(!W)return;let r=false;try{r=W.ev(type,d)}catch(e){}
-    if(!r)return;w.prog+=typeof r==='number'?r:1;changed=true;if(w.prog>=(W.n||1)){w.done=true;w.doneT=performance.now();gemsEarn('task',`${W.id}:${day()}:${MP.campus||'solo'}:${P().name}`,W.g);S.tasksDone++;P().needs.fun=clamp(P().needs.fun+4);
-      setTimeout(()=>toast(`🎯 Task complete: ${W.t} · +${W.g} 💎`),type==='act'?1200:200);gemPop(W.g)}});if(changed&&$('taskSheet'))taskSheet()}
+    if(!r)return;w.prog+=typeof r==='number'?r:1;changed=true;if(w.prog>=(W.n||1)){w.done=true;w.doneT=performance.now();S.tasksDone++;P().needs.fun=clamp(P().needs.fun+4);taskReward(W,type)}});if(changed&&$('taskSheet'))taskSheet()}
 function checkMiles(){MILES.forEach(([t,g,f],i)=>{if(S.miles[i])return;let ok=false;try{ok=f()}catch(e){}if(ok){S.miles[i]=1;gemsEarn('mile',i,g);setTimeout(()=>toast(`🏅 Milestone: ${t} · +${g} 💎`),1800);gemPop(g)}});if(S.whims.length)ev('tick')}
 function gemPop(g){const b=$('gemBtn');if(!b)return;b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop')}
 function gemCost(){const b=S.busy;if(!b||!b.timed)return 0;const rem=b.timed.start+b.timed.mins-S.min;return Math.max(1,Math.ceil(rem/60))}
@@ -62,10 +61,10 @@ function busyHud(){const b=S.busy;if(!b||!b.timed)return;const T=b.timed,k=clamp
   const bar=$('busyBar');if(bar)bar.style.width=(k*100).toFixed(1)+'%';const r=$('busyRem');if(r)r.textContent=rem>=60?`${Math.floor(rem/60)}h ${rem%60}m left`:`${rem}m left`;
   const g=$('gemSkip');if(g){const c=gemCost();g.textContent=innerWidth<700?`⚡ Finish · 💎${c}`:`⚡ Finish now · 💎${c}`;g.classList.toggle('dim',(S.gems||0)<c)}}
 function taskSheet(){S.paused=true;openSheet();const p=P(),M=moodInfo();
-  const rows=S.whims.map(w=>{const W=WHIMS.find(x=>x.id===w.id);if(!W)return'';const n=W.n||1;return `<div class="task${w.done?' done':''}"><span class="tic">${W.ic}</span><div class="grow"><b>${esc(W.t)}</b>${n>1?`<div class="bar"><i style="width:${Math.min(100,w.prog/n*100)}%"></i></div><small>${Math.min(n,Math.round(w.prog))}/${n}${W.id==='study'?' min':''}</small>`:''}</div><span class="tag y">${w.done?'✓':'+'+W.g+' 💎'}</span></div>`}).join('');
+  const rows=S.whims.map(w=>{const W=WHIMS.find(x=>x.id===w.id);if(!W)return'';const n=W.n||1;return `<div class="task${w.done?' done':''}"><span class="tic">${W.ic}</span><div class="grow"><b>${esc(W.t)}</b>${n>1?`<div class="bar"><i style="width:${Math.min(100,w.prog/n*100)}%"></i></div><small>${Math.min(n,Math.round(w.prog))}/${n}${W.id==='study'?' min':''}</small>`:''}</div><span class="tag y">${w.done?'✓':taskGemsLeft()>0?'+1 💎':'+'+cedi(TASK_CASH)}</span></div>`}).join('');
   const nextM=MILES.map((m,i)=>[m,i]).filter(([m,i])=>!S.miles[i]).slice(0,4);
   $('sheetIn').innerHTML=`<div id="taskSheet"></div><div class="row" style="justify-content:space-between;align-items:center"><h3>🎯 Tasks</h3><span class="tag y" style="font-size:15px">💎 ${S.gems}</span></div>
-   <p style="font-size:13px;color:var(--muted);margin:6px 0 10px">Finish tasks to earn gems. Spend gems on <b>⚡ Finish now</b> to complete any activity instantly. New tasks arrive each morning. <a href="#" id="tsShop" style="color:var(--gold,#e8b24a);font-weight:700">💎 Get more gems from GH₵1</a></p>
+   <p style="font-size:13px;color:var(--muted);margin:6px 0 10px">Your first ${TASK_GEMS_DAY} tasks each real day pay 💎 (${taskGemsLeft()} left today); after that tasks pay cash. Claim your 🎁 daily reward every 24 hours. Spend gems on <b>⚡ Finish now</b> to complete any activity instantly. <a href="#" id="tsShop" style="color:var(--gold,#e8b24a);font-weight:700">💎 Get more gems from GH₵1</a></p>
    <div class="eyebrow">Today</div><div class="tasks">${rows}</div>
    <button class="ghost sm" id="swapT" ${S.swapDay===day()?'disabled':''}>🎲 Swap one task${S.swapDay===day()?' (used today)':' (free once a day)'}</button>
    <div class="eyebrow" style="margin-top:14px">Campus Legend milestones</div><div class="tasks">${nextM.map(([m])=>`<div class="task"><span class="tic">🏅</span><div class="grow"><b>${esc(m[0])}</b></div><span class="tag">+${m[1]} 💎</span></div>`).join('')||'<p>All milestones complete. Legend! 👑</p>'}</div>

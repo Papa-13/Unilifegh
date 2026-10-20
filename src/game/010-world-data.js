@@ -137,9 +137,9 @@ const BEARDS={none:'Clean shaven',goatee:'Goatee',full:'Full beard'};
 const BAGS={backpack:'Backpack',sling:'Crossbody sling bag',tote:'Tote bag',none:'No bag'};
 /* family background */
 const BG={
- rich:{name:'Wealthy home',emoji:'🏡',fund:20000,allow:800,momo:8000,agg:[6,13],story:'Your dad runs a construction company in East Legon and your mum is a pharmacist. You went to a top boarding school. Money is not the problem. Making real friends might be.'},
- avg:{name:'Average home',emoji:'🏠',fund:7000,allow:350,momo:2500,agg:[7,18],story:'Your mum is a teacher and your dad works at the district assembly. They saved for years for your university fees. They will support you, but every cedi counts.'},
- poor:{name:'Struggling home',emoji:'🛖',fund:4800,allow:200,momo:1200,agg:[7,22],story:'Your mum sells tomatoes at the market and you have three younger siblings. The whole family contributed for your hostel. You will have to hustle, and you qualify for the student loan.'}};
+ rich:{name:'Wealthy home',emoji:'🏡',fund:20000,allow:1400,momo:8000,agg:[6,13],story:'Your dad runs a construction company in East Legon and your mum is a pharmacist. You went to a top boarding school. Money is not the problem. Making real friends might be.'},
+ avg:{name:'Average home',emoji:'🏠',fund:7000,allow:600,momo:2500,agg:[7,18],story:'Your mum is a teacher and your dad works at the district assembly. They saved for years for your university fees. They will support you, but every cedi counts.'},
+ poor:{name:'Struggling home',emoji:'🛖',fund:4800,allow:350,momo:1200,agg:[7,22],story:'Your mum sells tomatoes at the market and you have three younger siblings. The whole family contributed for your hostel. You will have to hustle, and you qualify for the student loan.'}};
 /* hostels: prices per academic year (2 semesters), inspired by real rates around KNUST */
 const HOSTEL_TPL={0:[{beds:4,price:3900},{beds:3,price:4700},{beds:3,price:5400,kitchen:true}],
   1:[{beds:2,price:5800},{beds:2,price:6300,large:true},{beds:2,price:6600,kitchen:true},{beds:1,price:6400},{beds:1,price:7400,kitchen:true}],

@@ -27,7 +27,7 @@ function npcReply(n,intent,vn){const p=P();let lines=RB[intent]||RB.def;
   return{text:pick(lines),gain:intent==='def'?1:2}}
 function famReply(intent,vn){const p=P(),k='fam'+week();
   if(intent==='money'){if(!S[k]&&Math.random()<({poor:.35,avg:.55,rich:.85}[p.bg])+(vn?.15:0)){S[k]=1;const amt={poor:50,avg:100,rich:300}[p.bg];p.money+=amt;return `I've sent ${cedi(amt)} to your MoMo. Don't waste it o! 🙏`}
-    return pick(['Your allowance comes on Monday. Manage it well.','Again?! What are you doing with the money? 🤨','We don\'t have now, my child. Be patient.'])}
+    return pick(['Your allowance comes every two weeks. Manage it well.','Again?! What are you doing with the money? 🤨','We don\'t have now, my child. Be patient.'])}
   if(intent==='love'||intent==='thanks')return pick(['We love you too. Make us proud ❤️','God bless you, my child 🙏']);
   if(intent==='how'||intent==='greet')return pick(['We are fine. Are you eating well?','Thank God. Have you been going to church?','Fine o. Your sister says hi. How are your studies?']);
   if(intent==='study')return 'Good. Learn hard, that is why you are there 📚';

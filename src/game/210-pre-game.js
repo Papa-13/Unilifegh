@@ -7,7 +7,7 @@ function rollBackground(){
   $('panel').innerHTML=`<div class="fam">${stepBar(1)}<h2 class="it">Your family</h2><div class="reel"><div class="reel-in" style="--to:${15+order.indexOf(bg)}">${reel.map(k=>`<div><em>${BG[k].emoji}</em>${BG[k].name}</div>`).join('')}</div></div><p class="story">Where you come from decides your allowance, your rent money and your exam results. Let's see…</p></div>`;
   setTimeout(()=>{$('panel').innerHTML=`<div class="fam">${stepBar(1)}<div class="badge">${b.emoji}</div><h2 class="it">You come from ${bg==='avg'?'an':'a'} ${b.name.toLowerCase()}</h2>
     <p class="story">${b.story}</p>
-    <div class="receipt"><h4><span>Family support</span><span>MoMo</span></h4><div class="ln"><span>Toward rent, each year</span><i></i><b>${cedi(b.fund)}</b></div><div class="ln"><span>Allowance, every Monday</span><i></i><b>${cedi(b.allow)}</b></div><div class="ln"><span>On your MoMo now</span><i></i><b>${cedi(b.momo)}</b></div>
+    <div class="receipt"><h4><span>Family support</span><span>MoMo</span></h4><div class="ln"><span>Toward rent, each year</span><i></i><b>${cedi(b.fund)}</b></div><div class="ln"><span>Allowance, every 2 weeks</span><i></i><b>${cedi(b.allow)}</b></div><div class="ln"><span>On your MoMo now</span><i></i><b>${cedi(b.momo)}</b></div>
       <div class="agg"><strong>${agg}</strong><small><b>Your WASSCE aggregate.</b><br>6 is the best possible. It decides which programmes you can get.</small></div></div>
     <button class="sbtn sm" id="nx">Choose your programmes</button></div>`;$('nx').onclick=programmes},2700);
 }

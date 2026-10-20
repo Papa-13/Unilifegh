@@ -1,0 +1,16 @@
+/* lecture reminder banner, daily reward streak, the gift dot on the gem button */
+#lecNote{position:fixed;left:50%;top:calc(var(--sat,0px) + 108px);transform:translate(-50%,-140%);z-index:60;width:min(460px,calc(100% - 24px));display:flex;flex-direction:column;gap:10px;
+  padding:12px 14px;border-radius:16px;background:#fbf3e2;color:#2a1a14;font:700 14.5px/1.35 var(--body,Figtree,system-ui);border:2px solid #120a12;box-shadow:5px 5px 0 #120a12;transition:transform .35s cubic-bezier(.2,1.3,.4,1)}
+#lecNote.in{transform:translate(-50%,0)}
+#lecNote[hidden]{display:none}
+#lecNote .ln-b{display:flex;gap:8px;justify-content:flex-end}
+#lecNote .ghost{color:#2a1a14;border-color:rgba(0,0,0,.25)}
+.dstreak{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:10px}
+.dstreak div{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 2px;border-radius:10px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.12)}
+.dstreak small{font:700 10px var(--body,system-ui);opacity:.75}.dstreak b{font:800 13px var(--body,system-ui)}
+.dstreak .got{background:rgba(30,154,87,.25);border-color:#1e9a57}
+.dstreak .now{background:rgba(245,180,31,.22);border-color:#f5b41f;box-shadow:0 0 12px rgba(245,180,31,.4)}
+#gemBtn.daily{position:relative}
+#gemBtn.daily::after{content:"🎁";position:absolute;right:-6px;top:-8px;font-size:15px;animation:giftBob 1s ease-in-out infinite alternate}
+@keyframes giftBob{to{transform:translateY(-3px) rotate(8deg)}}
+@media (prefers-reduced-motion:reduce){#gemBtn.daily::after{animation:none}#lecNote{transition:none}}
