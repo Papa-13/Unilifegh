@@ -166,7 +166,7 @@ function meetFromPend(n,pd){const at=Math.ceil((S.min+(pd.in||45))/10)*10;if(!BI
 {const _ra=roomActions;roomActions=function(){const a=_ra.apply(this,arguments);try{if(IS&&IS.kind==='room'&&!IS.mine&&IS.owner&&IS.owner!=='me'&&!IS.owner.real&&npcConsole(IS.owner))a.unshift([`🎮 Play FIFA with ${IS.owner.name} (1h)`,()=>playFifa(),null,'b'])}catch(e){}return a}}
 
 /* ---- hourly: someone may hit on you, your partner may show up, friends text you ---- */
-{const _h=hourly;hourly=function(){const r=_h.apply(this,arguments);try{if(S&&S.p&&!NOBOTS){const h=hour();
+{const _h=hourly;hourly=function(){const r=_h.apply(this,arguments);try{const hk=day()*24+Math.floor(hour());if(S&&S.p&&!NOBOTS&&S._llh!==hk){S._llh=hk;const h=hour();
   if(!IS&&h>=8&&h<21&&S.hitDay!==day()&&Math.random()<.09)setTimeout(hitOnYou,1200);
   if(P().partner&&IS&&IS.kind==='room'&&IS.mine&&h>=10&&h<22&&Math.random()<.05+(S.cheat?S.cheat.sus:0)/500)setTimeout(partnerKnock,900);
   phoneSnoop();npcTextsYou();

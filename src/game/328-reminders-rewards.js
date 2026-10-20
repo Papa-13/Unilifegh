@@ -31,7 +31,7 @@ function lecNote(text,go){let el=$('lecNote');if(!el){el=document.createElement(
   el.innerHTML=`<span>${esc(text)}</span><div class="ln-b">${go?'<button class="btn sm" id="lnGo">🚶 Go to class</button>':''}<button class="ghost sm" id="lnX">Later</button></div>`;el.hidden=false;el.classList.remove('in');void el.offsetWidth;el.classList.add('in');
   const close=()=>{el.hidden=true;clearTimeout(lecNote.t)};$('lnX').onclick=close;if($('lnGo'))$('lnGo').onclick=()=>{close();if(S.busy)return toast('Finish what you\'re doing first, or tap ⚡ to finish now.');walkTo(BID[P().col]);toast(`Heading to ${BID[P().col].name} 🚶`)};
   clearTimeout(lecNote.t);lecNote.t=setTimeout(close,25000);try{navigator.vibrate&&navigator.vibrate([120,80,120])}catch(e){}}
-{const _h=hourly;hourly=function(){const r=_h.apply(this,arguments);try{lecReminders()}catch(e){console.error(e)}return r}}
+{const _h=hourly;hourly=function(){const r=_h.apply(this,arguments);try{const hk=day()*24+Math.floor(hour());if(S&&S._lrh!==hk){S._lrh=hk;lecReminders()}}catch(e){console.error(e)}return r}}
 /* note when you actually attended, so the reminders know */
 {const _l=lecture;lecture=function(L){const r=_l.apply(this,arguments);try{S['att'+day()+'-'+L[0]]=1}catch(e){}return r}}
 

@@ -10,17 +10,20 @@ const LINES={
  ask:{good:['Yes! I\'ve been waiting for you to ask. ❤️','Ei, finally! Yes, yes, yes.'],bad:['You\'re a really good friend. I don\'t want to spoil that.','I\'m sorry. I don\'t feel the same way.']},
  tired:['Chale, I have to go. Let\'s talk later.','I need to rest small. Catch you later.']};
 function talkMenu(n){
-  S.paused=true;openSheet();const p=P();S.talkN=n;n.pose='talk';p.pose='talk';if(!IS){n.face=Math.atan2(p.x-n.x,p.y-n.y);p.face=Math.atan2(n.x-p.x,n.y-p.y)}
+  S.paused=true;openSheet();const p=P();S.talkN=n;n.pose='talk';n.vibe=0;n.know=n.know||{};p.pose='talk';if(!IS){n.face=Math.atan2(p.x-n.x,p.y-n.y);p.face=Math.atan2(n.x-p.x,n.y-p.y)}
   const q=IS&&IS.people.find(q=>q.n===n);if(q&&!q.lying){q.pose='talk';q.mesh.rotation.y=Math.atan2(p.ix-q.x,p.iz-q.z);p.face=Math.atan2(q.x-p.ix,q.z-p.iz)}
   {const T=(IS&&IS.people.find(q=>q.n===n))||n,gk=p.partner===n||n.friend>=70?'hug':n.friend>=35?'dap':n.met?'handshake':null;if(gk==='hug')hugPair(p,T,2.2);else if(gk){setGest(T,gk,1.7);setGest(p,gk,1.7)}else setExpr(T,'surprised',.8)}
   const shared=n.ints.filter(i=>p.interests.includes(i));const role=n.gender==='f'?'girlfriend':'boyfriend';
   const draw=(said)=>{
-    let opts=[['chat','Chat'],['joke','Tell a joke'],['interest',`Talk about ${shared[0]||n.ints[0]}`],['compliment','Compliment their style']];
-    if(!n.met)opts=[['intro','Introduce yourself'],['wave','Wave and smile']];
-    if(!n.contact&&n.met&&n.friend>=15)opts.push(['number','Ask for their number']);
+    const K=n.know;let opts=[];
+    /* small talk the way it really goes: names first, then "are you new here?", course, hostel, where you're from */
+    if(!n.met)opts=[['intro','🙋 "Hi, I\'m '+esc((p.name||'').split(' ')[0])+'"'],['hi','👋 "Hey, how far?"'],['wave','Smile and wave']];
+    else{if(!K.lvl)opts.push(['q_new','"Are you new here?"']);if(!K.course)opts.push(['q_course','"What course do you do?"']);if(K.course&&!K.hostel)opts.push(['q_hostel','"Which hostel are you in?"']);if(K.course&&!K.from)opts.push(['q_from','"Where are you from?"']);
+      opts.push(['chat','Chat'],['joke','Tell a joke'],['interest',`Talk about ${shared[0]||n.ints[0]}`],['compliment','Compliment their style'])}
+    if(!n.contact&&n.met&&n.friend>=15&&n.numNo!==day())opts.push(['number','📱 Ask for their number']);
     const here=!IS&&locOf(p.x,p.y);
     if(n.friend>=25&&here&&here.id==='lib')opts.push(['study','Study together (2h)']);
-    if(!IS&&n.met){if(n.with>S.min){opts.push(['walk','🚶 Take a walk together'],['sitw','🪑 Sit somewhere together'],['bye','👋 "See you later"'])}else if(n.friend>=15)opts.push(['come','👥 "Come with me"'])}
+    if(!IS&&n.met){if(n.with>S.min){opts.push(['walk','🚶 Take a walk together'],['sitw','🪑 Sit somewhere together'],['bye','👋 "See you later"'])}else if(n.friend>=15)opts.push(['come','🚶 "Do you mind taking a walk with me?"'])}
     if(!IS&&n.friend>=30&&!n.mate&&hour()>=8&&hour()<22)opts.push(['visit','🏠 Visit their room']);
     if(n.friend>=50&&!p.debts.some(x=>x.n===n&&!x.done&&x.kind==='owe'))opts.push(['borrow','Ask to borrow money']);
     const owe=p.debts.find(x=>x.n===n&&!x.done&&x.kind==='owe');if(owe)opts.push(['repay',`Pay back ${cedi(owe.amt)}`]);
@@ -45,7 +48,7 @@ function talkMenu(n){
   };
   draw(n.met?'':`<span style="color:var(--muted)">You don't know ${n.gender==='f'?'her':'him'} yet.</span>`);
 }
-function socialAct(n,a,shared,draw){const b4={f:n.friend,r:n.romance};const r=socialAct0(n,a,shared,draw);try{const dd=(n.friend-b4.f)+(n.romance-b4.r);ev('talk',{a,good:dd>4});if(a==='joke')addBuff(dd>4?'amused':dd<0?'embarrassed':'');if(a==='ask'&&P().partner===n||a==='flirt'&&dd>6)addBuff('loved')}catch(e){}try{reactTalk(n,a,b4)}catch(e){}return r}
+function socialAct(n,a,shared,draw){const b4={f:n.friend,r:n.romance};const r=socialAct0(n,a,shared,draw);try{const dd=(n.friend-b4.f)+(n.romance-b4.r);n.vibe=(n.vibe||0)+(dd>4?1:dd<0?-1:0);ev('talk',{a,good:dd>4});if(a==='joke')addBuff(dd>4?'amused':dd<0?'embarrassed':'');if(a==='ask'&&P().partner===n||a==='flirt'&&dd>6)addBuff('loved')}catch(e){}try{reactTalk(n,a,b4)}catch(e){}return r}
 function talkBody(n){return (IS&&IS.people.find(q=>q.n===n))||n}
 function reactTalk(n,a,b4){const p=P(),T=talkBody(n),d=(n.friend-b4.f)+(n.romance-b4.r),G=(k,dur,e)=>setGest(T,k,dur,e),Me=(k,dur,e)=>setGest(p,k,dur,e),later=(f,ms=650)=>setTimeout(f,ms);
   if(['walk','sitw','visit','date'].includes(a))return;
@@ -63,11 +66,23 @@ function reactTalk(n,a,b4){const p=P(),T=talkBody(n),d=(n.friend-b4.f)+(n.romanc
     if(d>=8)G(pick(['laugh','nod','clap']),2.2);else if(d>0)G('nod',1.6,'smile');else if(d<0)G(pick(['cross','no','facepalm']),2.2);else G('shrug',1.6)},700)}
 function socialAct0(n,a,shared,draw){
   const p=P(),say=t=>`<b>${esc(n.name)}:</b> ${t}`;if(a.startsWith('tell:'))return memTell(n,a.slice(5));
-  if(a==='intro'){n.met=true;n.friend=clamp(n.friend+(n.pers==='shy'?5:8));advance(5);return say(pick(['Hi! I\'m '+n.name+'. You\'re new?','Hey, I\'m '+n.name+'. '+n.prog+', level 100.','Akwaaba! I\'m '+n.name+'. Nice to meet you.']))}
+  if(a==='intro'||a==='hi'){advance(2);const cold=n.pers==='shy'&&Math.random()<.35||Math.random()<.08;
+    if(a==='hi'&&!n.met){n.friend=clamp(n.friend+2);return say(cold?'Hi. 🙂':pick(['I dey o! You?','Hey! Fine, and you? 😄','Hi hi 👋']))+'<br><span style="color:var(--muted)">You still don\'t know their name.</span>'}
+    n.met=true;n.know.name=1;n.friend=clamp(n.friend+(cold?3:7));if(cold){n.vibe--;return say(`Oh, hi. I'm ${n.name.split(' ')[0]}. 🙂`)+'<br><span style="color:var(--muted)">They seem a bit reserved.</span>'}
+    return say(pick([`Hi ${(p.name||'').split(' ')[0]}! I'm ${n.name}. Nice to meet you 😊`,`Ah, nice to meet you! I'm ${n.name}. Are you new here?`,`Akwaaba! I'm ${n.name.split(' ')[0]} 👋 First time I'm seeing you around.`]))}
+  if(a==='q_new'){advance(2);n.know.lvl=1;const L=npcLevel(n),you=(P().yr||1)*100;n.friend=clamp(n.friend+2);
+    return say(L===you?pick([`Yes o! Level ${L} too. Everything is still confusing 😂`,`I'm also new, Level ${L}. We'll find our way 🙏`]):L>you?pick([`No, I'm in Level ${L}. Welcome to campus! If you need help, ask me 😄`,`Level ${L} now, chale. Time flies. You'll enjoy it here`]):`I'm Level ${L}. You're my senior then 😅`)}
+  if(a==='q_course'){advance(2);n.know.course=1;const same=n.prog===P().prog;n.friend=clamp(n.friend+(same?6:2));if(same)n.vibe++;
+    return say(same?pick([`${n.prog}! Same as you? Ei, coursemates! 🤝`,`I do ${n.prog}. Wait, you too?! We'll be suffering together 😂`]):pick([`I do ${n.prog}. It's hard paa but I like it.`,`${n.prog}. Don't ask me about it, my head is full 😅 What about you?`,`${n.prog} at ${COLLEGES[n.col]?COLLEGES[n.col].short:'my college'}. And you?`]))}
+  if(a==='q_hostel'){advance(2);n.know.hostel=1;const b=BID[n.home],same=n.home===P().home;n.friend=clamp(n.friend+(same?5:2));
+    return say(same?`${b.name}! We're neighbours then 😄 Which room?`:pick([`${b.name}. It's not bad, the water flows sometimes 😂`,`I stay at ${b.name}. Come and visit some time.`]))}
+  if(a==='q_from'){advance(2);n.know.from=1;const t=npcTown(n);n.friend=clamp(n.friend+2);return say(pick([`I'm from ${t}. Born and bred 😄`,`${t}! You've been there?`,`My family is in ${t}. I miss home food small 😩`]))}
   if(a==='wave'){n.friend=clamp(n.friend+2);return n.pers==='shy'?'<span style="color:var(--muted)">They give a small wave back and look away.</span>':say('Hey! 👋')}
-  if(a==='number'){n.contact=true;advance(5);return say(pick(['Sure! Here, put it in. Don\'t flash me o.','Okay, add me on WhatsApp too.']))+'<br><span class="tag g">Added to your phone</span>'}
+  if(a==='number'){advance(2);const ok=n.friend>=35||(n.vibe>=1&&Math.random()<.55+n.friend/150)||(n.vibe>=0&&Math.random()<.25+n.friend/120);
+    if(!ok){n.numNo=day();n.friend=clamp(n.friend-2);return say(pick(['Hmm, let\'s get to know each other first 😅','I don\'t really give my number out like that, sorry.','Ah, maybe next time. 🙂','Haha, slow down. We just met 😂']))}
+    n.contact=true;return say(pick(['Sure! Here, put it in. Don\'t flash me o.','Okay, add me on WhatsApp too.']))+'<br><span class="tag g">Added to your phone</span>'}
   if(a==='visit'){closeSheet();visitRoom(n);return null}
-  if(a==='come'){advance(2);if(Math.random()<.35+n.friend/100&&!(hour()<6.5||hour()>=23)){n.with=S.min+120;n.pose=null;return say(pick(['Sure, let\'s go! 🚶🏾','Okay, I\'m free. Where are we going?','Yes o, I was bored anyway 😂']))+'<br><span class="tag g">'+esc(n.name)+' is with you now</span>'}return say(pick(['Sorry, I\'m busy now. Later?','Ah, I can\'t now 😩']))}
+  if(a==='come'){advance(1);const busy=n.plan&&(COLLEGES[n.plan.b]&&lectureNow()||n.plan.b==='lib');if(!busy&&n.vibe>=0&&Math.random()<.3+n.friend/100&&!(hour()<6.5||hour()>=23)){n.with=S.min+120;n.pose=null;return say(pick(['Sure, why not! 🚶🏾','Okay, I have small time. Let\'s go.','Yes o, I was bored anyway 😂']))+'<br><span class="tag g">'+esc(n.name)+' is walking with you now</span>'}return say(busy?pick(['Ah, I\'m going for lectures now 😩 Another time?','I\'m heading to the library, exams are coming. Next time!']):pick(['Sorry, I\'m in a hurry now. Later?','Hmm, not today. Maybe another time 🙂','I have somewhere to be, sorry 😅']))}
   if(a==='walk'){closeSheet();walkWith(n);return null}
   if(a==='sitw'){closeSheet();sitWith(n);return null}
   if(a==='bye'){n.with=0;n.lastPlan=-1;return say(pick(['Okay, see you later! 👋','Bye o! Text me 📱','Later! That was fun 😄']))}
@@ -80,7 +95,7 @@ function socialAct0(n,a,shared,draw){
   if(a==='sell'){n.customer=true;advance(10);p.biz.aware+=6;n.friend=clamp(n.friend+2);return say(pick(['Oh nice! Send me your price list.','I\'ll definitely buy. Support your own!','Okay, I\'ll tell my roommates too.']))}
   if(a==='vote'){p.race.endorse.push(n);advance(15);const yes=n.friend>=45||Math.random()<.6;if(yes){p.race.support+=4;return say(pick(['You have my vote, and my whole room\'s. 🗳️','Of course! I\'ll share your flyer on my status.']))}return say('Hmm, I\'ll see. The other candidate is also my friend.')}
   if(n.talks>=5&&a!=='date')return say(pick(LINES.tired));
-  n.talks++;advance(15);p.needs.social=clamp(p.needs.social+8);
+  n.talks++;advance(4);p.needs.social=clamp(p.needs.social+8);
   const mood=((p.needs.energy<20||p.needs.hunger<15)?-.15:0)-(p.needs.hygiene<25?.2:0);
   const persB={friendly:.15,funny:a==='joke'?.25:.05,shy:-.1,serious:a==='joke'?-.2:0}[n.pers]||0;
   const base={chat:.6,joke:.5,interest:shared.length?.85:.3,compliment:.55,flirt:.2+n.chem*.5+n.friend/250,date:.2+n.romance/120,study:.8,ask:.15+n.romance/150+n.dates*.08}[a];
@@ -129,3 +144,8 @@ function sleepoverAsk(n,mine){const p=P(),yes=Math.random()<(n.romance>=60?.9:.5
     const sl=IS.slots&&IS.slots[0];if(sl){IS.people.filter(q=>q.n===n).forEach(q=>{IS.scene.remove(q.mesh)});IS.people=IS.people.filter(q=>q.n!==n);addInPerson(n.look,n.name,sl.x+.32,sl.z+.85,0,'lie',{n,lie:true,y:sl.y+.32})}
     if(mine&&S.mates.some(m=>homeNow(m)))setTimeout(()=>toast(`${S.mates[0].name} (whispering): "Eiii, we are also in this room o 😂"`),900);
     sleep();const b=S.busy;if(b){const d=b.done;b.done=()=>{d();addBuff('loved');setTimeout(()=>toast(`☀️ Good morning! ${n.name}: "${pick(['Morning, sleepyhead ❤️','I made you tea ☕','You snore small o 😂❤️'])}"`),600)}}}]])}
+
+/* things you learn by asking: their level and hometown (fixed per person) */
+function npcHash(n,salt){let h=7;for(const c of String(n.id)+salt)h=(h*31+c.charCodeAt(0))%9973;return h}
+function npcLevel(n){return [100,100,100,200,200,300,400][npcHash(n,'lvl')%7]}
+function npcTown(n){return ['Kumasi','Accra','Tamale','Cape Coast','Ho','Takoradi','Sunyani','Koforidua','Obuasi','Techiman','Tema','Bolgatanga'][npcHash(n,'town')%12]}

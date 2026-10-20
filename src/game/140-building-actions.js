@@ -96,8 +96,7 @@ function placeActions(b,inside){
   if(b.id==='terminal'){a.push(['See the shuttle route',()=>story(`<div class="eyebrow">Campus Shuttle Terminal</div><h3>Free shuttles, all day</h3><p class="scene">Two buses loop around campus and stop at every 🚌 shelter. Walk to any shelter and wait.</p><p>${SH_STOPS.map(x=>esc(x.name)).join(' → ')} → back again</p>`,[['Got it','g',()=>{}]])]);a.push(['Sit on a bench at the terminal (30m)',()=>doAct('Sitting on a bench at the terminal',30,{energy:6,fun:3})])}
   if(b.id==='trotro'){/* the city (Kejetia, Adum, home trips) isn't on the map yet: the station is for catching trotros along the campus roads */
     a.push(['🚐 Where do the trotros go?',()=>story(`<div class="eyebrow">Tech Junction trotro station</div><h3>"Kejetia! Kejetia! One more seat!"</h3><p class="scene">The mates shout for Kejetia, Adum and Ayeduase, but the city isn't open in the game yet. For now, trotros run along the roads around campus. Stand by the road and wave one down as it passes. GH₵${TROTRO_FARE} a ride.</p><p style="font-size:13px;color:var(--muted)">🏙️ Kejetia market, town, restaurants and going home are coming in a future update.</p>`,[['Okay','g',()=>{}]])]);
-    a.push(['Buy pure water from a hawker · GH₵1',()=>{if(!spend(1))return;doAct('Drinking a sachet of pure water',5,{hunger:3,energy:3})}]);
-    a.push(['Sit and watch the trotros (20m)',()=>doAct('Sitting at the station watching the trotros',20,{energy:4,fun:4})])}
+    a.push(['Buy pure water from a hawker · GH₵1',()=>{if(!spend(1))return;doAct('Drinking a sachet of pure water',5,{hunger:3,energy:3})}]);}
   return a;
 }
 function nextLecture(){for(let k=0;k<7*48;k++){const m=S.min+k*30,d=Math.floor(m/1440)%7,h=(m%1440)/60,L=TT[d]&&TT[d].find(([c,st])=>Math.abs(h-st)<.01);if(L)return `Next: ${courseName(L[0])}, ${DAYS[d]} ${String(L[1]).padStart(2,'0')}:00`}return ''}

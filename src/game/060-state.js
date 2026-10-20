@@ -25,7 +25,7 @@ function newGame(){
     needs:{hunger:80,energy:90,social:55,fun:65,hygiene:85},money:bg.momo+Math.max(0,bg.fund-rt.price)-Math.max(0,rt.price-bg.fund)-(pre.feePaying?3500:0),study:0,att:[0,0,0],exams:{},printed:-1,job:null,partner:null,target:null,
     items:[],prov:pre.bg==='poor'?10:4,pantry:{rice:2,tomato:1,egg:pre.bg==='rich'?0:6,gari:pre.bg==='poor'?4:0,noodles:pre.bg==='poor'?0:5},food:[],wardrobe:[{outfit:myLook.outfit,pal:myLook.pal}],fit:0,deco:{wall:'cream',sheet:'gold',curtain:'none'},
     biz:null,flyers:0,posters:0,debts:[],requests:[],loanTaken:false,bursary:false,office:null,race:null};
-  if(pre.bg==='rich'){p.items.push('speaker','mirror')}
+  if(pre.bg==='rich'){p.items.push('speaker','mirror','umbrella')}
   const npcs=NOBOTS?[]:NPCS.map(([n,g,home,ints,pers],i)=>{const look=randomLook(g);const pg=pick(ALLPROGS);
     const h=makeHuman(look,{label:n});scene.add(h.g);const dd=BID[home].door;
     return{id:i,name:n,gender:g,prog:pg.name,col:pg.col,home,origHome:home,ints,pers,look,wealth:HT(home)==='royal'?'rich':HT(home)==='lodge'?pick(['poor','avg']):pick(['avg','avg','rich']),reliable:Math.random()<.7,
@@ -49,5 +49,7 @@ function assignMates(){const p=P(),rt=roomOf();
   const pool=S.npcs.filter(n=>n.gender===p.look.gender);
   const mates=shuffle(pool).slice(0,rt.beds-1);
   mates.forEach((n,i)=>{n.home=p.home;n.mate=true;n.met=true;n.friend=Math.max(n.friend,15);n.bed=i+1;const dd=BID[p.home].door;n.x=dd[0]+R(-40,40);n.y=dd[1]+R(4,30)*outDir(BID[p.home])});S.mates=mates}
-function msg(from,text,vn){const open=CHAT===from&&!$('sheet').hidden;S.msgs.unshift({from,chat:from,text,at:S.min,vn,read:open});if(open){drawChat();return}S.unread=unreadN();toast(`📱 ${from}: ${vn?'🎤 Voice note':text.length>60?text.slice(0,58)+'…':text}`)}
+/* safety net: one person can't flood your phone (max 3 texts from the same person per real minute, 12 in total) */
+const MSGRATE={};function msgFlood(from){if(typeof FAMILY!=='undefined'&&FAMILY.includes(from))return false;const now=Date.now(),L=(MSGRATE[from]=(MSGRATE[from]||[]).filter(t=>now-t<60000)),A=(MSGRATE._all=(MSGRATE._all||[]).filter(t=>now-t<60000));const npc=typeof S!=='undefined'&&S&&S.npcs&&S.npcs.some(n=>n.name===from);if(L.length>=(npc?3:6)||npc&&A.length>=12)return true;L.push(now);if(npc)A.push(now);return false}
+function msg(from,text,vn){if(msgFlood(from))return;const open=CHAT===from&&!$('sheet').hidden;S.msgs.unshift({from,chat:from,text,at:S.min,vn,read:open});if(open){drawChat();return}S.unread=unreadN();toast(`📱 ${from}: ${vn?'🎤 Voice note':text.length>60?text.slice(0,58)+'…':text}`)}
 const unreadN=()=>S.msgs.filter(m=>!m.read&&!m.mine).length;

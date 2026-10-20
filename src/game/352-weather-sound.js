@@ -31,11 +31,27 @@ const UMB_COL=[0x8e2a3a,0x2f6bb5,0xf4c430,0x2fa84f,0x111111,0xc8322b,0x6a3f8a];
 function umbrellaFor(m){if(m.userData.umb)return m.userData.umb;const g=new THREE.Group(),col=UMB_COL[Math.floor(Math.random()*UMB_COL.length)];
   const can=new THREE.Mesh(new THREE.ConeGeometry(.62,.26,10,1,true),lam(col));can.material.side=THREE.DoubleSide;can.position.y=1.98;g.add(can);
   const pole=new THREE.Mesh(cyl(.014,.014,.95,5),lam(0x222222));pole.position.y=1.48;g.add(pole);g.position.set(.12,0,.1);g.visible=false;m.add(g);m.userData.umb=g;return g}
+/* only people who own an umbrella carry one; you open yours yourself (☂️ button) */
+const npcUmb=n=>{let h=3;for(const c of String(n.id)+'umb')h=(h*31+c.charCodeAt(0))%997;return h%100<55};
 function umbrellasTick(on){const show=(c,ok)=>{const m=c&&c.mesh;if(!m)return;if(!on&&!m.userData.umb)return;const u=umbrellaFor(m);u.visible=on&&ok};
   const sit=c=>/^sit|type|swim|dive|lie|sleep/.test(c.pose||'')||c.lying;
-  try{const p=P();show(p,!p.inCar&&!p.onBus&&!sit(p))}catch(e){}
-  if(S&&S.npcs)S.npcs.forEach(n=>show(n,!n.hidden&&!sit(n)));
+  try{const p=P();show(p,!!p.umbOpen&&!p.inCar&&!p.onBus&&!sit(p))}catch(e){}
+  if(S&&S.npcs)S.npcs.forEach(n=>show(n,npcUmb(n)&&!n.hidden&&!sit(n)));
   try{if(typeof MP!=='undefined')for(const rp of MP.peers.values())show(rp,!rp.in)}catch(e){}}
+
+/* ---- getting wet: no open umbrella in the rain and you get soaked; indoors you slowly dry off ---- */
+BUFFS.soaked=['🌧️','Soaked to the skin','tense',150];BUFFS.cold=['🤧','Caught a cold','tense',600];
+function rainSoak(dt,ri){const p=P();if(!p)return;const out=!IS&&!p.inCar&&!p.onBus&&!(S.busy&&/shuttle|ride/i.test(S.busy.label||''));
+  const cover=p.umbOpen&&p.items.includes('umbrella');
+  if(out&&ri>.3&&!cover){S.wet=Math.min(100,(S.wet||0)+dt*ri*(p.spd>20?3:4.5));p.needs.hygiene=clamp((p.needs.hygiene??80)-dt*.35*ri);
+    if(S.wet>25&&!S.wetT){S.wetT=1;toast(p.items.includes('umbrella')?'🌧️ You\'re getting soaked! Tap ☂️ to open your umbrella.':'🌧️ You\'re getting soaked! Get indoors, or buy an umbrella at the Campus Mall.')}
+    if(S.wet>60&&!(S.buffs||[]).some(b=>b.k==='soaked')){addBuff('soaked');p.needs.fun=clamp(p.needs.fun-8);if(Math.random()<.25)S.coldDay=day()+1}}
+  else{S.wet=Math.max(0,(S.wet||0)-dt*(IS?2.5:.6));if(S.wet<10)S.wetT=0}
+  if(S.coldDay===day()&&hour()>=7&&!S.coldShown){S.coldShown=day();addBuff('cold');p.needs.energy=clamp(p.needs.energy-15);toast('🤧 You caught a cold from walking in the rain yesterday. Rest and drink something warm.')}
+  umbBtn(ri)}
+function umbBtn(ri){let b=$('umbB');const p=P(),want=!IS&&(ri>.2||p.umbOpen);
+  if(!b){b=document.createElement('button');b.id='umbB';b.className='glass';b.setAttribute('aria-label','Umbrella');b.onclick=()=>{const p=P();if(!p.items.includes('umbrella'))return toast('☂️ You don\'t have an umbrella. Buy one at the Campus Mall (GH₵35).');p.umbOpen=!p.umbOpen;toast(p.umbOpen?'☂️ Umbrella open':'Umbrella closed');umbrellasTick(WX.ri>.25&&!IS)};document.body.appendChild(b)}
+  b.hidden=!want||$('game').hidden;b.textContent=p.umbOpen?'☂️ Close':'☂️ Open';b.classList.toggle('no',!p.items.includes('umbrella'))}
 
 /* ---- called from lighting() every frame ---- */
 function weatherTick(dt){if(!S||!S.p)return;const w=weatherAt(S.min);
@@ -51,7 +67,7 @@ function weatherTick(dt){if(!S||!S.p)return;const w=weatherAt(S.min);
   WX.umbT-=dt;if(WX.umbT<=0){WX.umbT=.5;umbrellasTick(ri>.25&&!IS)}
   /* it started raining */
   const on=ri>.35;if(on&&!WX.was){toast(WX.storm?'⛈️ A storm is coming! Get indoors or grab your umbrella.':'🌧️ It\'s raining on campus.')}WX.was=on;
-  if(on&&!IS){const p=P();if(p.spd>20&&!p.inCar&&!p.onBus)p.needs.hygiene=clamp((p.needs.hygiene??80)-dt*.25*ri)}
+  rainSoak(dt,ri);
   try{hawkerTick();hustleTick()}catch(e){}
   SND.tick(dt)}
 

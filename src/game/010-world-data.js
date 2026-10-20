@@ -204,6 +204,7 @@ const SHOP=[
  {id:'microwave',name:'Microwave',price:520,desc:'Warm up leftovers and food from your cupboard'},
  {id:'laptop',name:'Laptop',price:3200,desc:'Do design gigs from your room (Phone → Hustles) and study online'},
  {id:'cupboard',name:'Kitchen cupboard',price:260,desc:'More space: stores up to 16 provision packs'},
+ {id:'umbrella',name:'Umbrella',price:35,desc:'Stay dry: open it yourself with ☂️ when it rains'},
  {id:'iron',name:'Pressing iron',price:90,desc:'Neat clothes: a little confidence boost before class'},
  {id:'dispenser',name:'Water dispenser',price:450,desc:'Cold and hot water. Refreshing on hot afternoons'}];
 function photoTex(i){const c=document.createElement('canvas');c.width=64;c.height=80;const g=c.getContext('2d');const sky=[['#7fb8e0','#f6d9a8'],['#f0a070','#3a2a50'],['#9ad7a0','#e8f2d0']][i%3];const gr=g.createLinearGradient(0,0,0,80);gr.addColorStop(0,sky[0]);gr.addColorStop(1,sky[1]);g.fillStyle=gr;g.fillRect(0,0,64,80);

@@ -29,7 +29,7 @@ function updateNPCs(dt){
     else if(n.lastPlan!==hk){n.lastPlan=hk;const np=planFor(n);if(n.hidden&&n.plan&&np.hide&&np.b===n.plan.b){n.plan=np;return}n.plan=np;const b=BID[n.plan.b];
       const pt=n.plan.spot?n.plan.spot():b.open?{x:R(b.x+30,b.x+b.w-30),y:R(b.y+30,b.y+b.h-30)}:{x:b.door[0]+R(-50,50),y:b.door[1]+(b.door[1]>b.y?R(6,30):R(-30,-6))};const q=freeSpot(pt.x,pt.y);n.tx=q.x;n.ty=q.y;n.needPath=true}
     if(n.needPath&&budget>0){budget--;n.needPath=false;n.path=findPath(G,n.x,n.y,n.tx,n.ty)}
-    const dT=Math.hypot(n.tx-n.x,n.ty-n.y);n.fast=dT>350&&!!n.path;
+    const dT=Math.hypot(n.tx-n.x,n.ty-n.y);n.fast=!!n.path&&(dT>1600||(typeof WX!=='undefined'&&WX.ri>.3&&!npcUmb(n)));
     if(n.path&&n.path.length&&S.talkN!==n&&crossWait(n,n.path[0].x,n.path[0].y)){n.pose=null;n.fast=false}
     else if(n.path&&n.path.length&&S.talkN!==n){const q=n.path[0],d=Math.hypot(q.x-n.x,q.y-n.y),st=(n.fast||n.hurry?150:62)*dt;
       if(d<=st){n.x=q.x;n.y=q.y;n.path.shift();if(!n.path.length)n.path=null}
