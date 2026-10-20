@@ -23,12 +23,12 @@ function hailWave(k){const kind=k===1?'taxi':'trotro',c=passingCar(k),h=hailSpot
 function hailRelease(){TRAFFIC.forEach(c=>{if(!c.hired||(S.ride&&S.ride.fromCar===c))return;c.hired=false;c.d=(c.d||0)+perim(c.route)/2;c.g=c.kind===3?makeTrotro():makeCar(0xf4c430,true)})}
 function hailSheet(kind){const R=S.ride,pend=R&&R.hail&&!R.dest;if(!pend)return toast('Wave down a taxi or trotro that is coming first.');S.paused=true;openSheet();const p=P();
   const places=B.filter(b=>!b.open||['taxi','trotro','terminal','market','night','square'].includes(b.id)).map(b=>{const door={x:b.door[0],y:b.door[1]},RP=ringPath({x:p.x,y:p.y},door),len=pathLen([RP.from,...RP.mid,RP.to]),walk=Math.round(Math.hypot(RP.to.x-door.x,RP.to.y-door.y));
-    return{b,len,walk,price:kind==='trotro'?TROTRO_FARE:Math.round(15+len*.011)}}).filter(o=>o.len>350).sort((a,b)=>a.b.name.localeCompare(b.b.name));
+    return{b,len,walk,price:kind==='trotro'?TROTRO_FARE:Math.round(15+len/KM*.011)}}).filter(o=>o.len>350).sort((a,b)=>a.b.name.localeCompare(b.b.name));
   $('sheetIn').innerHTML=`<div class="eyebrow">${kind==='taxi'?'🚕 Taxi':'🚐 Trotro'} · by the roadside</div><h3>✋ Where are you going?</h3><p style="font-size:13px;opacity:.85">${kind==='taxi'?'A "dropping" is just for you, priced by distance.':`Shared with other passengers. Flat fare ${cedi(TROTRO_FARE)}.`} They don't enter campus, so campus places mean a short walk from the road.</p>
    <input id="hlQ" placeholder="🔎 Search: Ayeduase, Library, Kotei…" style="width:100%;margin-bottom:6px"><div class="list" id="hlL"></div><button class="ghost sm" id="bye">Cancel</button>`;
   const draw=q=>{$('hlL').innerHTML=places.filter(o=>!q||o.b.name.toLowerCase().includes(q)).map(o=>`<div class="item"><div class="grow"><b>${esc(o.b.name)}</b><small>${o.walk>200?`then ~${Math.max(1,Math.round(o.walk/110))} min walk`:'right by the road'}</small></div><button class="btn sm" data-hl="${o.b.id}">${cedi(o.price)}</button></div>`).join('');
     $('hlL').querySelectorAll('[data-hl]').forEach(x=>x.onclick=()=>{const o=places.find(y=>y.b.id===x.dataset.hl);if(p.money<o.price)return toast(`Not enough on MoMo (${cedi(o.price)}).`);closeSheet();hailSet(o)})};
   draw('');$('hlQ').oninput=e=>draw(e.target.value.trim().toLowerCase());$('hlQ').onkeydown=e=>e.stopPropagation();$('bye').onclick=closeSheet}
 function hailSet(o){const r=S.ride;if(!r||!r.hail)return;const pk=r.pts[r.pts.length-1],b=o.b,door={x:b.door[0],y:b.door[1]+(b.door[1]>b.y?22:-22)},RP=ringPath(pk,door);
-  r.dest=b.id;r.price=o.price;r.mins=Math.round(2+o.len/320);r.drive=[{x:r.pos.x,y:r.pos.y},...RP.mid,RP.to];r.door=door;
+  r.dest=b.id;r.price=o.price;r.mins=Math.round(2+o.len/KM/320);r.drive=[{x:r.pos.x,y:r.pos.y},...RP.mid,RP.to];r.door=door;
   toast(r.app==='taxi'?`"${b.name}? Okay, enter." 🚕 ${cedi(o.price)}`:`The mate: "${b.name.split(' ')[0]}! Enter, enter!" 🚐`);acts(true)}

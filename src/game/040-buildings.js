@@ -117,7 +117,7 @@ function buildArch(b,s,cx,cz,w,d,f){
     if(top){const [ty,tw,td]=top,iw=tw-.32,idp=td-.32,hs=(Math.abs(Math.sin(b.x*.37+b.y*.11))*1000)|0;bx('deck',iw,.03,idp,cx,ty+.005,cz);
       const fz=cz+f*idp*.18;if(iw>2.2){for(let i=0;i<Math.min(4,Math.floor(iw/1.6));i++){const x=cx-iw/2+.6+i*.9;bx('white',.55,.38,.42,x,ty+.2,fz);add('dark',AG.cyl,x,ty+.4,fz,0,.3,.02,.3)}}
       bx(style==='sports'?'metal':'wall',.9,.75,.8,cx+iw/2-.7,ty+.38,cz+f*(idp/2-.6));bx('dark',.4,.6,.02,cx+iw/2-.7,ty+.32,cz+f*(idp/2-.6)+f*.41);bx('trim',1,.06,.9,cx+iw/2-.7,ty+.78,cz+f*(idp/2-.6));
-      if(hs%3!==0&&iw>3){const rows=Math.max(1,Math.floor((idp-1.2)/1.1));for(let r=0;r<rows;r++)for(let x=cx-iw/2+.8;x<cx+iw/2-1.9;x+=1.05){const z=cz-f*(idp/2-.75-r*1.1);if(Math.abs(z-(cz-f*(d/2-.8)))<.5&&Math.abs(x-cx+w/2-1.1)<1.2)continue;add('solar',AG.box,x,ty+.22,z,0,.95,.04,.62,f*.32);add('metal',AG.box,x,ty+.1,z,0,.05,.18,.05)}}}}
+      if(hs%2===0&&iw>3){const rows=Math.min(2,Math.max(1,Math.floor((idp-1.2)/1.1)));for(let r=0;r<rows;r++)for(let x=cx-iw/2+.8;x<Math.min(cx+iw/2-1.9,cx-iw/2+.8+6.4);x+=1.05){const z=cz-f*(idp/2-.75-r*1.1);if(Math.abs(z-(cz-f*(d/2-.8)))<.5&&Math.abs(x-cx+w/2-1.1)<1.2)continue;add('solar',AG.box,x,ty+.22,z,0,.95,.04,.62,f*.32);add('metal',AG.box,x,ty+.1,z,0,.05,.18,.05)}}}}
   // merge into one mesh per material
   const mats=amats(b),out=[];for(const k in B){const m=new THREE.Mesh(mergeGeos(B[k]),mats[k]);m.castShadow=SHADOWS&&!/glass|cur|neon/.test(k);m.receiveShadow=SHADOWS;s.add(m);out.push(m)}
   return{signY,signOut,signW,signBg,meshes:out}}
@@ -238,10 +238,10 @@ const solidC=(x,y,r)=>SOLIDS.push({t:0,x,y,r}),solidR=(x1,y1,x2,y2)=>SOLIDS.push
   const bx=new THREE.Box3(),cv3=new THREE.Vector3();
   for(let i=D0;i<s.children.length;i++){const o=s.children[i];if(o.userData.noShift)continue;let px=o.position.x,pz=o.position.z;
     if(!o.isLight){bx.setFromObject(o);if(!bx.isEmpty()){bx.getCenter(cv3);px=cv3.x;pz=cv3.z}}
-    const id=areaOf(px/U+MW/2,pz/U+MH/2);if(!id){o.visible=false;continue}const d=delta(id);o.position.x+=d[0]*U;o.position.z+=d[1]*U}
-  for(let i=S0;i<SOLIDS.length;i++){const o=SOLIDS[i];if(o.noShift)continue;const cx=o.t===1?(o.x1+o.x2)/2:o.x,cy=o.t===1?(o.y1+o.y2)/2:o.y,id=areaOf(cx,cy);if(!id)continue;const d=delta(id);
-    if(o.t===1){o.x1+=d[0];o.x2+=d[0];o.y1+=d[1];o.y2+=d[1]}else{o.x+=d[0];o.y+=d[1]}}
-  {const d=delta('parade');STAGE.sx+=d[0]*U;STAGE.sz+=d[1]*U;STAGE.lights.forEach(o=>o.x+=d[0]*U)}
+    const lx=px/U+MW/2,ly=pz/U+MH/2,id=areaOf(lx,ly);if(!id){o.visible=false;continue}const n=TA(id,lx,ly);o.position.x+=(n.x-lx)*U;o.position.z+=(n.y-ly)*U}
+  for(let i=S0;i<SOLIDS.length;i++){const o=SOLIDS[i];if(o.noShift)continue;const cx=o.t===1?(o.x1+o.x2)/2:o.x,cy=o.t===1?(o.y1+o.y2)/2:o.y,id=areaOf(cx,cy);if(!id)continue;const n=TA(id,cx,cy),dx=n.x-cx,dy=n.y-cy;
+    if(o.t===1){o.x1+=dx;o.x2+=dx;o.y1+=dy;o.y2+=dy}else{o.x+=dx;o.y+=dy}}
+  {const lx=STAGE.sx/U+MW/2,ly=STAGE.sz/U+MH/2,n=TA('parade',lx,ly),dx=(n.x-lx)*U,dz=(n.y-ly)*U;STAGE.sx+=dx;STAGE.sz+=dz;STAGE.lights.forEach(o=>o.x+=dx)}
 })();
 function fadeBuildings(px,py){B.forEach(b=>{if(b.open)return;const block=px>b.x-60&&px<b.x+b.w+60&&b.y>py-40&&b.y<py+320;if(block===b.faded)return;b.faded=block;
   b.meshes.forEach(m=>{if(m.material===WINLIT||m.material===WINDARK||m.material===WINROY){m.visible=!block;return}if(m._cs===undefined)m._cs=m.castShadow;m.castShadow=block?false:m._cs;const op0=m.material.userData.op??1;m.material.transparent=block||op0<1;m.material.opacity=block?.18:op0;m.material.depthWrite=!block;m.material.needsUpdate=true})})}

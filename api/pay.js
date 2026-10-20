@@ -1,10 +1,11 @@
 /* POST /api/pay — buy 💎 gems with real money through Paystack (MoMo or card, in Ghana cedis).
-   Body: { op:'packs' } | { op:'start', pack, back } → { url } (send the player there to pay) | { op:'check', ref } → { gems, added }
+   Body: { op:'packs' } | { op:'start', pack, back } → { url } (send the player there to pay) | { op:'check', ref } → { gems, added } | { op:'claim' } → { cash }
    Header: Authorization: Bearer <Firebase ID token>.
    Needs Vercel environment variables FIREBASE_SERVICE_ACCOUNT (already used by the gem bank) and PAYSTACK_SECRET_KEY
    (Paystack dashboard → Settings → API Keys & Webhooks). Without the Paystack key it answers 503 and the shop says "coming soon". */
 import { getAuth } from 'firebase-admin/auth';
-import { PACKS } from './_pay-rules.js';
+import { PACKS, claimOp } from './_pay-rules.js';
+import { getFirestore } from 'firebase-admin/firestore';
 import { adminApp, PS, psKey, psVerify, creditPayment } from './_paystack.js';
 
 export default async function handler(req, res) {
@@ -46,6 +47,13 @@ export default async function handler(req, res) {
     const v = await psVerify(ref);
     try { const reply = await creditPayment(app, uid, ref, v); return res.status(reply.error ? 400 : 200).json(reply); }
     catch (e) { return res.status(500).json({ error: 'The gem bank is busy. Try again.' }); }
+  }
+  if (body.op === 'claim') {
+    try {
+      const db = getFirestore(app), ref = db.doc(`wallets/${uid}`);
+      const reply = await db.runTransaction(async (tx) => { const w = await tx.get(ref); const out = claimOp(w.exists ? w.data() : null, Date.now()); if (out.wallet) tx.set(ref, out.wallet); return out.reply; });
+      return res.status(200).json(reply);
+    } catch (e) { return res.status(500).json({ error: 'The gem bank is busy. Try again.' }); }
   }
   return res.status(400).json({ error: 'Unknown request.' });
 }

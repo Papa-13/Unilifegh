@@ -10,12 +10,13 @@ const ZONES={c:{name:'Commercial Area',col:'#c8a57e',mini:'rgba(230,150,70,.55)'
   t:{name:'Tech Junction',col:'#a8997a',mini:'rgba(200,170,120,.45)',town:1,rects:[[0,0,600,1000]]},
   b:{name:'Bomso',col:'#a3956c',mini:'rgba(200,170,120,.45)',town:1,rects:[[600,0,1800,330]]},
   y:{name:'Ayigya',col:'#a3956c',mini:'rgba(200,170,120,.45)',town:1,rects:[[2400,0,1600,330]]},
-  n:{name:'Kentinkrono',col:'#a3956c',mini:'rgba(200,170,120,.45)',town:1,rects:[[4000,0,MW-4000,330]]},
-  a:{name:'Ayeduase',col:'#a89170',mini:'rgba(220,160,110,.45)',town:1,rects:[[4400,330,MW-4400,2470]]},
-  z:{name:'Gaza · Ayeduase New Site',col:'#a89170',mini:'rgba(220,160,110,.45)',town:1,rects:[[4400,2800,MW-4400,MH-2800]]},
-  o:{name:'Boadi',col:'#a89170',mini:'rgba(220,160,110,.45)',town:1,rects:[[3400,2800,1000,MH-2800]]},
-  k:{name:'Kotei',col:'#a89170',mini:'rgba(220,160,110,.45)',town:1,rects:[[2000,2800,1400,MH-2800]]},
-  g:{name:'Gyinyaase',col:'#a89170',mini:'rgba(220,160,110,.45)',town:1,rects:[[0,1000,600,1800],[0,2800,2000,MH-2800]]}};
+  n:{name:'Kentinkrono',col:'#a3956c',mini:'rgba(200,170,120,.45)',town:1,rects:[[4000,0,5400-4000,330]]},
+  a:{name:'Ayeduase',col:'#a89170',mini:'rgba(220,160,110,.45)',town:1,rects:[[4400,330,5400-4400,2470]]},
+  z:{name:'Gaza · Ayeduase New Site',col:'#a89170',mini:'rgba(220,160,110,.45)',town:1,rects:[[4400,2800,5400-4400,4000-2800]]},
+  o:{name:'Boadi',col:'#a89170',mini:'rgba(220,160,110,.45)',town:1,rects:[[3400,2800,1000,4000-2800]]},
+  k:{name:'Kotei',col:'#a89170',mini:'rgba(220,160,110,.45)',town:1,rects:[[2000,2800,1400,4000-2800]]},
+  g:{name:'Gyinyaase',col:'#a89170',mini:'rgba(220,160,110,.45)',town:1,rects:[[0,1000,600,1800],[0,2800,2000,4000-2800]]}};
+Object.values(ZONES).forEach(Z=>Z.rects=Z.rects.map(r=>r.map(KMf)));
 function zoneOf(x,y){for(const k in ZONES)if(ZONES[k].rects.some(([a,b,w,h])=>x>=a&&x<a+w&&y>=b&&y<b+h))return ZONES[k].name;return 'Campus'}
 (function buildZones(){
   /* ground: lawns on campus (with mowing stripes), interlocking pavers in the Commercial Area,
@@ -33,11 +34,11 @@ function zoneOf(x,y){for(const k in ZONES)if(ZONES[k].rects.some(([a,b,w,h])=>x>
     const m=mesh(new THREE.PlaneGeometry(w*U,h*U),new THREE.MeshLambertMaterial({map:t}),wx(x+w/2),-.012,wz(y+h/2),scene);m.rotation.x=-Math.PI/2})});
   const arch=(x,y,hw,text,col)=>{[-1,1].forEach(sd=>{solidC(x+sd*(hw+9),y,7);mesh(cyl(.16,.2,4,10),lam(0xe8e2d4),wx(x+sd*(hw+9)),2,wz(y),scene);mesh(sph(.24,10,8),lam(col),wx(x+sd*(hw+9)),4.1,wz(y),scene)});
     const w=(hw*2+18)*U+.6;box(w,.5,.3,col,wx(x),3.7,wz(y),scene);[1,-1].forEach(f=>{const p=mesh(new THREE.PlaneGeometry(w-.2,.42),new THREE.MeshBasicMaterial({map:textTex(text,{w:1024,h:90,font:'900 50px system-ui, sans-serif',color:'#ffffff',stroke:false,bg:'#'+col.toString(16).padStart(6,'0')})}),wx(x),3.7,wz(y)+f*.16,scene);if(f<0)p.rotation.y=Math.PI})};
-  arch(600,440,RHW,'AKWAABA UNIVERSITY · MAIN GATE',0x8e2a3a);arch(2000,440,RHW,'AKWAABA UNIVERSITY',0x8e2a3a);arch(3400,440,RHW,'AKWAABA UNIVERSITY',0x8e2a3a);
-  arch(4400,1100,RHW,'AYEDUASE GATE',0x7a4a2a);arch(600,2890,RHW,'WELCOME TO GYINYAASE',0x7a4a2a);arch(2000,2890,RHW,'KOTEI',0x7a4a2a);arch(3400,2890,RHW,'BOADI',0x7a4a2a);arch(4400,2890,RHW,'GAZA · NEW SITE',0x7a4a2a);
-  arch(2000,230,RHW,'BOMSO',0x7a4a2a);arch(3400,230,RHW,'AYIGYA',0x7a4a2a);arch(4400,230,RHW,'KENTINKRONO',0x7a4a2a);
+  arch(KR(600,440).x,KR(600,440).y,RHW,'AKWAABA UNIVERSITY · MAIN GATE',0x8e2a3a);arch(KR(2000,440).x,KR(2000,440).y,RHW,'AKWAABA UNIVERSITY',0x8e2a3a);arch(KR(3400,440).x,KR(3400,440).y,RHW,'AKWAABA UNIVERSITY',0x8e2a3a);
+  arch(KR(4400,1100).x,KR(4400,1100).y,RHW,'AYEDUASE GATE',0x7a4a2a);arch(KR(600,2890).x,KR(600,2890).y,RHW,'WELCOME TO GYINYAASE',0x7a4a2a);arch(KR(2000,2890).x,KR(2000,2890).y,RHW,'KOTEI',0x7a4a2a);arch(KR(3400,2890).x,KR(3400,2890).y,RHW,'BOADI',0x7a4a2a);arch(KR(4400,2890).x,KR(4400,2890).y,RHW,'GAZA · NEW SITE',0x7a4a2a);
+  arch(KR(2000,230).x,KR(2000,230).y,RHW,'BOMSO',0x7a4a2a);arch(KR(3400,230).x,KR(3400,230).y,RHW,'AYIGYA',0x7a4a2a);arch(KR(4400,230).x,KR(4400,230).y,RHW,'KENTINKRONO',0x7a4a2a);
   const pylon=(x,y,text,col)=>{solidC(x,y,6);[-.5,.5].forEach(dx=>mesh(cyl(.05,.05,1.6,6),lam(0x666666),wx(x)+dx,.8,wz(y),scene));const p=mesh(new THREE.PlaneGeometry(1.6,.7),new THREE.MeshBasicMaterial({map:textTex(text,{w:512,h:220,font:'900 46px system-ui, sans-serif',color:'#ffffff',stroke:false,bg:'#'+col.toString(16).padStart(6,'0')}),side:THREE.DoubleSide}),wx(x),1.8,wz(y),scene)};
-  pylon(460,250,'TECH JUNCTION',0x2a2a2a);pylon(1700,250,'ACCRA–KUMASI ROAD',0x2a5f3a);pylon(3900,250,'ACCRA–KUMASI ROAD',0x2a5f3a);pylon(712,1118,'COMMERCIAL AREA',0x9b4a2e);pylon(2112,888,'ADMINISTRATION',0x2f4e6b);pylon(3512,888,'FACULTY AREA',0x2f4e6b);pylon(2360,1090,'HALLS OF RESIDENCE',0x8a5a2a);pylon(2112,2268,'SPORTS COMPLEX',0x2f7a4a);pylon(712,2268,'BOTANICAL GARDEN',0x3c7a3a);pylon(4480,1090,'AYEDUASE',0x7a4a2a);
+  pylon(KR(460,250).x,KR(460,250).y,'TECH JUNCTION',0x2a2a2a);pylon(KR(1700,250).x,KR(1700,250).y,'ACCRA–KUMASI ROAD',0x2a5f3a);pylon(KR(3900,250).x,KR(3900,250).y,'ACCRA–KUMASI ROAD',0x2a5f3a);pylon(KR(712,1118).x,KR(712,1118).y,'COMMERCIAL AREA',0x9b4a2e);pylon(KR(2112,888).x,KR(2112,888).y,'ADMINISTRATION',0x2f4e6b);pylon(KR(3512,888).x,KR(3512,888).y,'FACULTY AREA',0x2f4e6b);pylon(KR(2360,1090).x,KR(2360,1090).y,'HALLS OF RESIDENCE',0x8a5a2a);pylon(KR(2112,2268).x,KR(2112,2268).y,'SPORTS COMPLEX',0x2f7a4a);pylon(KR(712,2268).x,KR(712,2268).y,'BOTANICAL GARDEN',0x3c7a3a);pylon(KR(4480,1090).x,KR(4480,1090).y,'AYEDUASE',0x7a4a2a);
 })();
 (function buildLights(){const tex={},zebra=(len)=>{if(tex[len])return tex[len];const c=document.createElement('canvas');c.width=16;c.height=64;const g=c.getContext('2d');g.fillStyle='#f4f4f0';for(let y=0;y<64;y+=16)g.fillRect(0,y,16,8);
     const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(1,len/32);return tex[len]=new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false})};

@@ -32,15 +32,15 @@
   const free=(x,y,r)=>!onRoad(x,y,RHW*0+8)&&!inB(x,y,r)&&!nearStop(x,y)&&!solidAt(x,y,r)&&!JUNCS.some(J=>Math.hypot(J.x-x,J.y-y)<RHW+70);
   /* royal palm avenues along the main campus drives (just outside the drains) */
   const avenue=(fixed,from,to,horiz)=>{for(let t=from;t<=to;t+=120)[-1,1].forEach(sd=>{const off=RHW+5+WW+DW+12,x=horiz?t:fixed+sd*off,y=horiz?fixed+sd*off:t;if(!free(x,y,10)||drives.some(d=>Math.abs(d-x)<40&&horiz))return;solidC(x,y,7);nicePalm(sc,x,y,true)})};
-  avenue(2000,420,2080,false);avenue(1000,2080,4320,true);avenue(3400,420,2080,false);avenue(2150,2080,3320,true);
+  avenue(2000*KM,420*KM,2080*KM,false);avenue(1000*KM,2080*KM,4320*KM,true);avenue(3400*KM,420*KM,2080*KM,false);avenue(2150*KM,2080*KM,3320*KM,true);
   /* flowering bushes along the front of campus buildings */
   B.forEach(b=>{if(b.open||!campus(b.door[0],b.door[1]))return;const fy=b.door[1]>b.y+b.h/2?b.y+b.h+14:b.y-14;
     for(let x=b.x+14;x<b.x+b.w-10;x+=34){if(Math.abs(x-b.door[0])<44)continue;if(onRoad(x,fy,4)||solidAt(x,fy,4))continue;niceBush(sc,x,fy,null,.9+R()*.3,R()*6)}});
   /* shady trees with round benches on the campus lawns */
-  let nB=0;for(let i=0;i<500&&nB<22;i++){const x=650+R()*3700,y=380+R()*2380;if(!campus(x,y)||!free(x,y,40))continue;solidC(x,y,16);niceTree(sc,x,y,1.15,R()<.45?'flame':'mango');
+  let nB=0;for(let i=0;i<900&&nB<44;i++){const x=(650+R()*3700)*KM,y=(380+R()*2380)*KM;if(!campus(x,y)||!free(x,y,40))continue;solidC(x,y,16);niceTree(sc,x,y,1.15,R()<.45?'flame':'mango');
     const bm=new THREE.Mesh(treeBenchTpl(),envMat('tree'));bm.position.set(wx(x),0,wz(y));sc.add(bm);nB++}
   /* bushes scattered on lawns and road verges */
-  for(let i=0,n=0;i<900&&n<140;i++){const x=40+R()*(MW-80),y=40+R()*(MH-80);if(!free(x,y,18))continue;niceBush(sc,x,y,campus(x,y)?null:'hib',.8+R()*.5,R()*6);n++}
+  for(let i=0,n=0;i<1800&&n<300;i++){const x=40+R()*(MW-80),y=40+R()*(MH-80);if(!free(x,y,18))continue;niceBush(sc,x,y,campus(x,y)?null:'hib',.8+R()*.5,R()*6);n++}
   /* black polytanks on steel stands behind hostels and halls */
   B.forEach(b=>{if(b.open||!(b.home||/hostel|hall|lodge|annex|villa|residence/i.test(b.name)))return;const back=b.door[1]>b.y+b.h/2?b.y-16:b.y+b.h+16,x=b.x+b.w-22;if(onRoad(x,back,10)||solidAt(x,back,8))return;
     const g=new THREE.Group();g.position.set(wx(x),0,wz(back));[-1,1].forEach(a=>[-1,1].forEach(c=>box(.04,1.1,.04,0x555a5e,a*.28,.55,c*.28,g)));box(.7,.05,.7,0x555a5e,0,1.1,0,g);

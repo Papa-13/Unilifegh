@@ -77,7 +77,7 @@ To lift the 100 simultaneous connection limit, switch the Firebase project to th
 3. Vercel → Project → **Settings → Environment Variables**: add `PAYSTACK_SECRET_KEY` = that key, then **Redeploy**.
 4. In the same Paystack page set the **Webhook URL** to `https://<your site>/api/paystack-webhook`.
 5. Paste the updated `firebase/firestore.rules` (adds `payments`) into Firestore → Rules → Publish.
-Packs (api/_pay-rules.js): GH₵1 → 5 · GH₵2 → 11 · GH₵5 → 30 · GH₵10 → 65 · GH₵20 → 140 · GH₵50 → 380 gems.
+Packs (api/_pay-rules.js): GH₵1 → 5 · GH₵2 → 11 · GH₵5 → 30 · GH₵10 → 65 + GH₵1,000 in-game · GH₵20 → 140 + GH₵3,000 · GH₵50 → 380 + GH₵10,000 gems. The in-game cedis wait on the server (wallets.cashOwed) until the game claims them.
 Until the key is set, the in-game Gem Shop shows "coming soon".
 
 ## Saves

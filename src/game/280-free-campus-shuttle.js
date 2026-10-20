@@ -1,5 +1,5 @@
 /* ================= free campus shuttle ================= */
-const SH_ROUTE=[[600,330],[4400,330],[4400,1000],[2000,1000],[2000,2150],[4400,2150],[4400,2800],[600,2800]];
+const SH_ROUTE=KP([[600,330],[4400,330],[4400,1000],[2000,1000],[2000,2150],[4400,2150],[4400,2800],[600,2800]]);
 function projD(rt,x,y){let acc=0,best=0,bd=1e9;for(let i=0;i<rt.length;i++){const a=rt[i],b=rt[(i+1)%rt.length],L=Math.hypot(b[0]-a[0],b[1]-a[1]);
   const t=clamp(((x-a[0])*(b[0]-a[0])+(y-a[1])*(b[1]-a[1]))/(L*L),0,1),px=a[0]+(b[0]-a[0])*t,py=a[1]+(b[1]-a[1])*t,dd=Math.hypot(px-x,py-y);if(dd<bd){bd=dd;best=acc+t*L}acc+=L}return best}
 const SH_PER=perim(SH_ROUTE);
@@ -31,10 +31,10 @@ SH_STOPS.forEach(st=>{let tight=solidAt(st.sx,st.sy,10)||B.some(b=>!b.open&&st.s
   ROADS.forEach(([rx,ry,w,h])=>{const horiz=w>h;for(let t=150;t<(horiz?w:h)-50;t+=300){const side=(Math.round(t/300)%2)?1:-1,x=horiz?rx+t:rx+w/2+side*(w/2+14),y=horiz?ry+h/2+side*(h/2+14):ry+t;
     if(onRoad(x,y,0)||nearB(x,y,12)||nearStop(x,y)||solidAt(x,y,14)||JUNCS.some(J=>Math.hypot(J.x-x,J.y-y)<70))continue;solidC(x,y,5);niceLamp(sc,x,y,horiz?(side>0?Math.PI/2:-Math.PI/2):(side>0?Math.PI:0))}});
   // trees and palms in open grass
-  let n=0;for(let y=50;y<MH-40;y+=100)for(let x=50;x<MW-40;x+=100){if(n>230)break;const px=x+(rnd()-.5)*60,py=y+(rnd()-.5)*60;
+  let n=0;for(let y=50;y<MH-40;y+=100)for(let x=50;x<MW-40;x+=100){if(n>520)break;const px=x+(rnd()-.5)*60,py=y+(rnd()-.5)*60;
     if(rnd()<.5&&!onRoad(px,py,26)&&!nearB(px,py,45)&&!nearStop(px,py)&&!solidAt(px,py,30)){rnd()<.3?palm(px,py):tree(px,py,.8+rnd()*.4);n++}}
   // evening lights in the new areas
-  [[2075,1150],[1000,1590],[1500,2550],[3150,1300],[2075,2250]].forEach(([x,y])=>{const L=new THREE.PointLight(0xffc77a,0,12,1.6);L.position.set(wx(x),2.8,wz(y));sc.add(L);nightLights.push(L)});
+  [[2075,1150],[1000,1590],[1500,2550],[3150,1300],[2075,2250]].map(([x,y])=>[x*KM,y*KM]).forEach(([x,y])=>{const L=new THREE.PointLight(0xffc77a,0,12,1.6);L.position.set(wx(x),2.8,wz(y));sc.add(L);nightLights.push(L)});
 })();
 const BUSES=[0,1/6,2/6,3/6,4/6,5/6].map(o=>({d:o*SH_PER,wait:0,last:-1,at:-1,g:makeBus()}));
 SH_STOPS.forEach(st=>{const q=along(SH_ROUTE,st.d);st.fx=q.dx;st.fy=q.dy});

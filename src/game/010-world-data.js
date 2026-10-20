@@ -1,8 +1,13 @@
 /* ================= world data ================= */
-const MW=5400,MH=4000,U=0.028,MINPS=1,SPEEDS=[0,1,3,8];
+/* KM: the campus is drawn 1.5x bigger than the original plan (more space between buildings, bigger buildings and grounds).
+   Coordinates written in the code are on the original plan; KM() / KP() turn them into map coordinates. */
+const KM=1.5,KMf=v=>v*KM,KP=a=>a.map(q=>Array.isArray(q)?[q[0]*KM,q[1]*KM,...q.slice(2)]:q*KM);
+/* KR: like KP for a single point, but things that sit beside a road (hawkers, signs, gates) keep their distance to it */
+const KR=(x,y)=>{const ax=[600,2000,3400,4400],ay=[330,1000,2150,2800,3400],f=(v,L)=>{const r=L.find(q=>Math.abs(v-q)<=220);return r!=null?r*KM+(v-r):v*KM};return{x:f(x,ax),y:f(y,ay)}};
+const MW=5400*KM,MH=4000*KM,U=0.028,MINPS=1,SPEEDS=[0,1,3,8];
 const wx=x=>(x-MW/2)*U, wz=y=>(y-MH/2)*U;
 /* the road grid: h = [y, from x, to x] (y=330 is the Accra–Kumasi Road, 2800 the Ayeduase–Kotei Road, 3400 the town road), v = x of full-height roads */
-const MAPR={h:[[330,0,MW],[1000,600,MW],[2150,600,MW],[2800,0,MW],[3400,0,MW]],v:[600,2000,3400,4400]};
+const MAPR={h:[[330,0,5400],[1000,600,5400],[2150,600,5400],[2800,0,5400],[3400,0,5400]].map(r=>r.map(KMf)),v:[600,2000,3400,4400].map(KMf)};
 const B=[
  /* KNUST-style: Accra–Kumasi Road on top; Tech Junction & Commercial Area (west), Administration, halls and Parade Grounds (centre),
     Faculty Area (east, next to Ayeduase), sports (south); hostels spread over Bomso, Ayigya, Kentinkrono, Ayeduase, Gaza, Boadi, Kotei and Gyinyaase */
@@ -68,12 +73,15 @@ const B=[
  {id:'ayigya',name:'Ayigya Grace Hostel',x:2600,y:20,w:280,h:165,ht:3.2,c:0xf2e6d8,roof:0x7b7f84,door:[2740,203],zone:'r',home:1},
  {id:'nyamedua',name:'Nyame Dua Hostel · Ayigya',x:3010,y:15,w:300,h:170,ht:4,c:0xcfd8e8,roof:0x9a5a32,door:[3160,203],zone:'r',home:1},
  {id:'kent',name:'Kentinkrono Gardens',x:4600,y:15,w:300,h:170,ht:4,c:0xe6c8c8,roof:0x2f6b3a,door:[4750,203],zone:'r',home:1}];
+/* scale every place to the bigger campus; landmark buildings get taller too */
+B.forEach(b=>{b.x*=KM;b.y*=KM;b.w*=KM;b.h*=KM;b.door=[b.door[0]*KM,b.door[1]*KM];if(b.ht&&!b.home)b.ht=+(b.ht*({greathall:1.35,lib:1.35,senate:1.3,mall:1.25,chapel:1.25,mosque:1.2}[b.id]||1.12)).toFixed(2)});
 /* where open areas and decorated places used to be (their props are built there, then moved) */
 const ORIG={garden:[60,370,260,200],night:[420,690,320,200],field:[820,690,360,240],trotro:[60,1040,260,170],square:[420,1040,320,200],lake:[1200,1040,290,200],court:[1520,1040,240,200],
   taxi:[60,1310,260,150],terminal:[420,1310,320,150],market:[820,1310,320,150],pool:[1200,1310,240,150],parade:[1840,370,280,870],club:[1520,1310,240,150]};
 function areaOf(x,y){let best=null,bd=71;for(const k in ORIG){const [ox,oy,w,h]=ORIG[k],dx=Math.max(ox-x,0,x-ox-w),dy=Math.max(oy-y,0,y-oy-h),d=Math.hypot(dx,dy);if(d<bd){bd=d;best=k}}return best}
-const delta=id=>[BID[id].x-ORIG[id][0],BID[id].y-ORIG[id][1]];
-function TA(id,x,y){const d=delta(id);return{x:x+d[0],y:y+d[1]}}
+/* a point drawn in an area's old place → the same spot in the area now (moved and stretched with it) */
+function TA(id,x,y){const b=BID[id],o=ORIG[id];return{x:b.x+(x-o[0])*b.w/o[2],y:b.y+(y-o[1])*b.h/o[3]}}
+const delta=id=>{const b=BID[id],o=ORIG[id];return[b.x-o[0],b.y-o[1]]};
 function T(x,y){const id=areaOf(x,y);return id?TA(id,x,y):{x,y}}
 const BID=Object.fromEntries(B.map(b=>[b.id,b]));
 const outDir=b=>b.door[1]>b.y?1:-1;

@@ -52,7 +52,7 @@ function cmDraw(){const cv2=$('cmc'),g=cv2.getContext('2d'),k=CM.s,X=x=>CM.ox+x*
   HROADS.forEach(([y,a,b2])=>{g.beginPath();g.moveTo(X(a),Y(y));g.lineTo(X(b2),Y(y));g.stroke()});VX.forEach(x=>{g.beginPath();g.moveTo(X(x),Y(0));g.lineTo(X(x),Y(MH));g.stroke()});g.setLineDash([]);
   // zone names
   g.textAlign='center';g.textBaseline='middle';g.font=`800 ${Math.max(11,Math.min(22,k*140))}px Figtree, system-ui`;g.fillStyle='rgba(255,255,255,.22)';
-  [['ACCRA–KUMASI ROAD',2700,265],['TECH JUNCTION',300,600],['BOMSO',1500,90],['AYIGYA',3200,90],['KENTINKRONO',4700,90],['COMMERCIAL AREA',1300,1700],['ADMINISTRATION',2700,940],['HALLS',2700,1600],['FACULTY AREA',3900,1300],['SPORTS',2700,2700],['BOTANICAL GARDEN',1000,2700],['AYEDUASE',4900,1600],['GYINYAASE',1000,3700],['KOTEI',2700,3700],['BOADI',3900,3700],['GAZA · NEW SITE',4900,3700]].forEach(([t,x,y])=>g.fillText(t,X(x),Y(y)));
+  [['ACCRA–KUMASI ROAD',2700,265],['TECH JUNCTION',300,600],['BOMSO',1500,90],['AYIGYA',3200,90],['KENTINKRONO',4700,90],['COMMERCIAL AREA',1300,1700],['ADMINISTRATION',2700,940],['HALLS',2700,1600],['FACULTY AREA',3900,1300],['SPORTS',2700,2700],['BOTANICAL GARDEN',1000,2700],['AYEDUASE',4900,1600],['GYINYAASE',1000,3700],['KOTEI',2700,3700],['BOADI',3900,3700],['GAZA · NEW SITE',4900,3700]].map(([t,x,y])=>[t,x*KM,y*KM]).forEach(([t,x,y])=>g.fillText(t,X(x),Y(y)));
   // shuttle stops
   SH_STOPS.forEach(st=>{g.fillStyle='#fff';g.beginPath();g.arc(X(st.sx),Y(st.sy),Math.max(2.5,k*14),0,7);g.fill();g.fillStyle='#8e2a3a';g.beginPath();g.arc(X(st.sx),Y(st.sy),Math.max(1.5,k*9),0,7);g.fill()});
   // buildings
