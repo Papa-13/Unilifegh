@@ -4,7 +4,13 @@ const BLD={lt:{W:10,D:7.6,wall:0xe7e1d4,floor:1},lib:{W:10,D:7.6,wall:0xe9e0cc,f
   club:{W:10,D:7.6,wall:0x1b1724,floor:3},lecoff:{W:6.4,D:5.2,wall:0xe9e1d0,floor:2},hkitchen:{W:7.6,D:5.6,wall:0xe9e4d8,floor:1},hbath:{W:7.4,D:5,wall:0xd8e6ea,floor:1},bank:{W:9,D:6.6,wall:0xeee8dc,floor:2},unity:{W:9,D:6.6,wall:0xe4e9ef,floor:2},
   senate:{W:10,D:7.6,wall:0xeee6d2,floor:2},greathall:{W:12,D:9,wall:0xe9dfc9,floor:2},hall:{W:12,D:9,wall:0xd7dde2,floor:3},phonehub:{W:7,D:5.6,wall:0xdfe6ee,floor:1},pharm:{W:7,D:5.6,wall:0xeef5ee,floor:1},shawarma:{W:7.6,D:5.6,wall:0xf3e3c8,floor:0},books:{W:7.6,D:5.6,wall:0xefe6d6,floor:2},mosque:{W:9,D:7,wall:0xf4f1e8,floor:2}};
 Object.keys(COLLEGES).forEach(c=>BLD[c]={W:10,D:7.6,wall:0xe6e1d4,floor:1});
-function addInPerson(look,label,x,z,ry,pose,o={}){const h=makeHuman(look,{label,labelColor:o.color||'#f6f0e8'});h.g.position.set(x,0,z);h.g.rotation.y=ry;IS.scene.add(h.g);
+function spotTaken(x,z,skip){if(!IS)return false;if(IS.people&&IS.people.some(q=>q!==skip&&q.mesh&&q.mesh.parent&&!q.gone&&Math.hypot(q.mesh.position.x-x,q.mesh.position.z-z)<.38))return true;const r=IS.spots&&IS.spots.seat;return !!(r&&IS.seatList&&IS.seatList.includes(r)&&skip!=='me'&&Math.hypot(r.x-x,r.z-z)<.38)}
+/* the nearest free alternative to a spot (another seat in the row, another treadmill); the spot itself if it is free */
+function freeAlt(sp,me){if(!sp||!IS||!IS.people)return sp;const T=(x,z)=>IS.people.some(q=>q.mesh&&q.mesh.parent&&!q.gone&&!q.mp&&Math.hypot(q.mesh.position.x-x,q.mesh.position.z-z)<.38);if(!T(sp.x,sp.z))return sp;
+  const pool=(sp.alt||(IS.seatList&&IS.seatList.includes(sp)?IS.seatList:null)||[]).filter(q=>q!==sp&&!T(q.x,q.z)).sort((a,b)=>Math.hypot(a.x-sp.x,a.z-sp.z)-Math.hypot(b.x-sp.x,b.z-sp.z));return pool[0]||sp}
+function addInPerson(look,label,x,z,ry,pose,o={}){
+  if(!o.lie&&IS&&IS.seatList&&IS.seatList.length&&spotTaken(x,z)){const q=IS.seatList.filter(q=>!spotTaken(q.x,q.z)).sort((a,b)=>Math.hypot(a.x-x,a.z-z)-Math.hypot(b.x-x,b.z-z))[0];if(q){x=q.x;z=q.z;ry=q.ry;if(q.ly!=null)o=Object.assign({},o,{y:q.ly})}else if(!label)return {mesh:{position:{x,z},parent:null},gone:1}}
+  const h=makeHuman(look,{label,labelColor:o.color||'#f6f0e8'});h.g.position.set(x,0,z);h.g.rotation.y=ry;IS.scene.add(h.g);
   if(!o.lie&&!o.noObst)IS.obst.push({x1:x-.17,x2:x+.17,z1:z-.17,z2:z+.17});const q={n:o.n||null,mesh:h.g,legs:h.legs,knees:h.knees,arms:h.arms,elbows:h.elbows,head:h.head,lids:h.lids,torso:h.torso,pose,phase:Math.random()*6,id:Math.random()*9,x,z,sleeping:!!o.lie,lying:!!o.lie,spotY:o.y||0};IS.people.push(q);return q}
 const staffLook=(g,o)=>Object.assign(randomLook(g),{bag:'none',extra:'none'},o||{});
 function lectureNow(){if(S&&S.p&&P().grad)return null;const w=wd(),h=hour();return TT[w]&&TT[w].find(([c,st])=>h>=st-.5&&h<st+2)}
@@ -22,7 +28,7 @@ function enterBuilding(id,back){fadeIn();S.shuttleWait=null;const BD=IS?(IS.budd
   if(!IS.win)IS.win={material:{color:new THREE.Color()}};
   const dz=D/2-.8;box(.06,2.1,1,lam(0x6b4a2e),-W/2+.08,1.05,dz,s);IS.objs.push({id:'door',x:-W/2+.55,z:dz,r:.8});
   const B_=(w,h,d,c,x,y,z,ob)=>{const m=box(w,h,d,c,x,y,z,s);if(ob)IS.obst.push({x1:x-w/2,x2:x+w/2,z1:z-d/2,z2:z+d/2});return m};
-  const seats=[];const here=S.npcs.filter(n=>(!n.hidden||id==='club')&&n.plan&&n.plan.b===id&&n!==BD);
+  const seats=[];IS.seatList=seats;const here=S.npcs.filter(n=>(!n.hidden||id==='club')&&n.plan&&n.plan.b===id&&n!==BD);
   const sign=(t,x,y,z,w=2.4,bg='#2f4e6b')=>mesh(new THREE.PlaneGeometry(w,.42),new THREE.MeshBasicMaterial({map:textTex(t,{font:'800 40px system-ui',color:'#fff',stroke:false,bg})}),x,y,z,s);
   let seatPose='sit';
   const LEC=COLLEGES[id]&&(lectureNow()||examNow()),own=id===P().col;
@@ -52,8 +58,9 @@ function enterBuilding(id,back){fadeIn();S.shuttleWait=null;const BD=IS?(IS.budd
   if(id==='gym'){box(W-1,1.8,.04,lam(0xbfd8e8),0,1.4,-D/2+.08,s);
     for(let i=0;i<3;i++){const x=-3+i*1.4;B_(.8,.25,1.8,0x2b2b2b,x,.13,-D/2+1.3,true);box(.8,.05,.06,0x888888,x,1.1,-D/2+.45,s)}
     B_(1.6,.45,.5,0x8e2a3a,2.2,.23,.8,true);[-.6,.6].forEach(dx=>box(.06,1.1,.06,0x666666,2.2+dx,.55,.4,s));
-    IS.spots.tread={x:-1.6,z:-D/2+1.4,ry:Math.PI};IS.spots.lift={x:2.2,z:1.4,ry:Math.PI};
-    [[-3,-D/2+1.4,'run'],[-4.4+2.8,-D/2+1.4,'run'],[0,1.6,'lift']].forEach(([x,z,ps],i)=>{const n=here[i];if(n)addInPerson(n.look,n.name,x,z,Math.PI,ps,{n});else if(hour()>=6&&hour()<21&&Math.random()<.6)addInPerson(Object.assign(randomLook(Math.random()<.5?'m':'f'),{outfit:pick(['track','jersey','athleisure','hoodie']),bag:'none'}),'',x,z,Math.PI,ps,{noObst:1})});sign('CAMPUS GYM · NO PAIN NO GAIN',0,2.6,-D/2+.1,4,'#2b2b2b')}
+    {const T3=[-3,-1.6,-.2].map(x=>({x,z:-D/2+1.4,ry:Math.PI}));IS.spots.tread=T3[1];T3[1].alt=T3;IS.spots.lift={x:2.2,z:1.4,ry:Math.PI};IS.spots.lift.alt=[IS.spots.lift,{x:0,z:1.6,ry:Math.PI}]}
+    /* other gym users take a random treadmill / the free weights; the player is given whichever machine is free when they start */
+    [[pick([-3,-.2]),-D/2+1.4,'run'],[-1.6,-D/2+1.4,'run'],[0,1.6,'lift']].slice(0,1+Math.floor(Math.random()*3)).forEach(([x,z,ps],i)=>{const n=here[i];if(n)addInPerson(n.look,n.name,x,z,Math.PI,ps,{n});else if(hour()>=6&&hour()<21&&Math.random()<.6)addInPerson(Object.assign(randomLook(Math.random()<.5?'m':'f'),{outfit:pick(['track','jersey','athleisure','hoodie']),bag:'none'}),'',x,z,Math.PI,ps,{noObst:1})});sign('CAMPUS GYM · NO PAIN NO GAIN',0,2.6,-D/2+.1,4,'#2b2b2b')}
   if(id==='salon'){for(let i=0;i<3;i++){const x=-2+i*2;box(.9,1.2,.04,lam(0xcfe3f0),x,1.5,-D/2+.08,s);B_(.6,.08,.6,0x222222,x,.5,-D/2+1.1,true);box(.6,.6,.08,0x222222,x,.85,-D/2+1.4,s);seats.push({x,z:-D/2+1.1,ry:Math.PI});if(i)addInPerson(staffLook(i===1?'m':'f',{outfit:i===1?'tee':'dress'}),i===1?'Barber Kobby':'Sister Abena',x+.55,-D/2+1.3,Math.PI*1.1,'talk')}
     sign('BARBER & SALON',0,2.4,-D/2+.1,2.8,'#9b3a6e')}
   if(id==='chapel'){box(.12,1.4,.08,0x8a6a4a,0,2,-D/2+.1,s);box(.7,.12,.08,0x8a6a4a,0,2.3,-D/2+.1,s);B_(2.4,.8,.8,0xf2efe8,0,.4,-D/2+1,true);
@@ -76,13 +83,6 @@ function enterBuilding(id,back){fadeIn();S.shuttleWait=null;const BD=IS?(IS.budd
     if(hour()>=9&&hour()<20)addInPerson(staffLook(Math.random()<.5?'m':'f',{outfit:'smock',pal:'kente',extra:'specs',grey:true}),'Guest Speaker',.9,-D/2+1.75,0,'talk',{color:'#ffd27a'});
     for(let r=0;r<4;r++)for(let i=0;i<8;i++){const x=-4.2+i*1.2,z=-.4+r*1.2;if(Math.abs(x)<.5)continue;B_(.5,.05,.45,0x8e2a3a,x,.47,z,true);box(.5,.5,.05,0x8e2a3a,x,.75,z+.22,s);seats.push({x,z,ry:Math.PI})}
     seatPose='sit';IS.spots.seat=seats[seats.length-3]}
-  if(id==='hall'){const line=(w,d,x,z)=>{const m=mesh(new THREE.PlaneGeometry(w,d),basic(0xf4f1ea),x,.013,z,s);m.rotation.x=-Math.PI/2};
-    const cm=mesh(new THREE.PlaneGeometry(7.2,3.8),lam(0xd9893a),-.6,.011,-.6,s);cm.rotation.x=-Math.PI/2;line(7.2,.05,-.6,-2.5);line(7.2,.05,-.6,1.3);line(.05,3.8,-4.2,-.6);line(.05,3.8,3,-.6);line(.05,3.8,-.6,-.6);
-    [-2.5,1.3].forEach(z=>mesh(cyl(.04,.04,2.4,8),lam(0x666666),-.6,1.2,z,s));box(.02,.7,3.8,new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:.45}),-.6,2,-.6,s);box(.03,.06,3.8,0xffffff,-.6,2.35,-.6,s);
-    for(let r=0;r<3;r++){B_(W-1,.35,.6,0x8a8f96,0,.18+r*.35,D/2-1.9+r*.6,true);for(let i=0;i<8;i++)seats.push({x:-4.2+i*1.2,z:D/2-1.9+r*.6,ry:Math.PI,ly:.36+r*.35})}
-    const ball=mesh(sph(.12,14,10),lam(0xf4f1ea),-1.8,1.6,-.4,s);let bt=0;IS.tick=dt=>{bt+=dt;ball.position.x=-.6+Math.sin(bt*1.6)*2.2;ball.position.y=1.2+Math.abs(Math.sin(bt*3.2))*1.4};
-    [[-3,-1.6],[-2,.4],[1.2,-1.4],[2.2,.5]].forEach(([x,z],i)=>addInPerson(staffLook(i%2?'f':'m',{outfit:'jersey',pal:i<2?'ankara':'denim'}),i<2?'Team Gold':'Team Blue',x,z,i<2?Math.PI/2:-Math.PI/2,'celebrate'));
-    sign('SPORTS HALL · INTER-COLLEGE VOLLEYBALL',0,3,-D/2+.1,5.6,'#2b6f8e');seatPose='sit';IS.spots.seat=seats[4]}
   if(id==='phonehub'){B_(3.4,.95,.6,0x2a2a2a,0,.48,-D/2+1.6,true);box(3.4,.04,.62,new THREE.MeshLambertMaterial({color:0xbfe3f0,transparent:true,opacity:.5}),0,.98,-D/2+1.6,s);
     for(let r=0;r<3;r++)for(let k=0;k<7;k++){box(.18,.34,.03,0x111111,-1.8+k*.6,1.3+r*.5,-D/2+.1,s);box(.15,.28,.01,basic([0x6fa8dc,0xe8b24a,0x9fe0b0,0xf3a6c8][(r+k)%4]),-1.8+k*.6,1.3+r*.5,-D/2+.12,s)}
     box(.5,.03,.35,0x222222,1.2,1.0,-D/2+1.6,s);const lid=box(.5,.32,.02,0x222222,1.2,1.16,-D/2+1.45,s);lid.rotation.x=-.25;
@@ -175,7 +175,7 @@ function enterBuilding(id,back){fadeIn();S.shuttleWait=null;const BD=IS?(IS.budd
     {const h=hour(),busy={lib:[8,22,5],canteen:[7,20,5],shawarma:[11,23,3],books:[9,18,2],print:[8,19,2]}[id]||(COLLEGES[id]&&!LEC?[8,18,3]:null);
       if(busy&&h>=busy[0]&&h<busy[1]){const rest=free.slice(here.length).sort(()=>Math.random()-.5).slice(0,busy[2]+Math.floor(Math.random()*2));
         rest.forEach(q=>addInPerson(randomLook(Math.random()<.5?'m':'f'),'',q.x,q.z,q.ry,id==='lib'||COLLEGES[id]?pick(['sitWrite','sitWrite','phone','type']):seatPose,{y:q.ly,noObst:1}))}}
-    seats.forEach(q=>{if(['mosque','clinic','salon','office','senate','greathall','hall','phonehub','pharm','shawarma'].includes(id))return;if(id==='lecoff'){B_(.45,.05,.45,0x8e2a3a,q.x,.47,q.z,true);box(.45,.45,.05,0x8e2a3a,q.x,.72,q.z+.22,s);return}if(!LEC&&id!=='chapel'&&id!=='canteen')B_(.42,.05,.42,0x2b2b2b,q.x,.47,q.z,true)})}
+    seats.forEach(q=>{if(['mosque','clinic','salon','office','senate','greathall','phonehub','pharm','shawarma'].includes(id))return;if(id==='lecoff'){B_(.45,.05,.45,0x8e2a3a,q.x,.47,q.z,true);box(.45,.45,.05,0x8e2a3a,q.x,.72,q.z+.22,s);return}if(!LEC&&id!=='chapel'&&id!=='canteen')B_(.42,.05,.42,0x2b2b2b,q.x,.47,q.z,true)})}
   if(BD&&!IS.buddy&&id!=='hbath'){IS.buddy=BD;addInPerson(BD.look,BD.name+' · with you',-W/2+1.4,dz-.35,.7,'talk',{n:BD})}
   if(id==='lecoff'){const li=S.lecIdx||0;if(li===1&&S.flags.hx===1&&!S.flags.resolved&&!IS.buddy)setTimeout(()=>story(`<div class="eyebrow">${BADLEC}'s office</div><h3>He looks up slowly.</h3><p class="scene">"Ah, you came alone. Have you thought about what I said?" You don't sit down. You say you just came to ask about the course, and you walk out.</p><p>Next time, bring a friend with you. You can report him confidentially at Student Affairs & SRC.</p>`,[['Leave','',()=>leaveRoom()]]),500);
     else if(IS.buddy)setTimeout(()=>toast(`With ${IS.buddy.name} beside you, ${li?BADLEC:GOODLEC} keeps the meeting professional and helpful.`),400)}

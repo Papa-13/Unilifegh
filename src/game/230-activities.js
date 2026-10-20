@@ -34,6 +34,8 @@ function animFor(label){const L=label.toLowerCase(),sp=(IS&&IS.spots)||{};
   if(/playing basketball|shooting hoops/i.test(L)&&!IS)return{pose:'idle',game:'basketball'};
   if(/football/.test(L))return{pose:'kick'};
   if(/basketball/.test(L))return{pose:'dribble'};
+  if(/playing volleyball/.test(L)&&!IS)return{pose:'cheer',spot:(()=>{const b=BID.volley;return{x:b.x+b.w*.3,y:b.y+b.h*.5,ry:-Math.PI/2}})()};
+  if(/watching volleyball/.test(L)&&!IS)return{pose:'sit',spot:(()=>{const b=BID.volley;return{x:b.x+b.w*.22,y:b.y+b.h-18,ry:0,ly:.2}})()};
   if(/jogging/.test(L))return{pose:'run',path:'track'};
   if(/walking by the lake/.test(L))return{pose:'walk',path:'lake'};
   if(/working out/.test(L))return{pose:'lift',spot:sp.lift};
@@ -56,6 +58,7 @@ function animFor(label){const L=label.toLowerCase(),sp=(IS&&IS.spots)||{};
   return{pose:'idle'}}
 function doAct(label,mins,fx){if(!S||S.busy){applyAct(label,mins,fx);return}const a=Object.assign({},animFor(label),{mins,fx});startBusy(label,a,0,()=>{const r=S.lastGame;applyAct(label,mins,fx);if(r){S.lastGame=null;ev('game',r);try{if(S.hallFinal&&!S.hallFinal.done&&r.kind==='football')hallFinalResult(r)}catch(e){console.error(e)}if(r.win>0){S.wins++;addBuff('won');P().needs.fun=clamp(P().needs.fun+8)}setTimeout(()=>toast(r.txt),60)}})}
 function startBusy(label,a,dur,done){
+  if(IS&&a&&a.spot&&!a._walked&&typeof freeAlt==='function'){const f=freeAlt(a.spot);if(f!==a.spot){a=Object.assign({},a,{spot:f});if(a.spot===f&&IS.spots.seat&&IS.seatList&&IS.seatList.includes(f))IS.spots.seat=f}}
   if(walkFirst(label,a,dur,done))return;
   const p=P();S.busy={label,a,dur,t0:performance.now(),done};$('needCard').hidden=true;if(a.mins)S.busy.timed={mins:Math.max(1,a.mins),fx:a.fx||{},start:S.min,ap:0};S.idleT=0;p.target=null;p.itarget=null;p.pose=a.pose;
   const sp=a.spot;if(sp){if(IS){S.busy.glide={k:'i',x0:p.ix,z0:p.iz,x1:sp.x,z1:sp.z,t:0};p.ix=sp.x;p.iz=sp.z}else{S.busy.glide={k:'o',x0:p.x,z0:p.y,x1:sp.x,z1:sp.y,t:0};p.x=sp.x;p.y=sp.y}p.face=sp.ry??null;p.spotY=sp.ly||0}

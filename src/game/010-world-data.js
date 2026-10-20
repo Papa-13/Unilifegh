@@ -48,7 +48,7 @@ const B=[
  {id:'court',name:'Basketball Court',x:2520,y:2250,w:240,h:200,open:1,c:0xb5653a,door:[2640,2350],zone:'s'},
  {id:'pool',name:'Swimming Pool',x:2800,y:2235,w:520,h:230,open:1,c:0xd9d4c7,door:[2960,2243],zone:'s'},
  {id:'gym',name:'Campus Gym',x:2520,y:2485,w:240,h:170,ht:2.8,c:0x9aa3ab,roof:0x2b2b2b,door:[2640,2673],zone:'s'},
- {id:'hall',name:'Indoor Sports Hall',x:2810,y:2505,w:280,h:170,ht:4,c:0xc9d2d8,roof:0x2a6f9b,door:[2950,2673],zone:'s',deco:1},
+ {id:'volley',name:'Volleyball Court',x:2830,y:2510,w:300,h:190,open:1,c:0xd8bf86,door:[2980,2605],zone:'s'},
  {id:'lodge',name:'Akwaaba Lodge · Ayeduase',x:4500,y:475,w:260,h:170,ht:3.2,c:0xd9c9a8,roof:0x8a5a2a,door:[4630,457],home:1,zone:'r'},
  {id:'heights',name:'Ayeduase Heights',x:4500,y:680,w:310,h:175,ht:5,c:0xe8d8c4,roof:0x6b4a2e,door:[4655,873],home:1,zone:'r'},
  {id:'sunrise',name:'Sunrise Hostel · Kotei',x:2100,y:2945,w:300,h:170,ht:4,c:0xf0dcc4,roof:0xc2572e,door:[2250,2927],home:1,zone:'r'},
