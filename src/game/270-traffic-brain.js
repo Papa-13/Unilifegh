@@ -73,7 +73,7 @@ const hr=y=>HROADS.find(r=>r[0]===y),nearH=(y,x)=>HROADS.filter(r=>x==null||(x>=
 function roadPath(f,t){const h1=nearH(f.y,f.x),h2=nearH(t.y,t.x),r1=hr(h1),r2=hr(h2),m=(f.x+t.x)/2,v=VX.filter(x=>x>=Math.max(r1[1],r2[1])&&x<=Math.min(r1[2],r2[2])).reduce((a,b)=>Math.abs(b-m)<Math.abs(a-m)?b:a,nearV(m));return h1===h2?[{x:f.x,y:h1},{x:t.x,y:h2}]:[{x:f.x,y:h1},{x:v,y:h1},{x:v,y:h2},{x:t.x,y:h2}]}
 const pathLen=pts=>pts.slice(1).reduce((s,q,i)=>s+Math.hypot(q.x-pts[i].x,q.y-pts[i].y),0);
 function rideQuote(dest){const p=P(),b=BID[dest],to={x:b.door[0],y:b.door[1]},from=IS?doorOfInside():{x:p.x,y:p.y};const len=pathLen([from,...roadPath(from,to),to]);
-  return{len,ryde:Math.round(15+len*.012),dash:Math.round(10+len*.009),mins:Math.round(4+len/80)}}
+  return{len,ryde:Math.round(15+len*.012),dash:Math.round(10+len*.009),mins:Math.round(3+len/300)}}
 function doorOfInside(){const b=insideB();return{x:b.door[0],y:b.door[1]+(b.door[1]>b.y?22:-22)}}
 const carDesc=app=>app==='trotro'?'trotro':app==='ryde'?'black Toyota Corolla · GR 2451-24':app==='dash'?'green Kia Picanto · AS 778-23':'yellow taxi';
 function roadPoint(x,y){const h={x,y:nearH(y,x)},v={x:nearV(x),y};return Math.abs(h.y-y)<=Math.abs(v.x-x)?Object.assign(h,{ax:'h'}):Object.assign(v,{ax:'v'})}
@@ -107,7 +107,7 @@ function taxiRide(dest,shared){if(S.ride)return toast('You already have a ride.'
   const b=BID[dest],door={x:b.door[0],y:b.door[1]+(b.door[1]>b.y?22:-22)},RP=ringPath({x:BID.taxi.door[0],y:BID.taxi.door[1]},door),start=RP.from,drop=RP.to,len=pathLen([start,...RP.mid,drop]);
   const walk=Math.hypot(drop.x-door.x,drop.y-door.y);if(walk>260)setTimeout(()=>toast(`🚕 Taxis can't enter the campus. The driver will drop you at the nearest gate road. Walk or take the free shuttle from there.`),1200);
   const price=shared?8:Math.round(20+len*.01);if(!spend(price))return;
-  S.ride={app:'taxi',dest,price:0,mins:Math.round(3+len/90),phase:'wait',waitUntil:S.min+45,pts:[],i:0,pos:{...start},dir:{x:1,y:0},g:makeCar(0xf4c430,true),sp:shared?300:360,drive:[start,...RP.mid,drop],door,shared,t:0,side:0};
+  S.ride={app:'taxi',dest,price:0,mins:Math.round(2+len/320),phase:'wait',waitUntil:S.min+45,pts:[],i:0,pos:{...start},dir:{x:1,y:0},g:makeCar(0xf4c430,true),sp:shared?300:360,drive:[start,...RP.mid,drop],door,shared,t:0,side:0};
   placeCar(S.ride.g,start.x,start.y,start.ax==='v'?0:1,start.ax==='v'?1:0);S.ride.dir={x:start.ax==='v'?0:1,y:start.ax==='v'?1:0};toast(`Paid ${cedi(price)}. Your ${shared?'shared ':''}taxi is parked on the road by the station. Walk up to it and get in 🚕`);acts(true)}
 function boardRide(){const r=S.ride,p=P();if(!r)return;r.phase='board';r.side=rideSide(r,p.x,p.y);r.atDoor=false;r.t=0;p.target=rideDoorPt(r,r.side);S.shuttleWait=null;acts(true)}
 function cancelRide(timeout){const r=S.ride;if(!r)return;const who=r.app==='taxi'?'Taxi driver':(r.app==='ryde'?'Ryde':'Dash')+' driver';

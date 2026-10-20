@@ -49,7 +49,7 @@ function enterBuilding(id,back){fadeIn();S.shuttleWait=null;const BD=IS?(IS.budd
     for(let i=0;i<3;i++){const x=-3+i*1.4;B_(.8,.25,1.8,0x2b2b2b,x,.13,-D/2+1.3,true);box(.8,.05,.06,0x888888,x,1.1,-D/2+.45,s)}
     B_(1.6,.45,.5,0x8e2a3a,2.2,.23,.8,true);[-.6,.6].forEach(dx=>box(.06,1.1,.06,0x666666,2.2+dx,.55,.4,s));
     IS.spots.tread={x:-1.6,z:-D/2+1.4,ry:Math.PI};IS.spots.lift={x:2.2,z:1.4,ry:Math.PI};
-    [[-3,-D/2+1.4,'run'],[-4.4+2.8,-D/2+1.4,'run'],[0,1.6,'lift']].forEach(([x,z,ps],i)=>{const n=here[i];if(n)addInPerson(n.look,n.name,x,z,Math.PI,ps,{n})});sign('CAMPUS GYM · NO PAIN NO GAIN',0,2.6,-D/2+.1,4,'#2b2b2b')}
+    [[-3,-D/2+1.4,'run'],[-4.4+2.8,-D/2+1.4,'run'],[0,1.6,'lift']].forEach(([x,z,ps],i)=>{const n=here[i];if(n)addInPerson(n.look,n.name,x,z,Math.PI,ps,{n});else if(hour()>=6&&hour()<21&&Math.random()<.6)addInPerson(Object.assign(randomLook(Math.random()<.5?'m':'f'),{outfit:pick(['track','jersey','athleisure','hoodie']),bag:'none'}),'',x,z,Math.PI,ps,{noObst:1})});sign('CAMPUS GYM · NO PAIN NO GAIN',0,2.6,-D/2+.1,4,'#2b2b2b')}
   if(id==='salon'){for(let i=0;i<3;i++){const x=-2+i*2;box(.9,1.2,.04,lam(0xcfe3f0),x,1.5,-D/2+.08,s);B_(.6,.08,.6,0x222222,x,.5,-D/2+1.1,true);box(.6,.6,.08,0x222222,x,.85,-D/2+1.4,s);seats.push({x,z:-D/2+1.1,ry:Math.PI});if(i)addInPerson(staffLook(i===1?'m':'f',{outfit:i===1?'tee':'dress'}),i===1?'Barber Kobby':'Sister Abena',x+.55,-D/2+1.3,Math.PI*1.1,'talk')}
     sign('BARBER & SALON',0,2.4,-D/2+.1,2.8,'#9b3a6e')}
   if(id==='chapel'){box(.12,1.4,.08,0x8a6a4a,0,2,-D/2+.1,s);box(.7,.12,.08,0x8a6a4a,0,2.3,-D/2+.1,s);B_(2.4,.8,.8,0xf2efe8,0,.4,-D/2+1,true);
@@ -167,6 +167,10 @@ function enterBuilding(id,back){fadeIn();S.shuttleWait=null;const BD=IS?(IS.budd
     const free=seats.filter(q=>q!==IS.spots.seat).sort((a,c)=>Math.hypot(a.x-IS.spots.seat.x,a.z-IS.spots.seat.z)-Math.hypot(c.x-IS.spots.seat.x,c.z-IS.spots.seat.z));
     if(BD&&id!=='gym'&&free.length){const q=free.shift();IS.buddy=BD;addInPerson(BD.look,BD.name+' · with you',q.x,q.z,q.ry,seatPose,{n:BD,y:q.ly})}
     if(id!=='gym')here.slice(0,free.length).forEach((n,i)=>{const q=free[i];addInPerson(n.look,n.name,q.x,q.z,q.ry,id==='chapel'&&wd()===6&&hour()<12?pick(['sit','pray','cheer']):seatPose,{n,y:q.ly})});
+    /* busy places feel busy: a few other students (no name tags) in the library, canteen, food spots and colleges during the day */
+    {const h=hour(),busy={lib:[8,22,5],canteen:[7,20,5],shawarma:[11,23,3],books:[9,18,2],print:[8,19,2]}[id]||(COLLEGES[id]&&!LEC?[8,18,3]:null);
+      if(busy&&h>=busy[0]&&h<busy[1]){const rest=free.slice(here.length).sort(()=>Math.random()-.5).slice(0,busy[2]+Math.floor(Math.random()*2));
+        rest.forEach(q=>addInPerson(randomLook(Math.random()<.5?'m':'f'),'',q.x,q.z,q.ry,id==='lib'||COLLEGES[id]?pick(['sitWrite','sitWrite','phone','type']):seatPose,{y:q.ly,noObst:1}))}}
     seats.forEach(q=>{if(['clinic','salon','office','senate','greathall','hall','phonehub','pharm','shawarma'].includes(id))return;if(id==='lecoff'){B_(.45,.05,.45,0x8e2a3a,q.x,.47,q.z,true);box(.45,.45,.05,0x8e2a3a,q.x,.72,q.z+.22,s);return}if(!LEC&&id!=='chapel'&&id!=='canteen')B_(.42,.05,.42,0x2b2b2b,q.x,.47,q.z,true)})}
   if(BD&&!IS.buddy&&id!=='hbath'){IS.buddy=BD;addInPerson(BD.look,BD.name+' · with you',-W/2+1.4,dz-.35,.7,'talk',{n:BD})}
   if(id==='lecoff'){const li=S.lecIdx||0;if(li===1&&S.flags.hx===1&&!S.flags.resolved&&!IS.buddy)setTimeout(()=>story(`<div class="eyebrow">${BADLEC}'s office</div><h3>He looks up slowly.</h3><p class="scene">"Ah, you came alone. Have you thought about what I said?" You don't sit down. You say you just came to ask about the course, and you walk out.</p><p>Next time, bring a friend with you. You can report him confidentially at Student Affairs & SRC.</p>`,[['Leave','',()=>leaveRoom()]]),500);

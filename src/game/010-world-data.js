@@ -41,7 +41,7 @@ const B=[
  {id:'field',name:'Sports Field',x:2075,y:2250,w:335,h:240,open:1,c:0x3f8a3a,door:[2230,2370],zone:'s'},
  {id:'court',name:'Basketball Court',x:2450,y:2250,w:240,h:200,open:1,c:0xb5653a,door:[2570,2350],zone:'s'},
  {id:'pool',name:'Swimming Pool',x:2750,y:2250,w:240,h:150,open:1,c:0xd9d4c7,door:[2870,2258],zone:'s'},
- {id:'pavilion',name:'Sports Pavilion',x:2050,y:2515,w:170,h:140,ht:2.6,c:0xe9e3d6,roof:0x8e2a3a,door:[2135,2673],zone:'s',deco:1},
+ {id:'pavilion',name:'Sports Pavilion',x:2075,y:2515,w:160,h:140,ht:2.6,c:0xe9e3d6,roof:0x8e2a3a,door:[2155,2673],zone:'s',deco:1},
  {id:'gym',name:'Campus Gym',x:2450,y:2485,w:240,h:170,ht:2.8,c:0x9aa3ab,roof:0x2b2b2b,door:[2570,2673],zone:'s'},
  {id:'hall',name:'Indoor Sports Hall',x:2750,y:2485,w:280,h:170,ht:4,c:0xc9d2d8,roof:0x2a6f9b,door:[2890,2673],zone:'s',deco:1},
  {id:'lodge',name:'Akwaaba Lodge · Ayeduase',x:4500,y:475,w:260,h:170,ht:3.2,c:0xd9c9a8,roof:0x8a5a2a,door:[4630,457],home:1,zone:'r'},
@@ -63,9 +63,9 @@ const B=[
  {id:'gyin',name:'Gyinyaase Gardens',x:700,y:2945,w:300,h:175,ht:3.8,c:0xe9e0d0,roof:0x2f6b3a,door:[850,2927],zone:'r',home:1},
  {id:'hilltop',name:'Hilltop Hostel · Gyinyaase',x:1100,y:2945,w:280,h:165,ht:3.2,c:0xf0d9b5,roof:0x8a4a2a,door:[1240,2927],zone:'r',home:1},
  {id:'morning',name:'Morning Glory Hostel · Bomso',x:1250,y:20,w:280,h:165,ht:3.2,c:0xe9c9a9,roof:0x8a4a2a,door:[1390,203],zone:'r',home:1},
- {id:'canaan',name:'Canaan Lodge · Bomso',x:1700,y:15,w:300,h:170,ht:4,c:0xd8e4d0,roof:0xc2572e,door:[1850,203],zone:'r',home:1},
+ {id:'canaan',name:'Canaan Lodge · Bomso',x:1600,y:15,w:300,h:170,ht:4,c:0xd8e4d0,roof:0xc2572e,door:[1750,203],zone:'r',home:1},
  {id:'ayigya',name:'Ayigya Grace Hostel',x:2600,y:20,w:280,h:165,ht:3.2,c:0xf2e6d8,roof:0x7b7f84,door:[2740,203],zone:'r',home:1},
- {id:'nyamedua',name:'Nyame Dua Hostel · Ayigya',x:3100,y:15,w:300,h:170,ht:4,c:0xcfd8e8,roof:0x9a5a32,door:[3250,203],zone:'r',home:1},
+ {id:'nyamedua',name:'Nyame Dua Hostel · Ayigya',x:3010,y:15,w:300,h:170,ht:4,c:0xcfd8e8,roof:0x9a5a32,door:[3160,203],zone:'r',home:1},
  {id:'kent',name:'Kentinkrono Gardens',x:4600,y:15,w:300,h:170,ht:4,c:0xe6c8c8,roof:0x2f6b3a,door:[4750,203],zone:'r',home:1}];
 /* where open areas and decorated places used to be (their props are built there, then moved) */
 const ORIG={garden:[60,370,260,200],night:[420,690,320,200],field:[820,690,360,240],trotro:[60,1040,260,170],square:[420,1040,320,200],lake:[1200,1040,290,200],court:[1520,1040,240,200],

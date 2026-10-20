@@ -23,6 +23,6 @@ function hailGo(kind,o){const p=P(),h=hailSpot();if(!h)return;const sg=h.sg,hori
   /* the nearest real taxi/trotro on the road is the one that stops for you */
   const tr=TRAFFIC.filter(c=>c.kind===(kind==='taxi'?1:3)&&c.px!=null).sort((a,z)=>Math.hypot(a.px-pk.x,a.py-pk.y)-Math.hypot(z.px-pk.x,z.py-pk.y));if(tr.length){const c=tr[0];c.d+=perim(c.route)/2}
   const g=kind==='taxi'?makeCar(0xf4c430,true):makeTrotro();
-  S.ride={app:kind,hail:1,dest:b.id,price:o.price,mins:Math.round(3+o.len/90),phase:'pickup',pts:[start,...RP0.mid,pk],i:0,pos:{...start},dir:{x:Math.sign(pk.x-start.x)||0,y:Math.sign(pk.y-start.y)||0},g,sp:kind==='taxi'?340:300,drive:[pk,...RP.mid,RP.to],door,shared:kind==='trotro',t:0,side:0};
+  S.ride={app:kind,hail:1,dest:b.id,price:o.price,mins:Math.round(2+o.len/320),phase:'pickup',pts:[start,...RP0.mid,pk],i:0,pos:{...start},dir:{x:Math.sign(pk.x-start.x)||0,y:Math.sign(pk.y-start.y)||0},g,sp:kind==='taxi'?340:300,drive:[pk,...RP.mid,RP.to],door,shared:kind==='trotro',t:0,side:0};
   
   p.target=null;try{setGest(p,'wave',2.5)}catch(e){}toast(kind==='taxi'?'✋ You wave at a taxi… it flashes its lights and pulls over 🚕':`✋ You wave at a trotro. The mate leans out: ${pick(TROTRO_CALLS)}`);acts(true)}
