@@ -1,7 +1,7 @@
 /* ================= campus realities =================
    The things every Ghanaian student knows:
    1 light off (dumsor)   2 water shortage   3 lecture life   4 exam season   5 the money cycle
-   6 admin stress   7 hall & hostel culture   8 faith life   9 health   10 departmental week
+   6 admin stress   7 hall & hostel culture (morale nights, visitors)   8 faith life   9 health   10 departmental week
    11 data, campus WiFi, phone battery and "seen, no reply".
    State lives in S.rl (saved with the game). Hooks: realityHourly() each game hour, realityTick() each
    frame indoors, realityActs() for the action list, rlPlaceActs() for buildings, and a few small wrappers. */
@@ -49,9 +49,6 @@ function realityHourly(){if(!S||!S.p)return;const r=RLS(),d=day(),h=Math.floor(h
   if(sd===0&&h===14&&!r['reg'+S.sem+'m']){r['reg'+S.sem+'m']=1;msg('Administration',`📋 Course registration closes ${DAYS[(S.semStart+4)%7]} 17:00. Register at the Administration (bring your slip). Late registration attracts a GH₵100 fine.`)}
   if(sd===4&&h===17&&!r['reg'+S.sem]&&!r['regx'+S.sem]){r['regx'+S.sem]=1;p.money-=100;msg('Administration','You missed the registration deadline. GH₵100 late fine has been charged. Please register immediately.')}
   if(sd===12&&h===10&&!r['rs'+S.sem]&&rlR(d,30)<.35){r['rs'+S.sem]='missing';msg('Class rep',"Have you checked your results? Some people's grades are not showing 😩 Go to the Administration if yours is missing.")}
-  /* 7. hall & hostel culture: room inspection on Mondays */
-  if(wd()===0&&h===9&&!r['ri'+d]){r['ri'+d]=1;const m=p.mess||0,who=BID[p.home]&&BID[p.home].hall?'Hall tutor':`${homeB().name} manager`;
-    if(m>75){p.money-=30;msg(who,'Room inspection today. Your room was very untidy. GH₵30 sanitation fine. Please clean it.')}else if(m>45)msg(who,'Room inspection: your room needs cleaning. We will check again next week.');else msg(who,'Room inspection: neat room! Well done 👏')}
   /* 9. health: malaria (no net), hits in the morning */
   if(h===6&&!r['ml'+d]&&!r.sick&&!p.items.includes('net')){r['ml'+d]=1;const wet=weatherAt?((weatherAt(S.min)||{}).rain||0)>.3:false;if(rlR(d,40)<(wet?.07:.04)){r.sick={k:'malaria',since:d};addBuff('sick');story('<div class="eyebrow">🦟 Morning</div><h3>You wake up with chills and a headache</h3><p class="scene">Your body is weak, your head is pounding. It looks like malaria. Go to the Health Centre for treatment. Next time, sleep under a mosquito net (the pharmacy sells them).</p>',[['Okay','',()=>{}]])}}
   if(r.sick){addBuff('sick');if(d-r.sick.since>=3&&!r.sick.rushed){r.sick.rushed=1;p.money-=80;r.sick=null;const f=bestFriend();story(`<div class="eyebrow">🏥 Health Centre</div><h3>${f?esc(f.name):'Your roommate'} rushed you to the Health Centre</h3><p class="scene">You waited too long. The nurse put you on a drip and gave you medicine. GH₵80 for the treatment. You feel better, but you lost a whole day.</p>`,[['Thank you','',()=>{advance(8*60)}]])}}
