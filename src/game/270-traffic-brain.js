@@ -1,5 +1,5 @@
 /* ================= traffic brain: vehicles never overlap; overtaking only when it is safe ================= */
-function vehicles(){const L=[];TRAFFIC.forEach(c=>{if(c.px==null)return;L.push({ref:c,x:c.px,y:c.py,dx:c.dx,dy:c.dy,hl:VH.car[0],hw:VH.car[1],v:c.v??0});if(c.ov&&Math.abs(c.lo-LANE)>4){const q=lanePt(c.route,c.d,LANE);L.push({ref:c,shadow:1,x:q.x,y:q.y,dx:q.dx,dy:q.dy,hl:VH.car[0],hw:VH.car[1],v:c.v??0})}});
+function vehicles(){const L=[];TRAFFIC.forEach(c=>{if(c.px==null||c.hired)return;L.push({ref:c,x:c.px,y:c.py,dx:c.dx,dy:c.dy,hl:VH.car[0],hw:VH.car[1],v:c.v??0});if(c.ov&&Math.abs(c.lo-LANE)>4){const q=lanePt(c.route,c.d,LANE);L.push({ref:c,shadow:1,x:q.x,y:q.y,dx:q.dx,dy:q.dy,hl:VH.car[0],hw:VH.car[1],v:c.v??0})}});
   BUSES.forEach(b=>{if(b.x==null)return;L.push({ref:b,x:b.x,y:b.y,dx:b.dx??1,dy:b.dy??0,hl:VH.bus[0],hw:VH.bus[1],v:b.wait>0?0:(b.v??0)});if(b.ov&&Math.abs(b.lo-LANE)>4){const q=lanePt(SH_ROUTE,b.d,LANE);L.push({ref:b,shadow:1,x:q.x,y:q.y,dx:q.dx,dy:q.dy,hl:VH.bus[0],hw:VH.bus[1],v:b.v??0})}});
   const r=S&&S.ride;if(r&&r.lp&&r.dir)L.push({ref:r,x:r.lp.x,y:r.lp.y,dx:r.dir.x,dy:r.dir.y,hl:VH.car[0],hw:VH.car[1],v:['pickup','drive','leave'].includes(r.phase)?(r.sp||200)*(r.rv??1):0});
   const d=S&&S.del;if(d&&d.lp&&d.dir)L.push({ref:d,x:d.lp.x,y:d.lp.y,dx:d.dir.x,dy:d.dir.y,hl:18,hw:8,v:['ride','leave'].includes(d.phase)?(d.sp||150):0});return L}
@@ -58,8 +58,8 @@ function ovTick(c,rt,x0,y0,dx,dy,hl,hw,L,dt){c.lo=c.lo??LANE;c.ov=c.ov||0;const 
     else if(Math.abs(c.lo-LANE)<1){c.lo=LANE;c.ov=0}
     else if((c.stuck||0)>2.5){const back=freeAhead(null,x0,y0,-dx,-dy,hl,hw,60,L.filter(o=>o.ref!==c&&!o.shadow));if(back>8){c.d-=Math.min(30*dt,back-6);c.v=0}}}
   return[x0,y0]}
-function updTraffic(dt){if(!updTraffic.sp){updTraffic.sp=1;spreadSpawn()}vehPush();TRAFFIC.forEach((c,i)=>c.vid=c.vid??i+1);BUSES.forEach((b,i)=>b.vid=b.vid??50+i);if(S.ride)S.ride.vid=90;if(S.del)S.del.vid=91;const L=vehicles(),CL=VH.car[0],CW=VH.car[1];
-  TRAFFIC.forEach(c=>{c.lo=c.lo??LANE;c.ov=c.ov||0;const q0=along(c.route,c.d),Lp=lanePt(c.route,c.d,c.lo),dx=Lp.dx,dy=Lp.dy,at=lo=>{const z=lanePt(c.route,c.d,lo);return[z.x,z.y]};let [x0,y0]=[Lp.x,Lp.y];c.v=c.v??c.sp;
+function updTraffic(dt){try{hailRelease()}catch(e){}if(!updTraffic.sp){updTraffic.sp=1;spreadSpawn()}vehPush();TRAFFIC.forEach((c,i)=>c.vid=c.vid??i+1);BUSES.forEach((b,i)=>b.vid=b.vid??50+i);if(S.ride)S.ride.vid=90;if(S.del)S.del.vid=91;const L=vehicles(),CL=VH.car[0],CW=VH.car[1];
+  TRAFFIC.forEach(c=>{if(c.hired)return;c.lo=c.lo??LANE;c.ov=c.ov||0;const q0=along(c.route,c.d),Lp=lanePt(c.route,c.d,c.lo),dx=Lp.dx,dy=Lp.dy,at=lo=>{const z=lanePt(c.route,c.d,lo);return[z.x,z.y]};let [x0,y0]=[Lp.x,Lp.y];c.v=c.v??c.sp;
     const me=L.find(o=>o.ref===c);if(me){me.x=x0;me.y=y0;me.dx=dx;me.dy=dy}
     // ---- overtaking a parked vehicle (taxi picking up, bus at a stop, delivery bike) ----
     [x0,y0]=ovTick(c,c.route,x0,y0,dx,dy,CL,CW,L,dt);
@@ -123,14 +123,15 @@ function moveAlong(o,dt){const tgt=o.pts[o.i+1];if(!tgt)return true;const dx=tgt
 const rideBusy=()=>S.ride&&['board','fill','drive','drop'].includes(S.ride.phase)&&!(S.ride.phase==='board'&&!S.ride.atDoor);
 function updRide(dt){const r=S.ride;if(!r)return;const p=P();
   if(r.phase==='pickup'||r.phase==='drive'||r.phase==='leave'){const L0=r.lp||r.pos,red=(r.phase!=='leave'&&redAhead(L0.x,L0.y,r.dir.x,r.dir.y,52))||(r.phase!=='pickup'||Math.hypot(r.pts[r.pts.length-1].x-r.pos.x,r.pts[r.pts.length-1].y-r.pos.y)>80)&&blockedAhead(L0.x,L0.y,r.dir.x,r.dir.y,62,r)==='p';r.stuck=((r.rv??1)<.05&&!red)?(r.stuck||0)+dt:0;
-    const free=juncGate(r,L0.x,L0.y,r.dir.x,r.dir.y,VH.car[0],VH.car[1],freeAhead(r,L0.x,L0.y,r.dir.x,r.dir.y,VH.car[0],VH.car[1],50+r.sp*.45,vehicles()),red);r.rv=(r.rv??1)+(((red?0:Math.min(1,Math.max(0,free-8)/90)))-(r.rv??1))*Math.min(1,dt*6);
+    let free=juncGate(r,L0.x,L0.y,r.dir.x,r.dir.y,VH.car[0],VH.car[1],freeAhead(r,L0.x,L0.y,r.dir.x,r.dir.y,VH.car[0],VH.car[1],50+r.sp*.45,vehicles()),red);
+    /* never deadlock with another vehicle that is waiting for us: after 4 s stuck, squeeze past */if(!red&&(r.stuck||0)>4)r.ghost=1.6;if(r.ghost>0){r.ghost-=dt;free=Math.max(free,200)}r.rv=(r.rv??1)+(((red?0:Math.min(1,Math.max(0,free-8)/90)))-(r.rv??1))*Math.min(1,dt*6);
     {/* the ride also pulls out round a parked bus or taxi when the other lane is clear */const hl=VH.car[0],dx=r.dir.x,dy=r.dir.y,bk=r._blk;r.bt=free<24&&!red?(r.bt||0)+dt:0;r.ov=r.ov||0;
       if(!r.ov&&r.bt>1.4&&bk&&bk.v<4&&parkedV(bk)){const al=(bk.x-L0.x)*dx+(bk.y-L0.y)*dy,op=laneOf(r.pos.x,r.pos.y,dx,dy,-LANE),VL=vehicles().filter(o=>o.ref!==r&&!o.shadow);
         if(!nearJunc(L0.x,L0.y,dx,dy,90,al+bk.hl+hl*2+90+RHW+150)&&freeAhead(null,op.x,op.y,dx,dy,hl,VH.car[1],600,VL)>=590){r.ov=1;r.ovB=bk.ref;r.ovT=0}}
       if(r.ov===1){r.ovT+=dt;const b=vehicles().find(o=>o.ref===r.ovB&&!o.shadow);if(!b||((b.x-L0.x)*dx+(b.y-L0.y)*dy)<-(hl+b.hl+14)||r.ovT>14||nearJunc(L0.x,L0.y,dx,dy,0,RHW+140+hl))r.ov=2}
       else if(r.ov===2&&Math.abs((r.lo??LANE)-LANE)<1)r.ov=0}
     const done=moveAlong(r,Math.min(dt*r.rv,Math.max(0,free-3)/r.sp));const L=rideLane(r,dt);placeCar(r.g,L.x,L.y,r.dir.x,r.dir.y);if(r.phase==='drive'){p.x=L.x;p.y=L.y}
-    if(done){if(r.phase==='pickup'){r.phase='wait';r.waitUntil=S.min+30;if(r.hail)toast(r.app==='trotro'?'🚐 The trotro stops. The mate slides the door open: "Enter, enter!"':'🚕 The taxi stops beside you. "Where are you going?"');else msg(`${r.app==='ryde'?'Ryde':'Dash'} driver`,`I'm here 📍 ${carDesc(r.app)} by the road. Come and get in!`);acts(true)}
+    if(done){if(r.phase==='pickup'){r.phase='wait';r.waitUntil=S.min+30;if(r.hail&&!r.dest)setTimeout(()=>{if(S.ride===r&&!r.dest)hailSheet(r.app)},500);if(r.hail)toast(r.app==='trotro'?'🚐 The trotro stops. The mate slides the door open: "Enter, enter!"':'🚕 The taxi stops beside you. "Where are you going?"');else msg(`${r.app==='ryde'?'Ryde':'Dash'} driver`,`I'm here 📍 ${carDesc(r.app)} by the road. Come and get in!`);acts(true)}
       else if(r.phase==='drive'){r.phase='drop';r.t=0;r.side=rideSide(r,r.door.x,r.door.y)}
       else{scene.remove(r.g);disposeTree(r.g);S.ride=null;acts(true)}}return}
   r.t+=dt;{const L=rideLane(r,dt);placeCar(r.g,L.x,L.y,r.dir.x,r.dir.y)}
