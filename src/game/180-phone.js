@@ -40,7 +40,7 @@ function phone(tab='home'){
         <div class="phGrid">${APPS.filter(a=>!DOCK.includes(a.k)).map(icon).join('')}</div><div class="phDock">${DOCK.map(k=>icon(APPS.find(a=>a.k===k))).join('')}</div></div>`
       :`<div style="background:${A.c}">${bar()}<div class="phHd" style="color:${A.fg||'#fff'}"><button id="phBack" style="color:${A.fg||'#fff'}" aria-label="Back">‹</button><span class="t">${A.ic} ${esc(A.n)}</span></div></div><div class="phBody">${body[t]()}</div>`;
     $('sheetIn').innerHTML=`<div class="phOut"><button class="ghost sm" id="bye">Close</button></div><div class="ph">${inner}<div style="background:#0b0b0d;padding:2px 0"><button class="phHomeBtn" id="phHomeB" aria-label="Home"></button></div></div>`;
-    $('sheetIn').querySelectorAll('[data-app]').forEach(b=>b.onclick=()=>{const a=APPS.find(x=>x.k===b.dataset.app);if(a.go){closeSheet();a.go()}else draw(a.k)});
+    $('sheetIn').querySelectorAll('[data-app]').forEach(b=>b.onclick=()=>{const a=APPS.find(x=>x.k===b.dataset.app);if(a.go){closeSheet();PHAPP=a;a.go();phWrap()}else draw(a.k)});
     if($('phBack'))$('phBack').onclick=()=>draw('home');$('phHomeB').onclick=()=>draw('home');
     $('sheetIn').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>draw(b.dataset.t));
     $('sheetIn').querySelectorAll('[data-chat]').forEach(b=>b.onclick=()=>openChat(chats[+b.dataset.chat]));
@@ -63,3 +63,14 @@ function phone(tab='home'){
     $('bye').onclick=closeSheet};
   draw(tab);hud();
 }
+
+/* apps that have their own screens (Feed, Hustles, HomeMart, Music, SRC, Campus Chat) still open
+   inside the phone: whatever they draw in the sheet is moved into the phone frame, under the app's
+   coloured top bar with a back button to the home screen. */
+let PHAPP=null;
+function phWrap(){const a=PHAPP,el=$('sheetIn');if(!a||!el||$('sheet').hidden||el.querySelector(':scope > .phOut'))return;
+  const kids=[...el.childNodes];el.innerHTML=`<div class="phOut"><button class="ghost sm" id="phX">Close</button></div><div class="ph"><div style="background:${a.c}"><div class="phBar"><span>${hm(S.min)}</span><span class="nt"></span><span>📶 4G 🔋</span></div><div class="phHd" style="color:${a.fg||'#fff'}"><button id="phB2" style="color:${a.fg||'#fff'}" aria-label="Back">‹</button><span class="t">${a.ic} ${esc(a.n)}</span></div></div><div class="phBody phSub"></div><div style="background:#0b0b0d;padding:2px 0"><button class="phHomeBtn" id="phH2" aria-label="Home"></button></div></div>`;
+  const body=el.querySelector('.phSub');kids.forEach(k=>body.appendChild(k));
+  const home=()=>{PHAPP=null;closeSheet();phone('home')};$('phB2').onclick=home;$('phH2').onclick=home;$('phX').onclick=()=>closeSheet()}
+{const _cs=closeSheet;closeSheet=function(){PHAPP=null;return _cs.apply(this,arguments)};
+  try{new MutationObserver(()=>{if(PHAPP)phWrap()}).observe($('sheetIn'),{childList:true})}catch(e){}}

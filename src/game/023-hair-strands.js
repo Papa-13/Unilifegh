@@ -35,10 +35,10 @@ function braidCapM(){if(SM.bcap)return SM.bcap;const c=document.createElement('c
   g.fillStyle='#2e2119';for(let y=0;y<128;y+=16){g.fillRect(0,y,128,1.2);for(let x=0;x<128;x+=16)g.fillRect(x+(y/16)%2*8,y,1.2,16)}
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(5,3);return SM.bcap=new THREE.MeshStandardMaterial({map:t,roughness:.85})}
 /* long styles: returns true if handled */
-const LONGHAIR={braids:{n:30,r:.0105,len:.52},knotless:{n:28,r:.011,len:.36},bobbraids:{n:26,r:.011,len:.2},fulani:{n:22,r:.0105,len:.44,rows:[.03]},
+const LONGHAIR={wig:{},blonde:{},bob:{},curlywig:{},braids:{n:30,r:.0105,len:.52},knotless:{n:28,r:.011,len:.36},bobbraids:{n:26,r:.011,len:.2},fulani:{n:22,r:.0105,len:.44,rows:[.03]},
   passion:{n:24,r:.016,len:.46,wave:.012},goddess:{n:22,r:.015,len:.46,wave:.016},locsf:{n:20,r:.019,len:.42},locsm:{n:17,r:.019,len:.22},halfup:{n:24,r:.011,len:.42,rows:[.0]},locbunf:{n:18,r:.018,len:.3,rows:[.0]},locbunm:{n:16,r:.018,len:.2,rows:[.0]}};
 function longHair(H,L,f,head,hair,gold){let k=H==='locs'||H==='locbun'?H+(f?'f':'m'):H;const o=LONGHAIR[k];if(!o)return false;
-  const capM=['locs','locbun','passion','goddess'].includes(H)?hair:braidCapM();
+  const capM=H==='blonde'?stdM(0xb98a3c,.75):['wig','bob','curlywig'].includes(H)?stdM(0x15100c,.6):['locs','locbun','passion','goddess'].includes(H)?hair:braidCapM();
   scalpMesh(head,f,capM,{t:.01});
   const G=drapeHair(H,L,f,head,!!L.grey)||strandsGeo('st'+k,o);if(!G.userData.ends||!DRAPE[(H==='locs'||H==='locbun')?H+(f?'f':'m'):H])mesh(G,hair,0,0,0,head);
   if(H==='fulani'){cornrowMesh(head,{rows:7,sp:.024,tEnd:.42,r:.009},'crwf',!!L.grey);G.userData.ends.forEach((e,i)=>{if(i%3)return;mesh(cyl(.012,.012,.024,8),gold,e.x,e.y+.06,e.z,head);if(i%2)mesh(cyl(.012,.012,.02,8),gold,e.x,e.y+.16,e.z,head)})}

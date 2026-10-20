@@ -84,8 +84,17 @@ function enterRoom0(owner){fadeIn();
   if(rt.ac)box(.9,.28,.22,lam(0xf4f4f4),-.6,2.35,-D/2+.2,s);
   else{const fan=new THREE.Group();fan.position.set(0,2.55,0);for(let i=0;i<3;i++){const pv=new THREE.Group();box(.9,.02,.12,lam(0xf0ebe0),.45,0,0,pv);pv.rotation.y=i*2.1;fan.add(pv)}mesh(cyl(.08,.08,.1,10),lam(0xf0ebe0),0,0,0,fan);s.add(fan);IS.fan=fan}
   IS.tv=!!(rt.tv||(mine&&P().items.includes('tv')));
-  IS.tvSpot=IS.tv?{x:W/2-1.55,z:1.9,ry:Math.PI/2}:null;
-  if(IS.tv){box(1.3,.75,.05,lam(0x111111),W/2-.05,1.45,1.9,s).rotation.y=Math.PI/2;const scr=box(1.2,.66,.01,basic(0x1d3a5a),W/2-.08,1.45,1.9,s);scr.rotation.y=Math.PI/2;if(!rt.tv){box(.4,.5,1.1,lam(0x3a2a20),W/2-.25,.25,1.9,s);IS.obst.push({x1:W/2-.45,x2:W/2,z1:1.35,z2:2.45})}IS.objs.push({id:'tv',label:'TV',x:W/2-1.3,z:1.9,r:1})}
+  /* TV: find a stretch of wall with nothing in front of it, so you can stand or sit and watch
+     (right wall first, then the back wall, then the left wall away from the door) */
+  if(IS.tv){const clear=(x1,x2,z1,z2)=>x1>-W/2-.01&&x2<W/2+.01&&z1>-D/2-.01&&z2<D/2+.01&&!IS.obst.some(o=>x1<o.x2+.05&&x2>o.x1-.05&&z1<o.z2+.05&&z2>o.z1-.05);
+    const C2=[];for(let z=D/2-.75;z>-D/2+.7;z-=.2)C2.push({wx:W/2,z,nx:-1});for(let x=W/2-.8;x>-W/2+.8;x-=.2)C2.push({wz:-D/2,x,nz:1});for(let z=-D/2+.75;z<D/2-.7;z+=.2)if(Math.abs(z-dz)>1.2)C2.push({wx:-W/2,z,nx:1});
+    let T=null;for(const c of C2){if(c.wx!=null){const x0=c.wx,vx=x0+c.nx*1.45;const fx1=Math.min(x0,x0+c.nx*.5),fx2=Math.max(x0,x0+c.nx*.5);if(clear(fx1,fx2,c.z-.6,c.z+.6)&&clear(Math.min(vx,x0+c.nx*.5)-.25,Math.max(vx,x0+c.nx*.5)+.25,c.z-.3,c.z+.3)){T={x:x0,z:c.z,ry:c.nx<0?-Math.PI/2:Math.PI/2,vx,vz:c.z};break}}
+      else{const z0=c.wz,vz=z0+1.45;if(clear(c.x-.6,c.x+.6,z0,z0+.5)&&clear(c.x-.3,c.x+.3,z0+.5-.25,vz+.25)){T={x:c.x,z:z0,ry:0,vx:c.x,vz};break}}}
+    T=T||{x:W/2,z:1.9,ry:-Math.PI/2,vx:W/2-1.45,vz:1.9};const G=new THREE.Group();G.position.set(T.x,0,T.z);G.rotation.y=T.ry;s.add(G);
+    box(1.3,.75,.05,lam(0x111111),0,1.45,.05,G);box(1.2,.66,.01,basic(0x1d3a5a),0,1.45,.085,G);if(!rt.tv){box(1.1,.5,.4,lam(0x3a2a20),0,.25,.22,G)}
+    const wv=new THREE.Vector3(.55,0,0).applyAxisAngle(new THREE.Vector3(0,1,0),T.ry),dv=new THREE.Vector3(0,0,.45).applyAxisAngle(new THREE.Vector3(0,1,0),T.ry);
+    if(!rt.tv)IS.obst.push({x1:Math.min(T.x-wv.x,T.x+wv.x+dv.x),x2:Math.max(T.x-wv.x,T.x+wv.x+dv.x),z1:Math.min(T.z-wv.z,T.z+wv.z+dv.z),z2:Math.max(T.z-wv.z,T.z+wv.z+dv.z)});
+    IS.tvAt={x:T.x,z:T.z};IS.keep=[{x1:Math.min(T.vx,T.x)-.3,x2:Math.max(T.vx,T.x)+.3,z1:Math.min(T.vz,T.z)-.3,z2:Math.max(T.vz,T.z)+.3}];IS.tvSpot={x:T.vx,z:T.vz,ry:Math.atan2(T.x-T.vx,T.z-T.vz)};IS.objs.push({id:'tv',label:'TV',x:(T.x+T.vx)/2,z:(T.z+T.vz)/2,r:1})}else IS.tvSpot=null;
   if(mine){
     const cb=slots[0],cupb=tier>=1||P().items.includes('cupboard');
     if(cupb){box(.7,.9,.42,lam(tier>=2?0x7a5536:0x9a7a55),cb.x-.2,.45,cb.z+1.35,s);box(.02,.7,.36,lam(0x5a3e28),cb.x-.2,.47,cb.z+1.35,s);[-.08,.08].forEach(dx=>mesh(sph(.02),lam(0xd9a537),cb.x-.2+dx,.6,cb.z+1.57,s));box(.5,.06,.34,lam(0xe8b24a),cb.x-.2,.93,cb.z+1.35,s)}
@@ -106,7 +115,7 @@ function enterRoom0(owner){fadeIn();
     if(P().biz&&!BIZ[P().biz.type].service&&P().biz.stock>0){for(let i=0;i<Math.min(6,Math.ceil(P().biz.stock/5));i++)box(.35,.25,.3,lam(P().biz.type==='snacks'?0xd9a537:P().biz.type==='thrift'?0x8e2a3a:0x2f6b9b),-.2+(i%3)*.38,.13+Math.floor(i/3)*.26,D/2-.45,s);IS.objs.push({id:'stock',label:'Stock',x:.2,z:D/2-1,r:.7})}
     // ---- extra decor, appliances and mess ----
     const it2=P().items,C=[];for(let zz=D/2-.45;zz>-.6;zz-=.4)for(let xx=-W/2+1.15;xx<W/2-.35;xx+=.4)C.push([+xx.toFixed(2),+zz.toFixed(2)]);
-    const free=(w,d)=>{for(const [x,z] of C){const r={x1:x-w/2,x2:x+w/2,z1:z-d/2,z2:z+d/2};if(Math.abs(x-(-W/2+.6))<1&&Math.abs(z-dz)<1)continue;if(!IS.obst.some(o=>r.x1<o.x2+.18&&r.x2>o.x1-.18&&r.z1<o.z2+.18&&r.z2>o.z1-.18))return{x,z}}return null};
+    const free=(w,d)=>{for(const [x,z] of C){const r={x1:x-w/2,x2:x+w/2,z1:z-d/2,z2:z+d/2};if(Math.abs(x-(-W/2+.6))<1&&Math.abs(z-dz)<1)continue;if(!IS.obst.concat(IS.keep||[]).some(o=>r.x1<o.x2+.18&&r.x2>o.x1-.18&&r.z1<o.z2+.18&&r.z2>o.z1-.18))return{x,z}}return null};
     IS.extraL=[];
     if(it2.includes('led')){const col=P().ledCol||0x8a4bff,m=new THREE.MeshBasicMaterial({color:col});box(W,.035,.035,m,0,2.63,-D/2+.1,s);box(.035,.035,D/2,m,-W/2+.1,2.63,D/4,s);const l=new THREE.PointLight(col,0,9,1.3);l.position.set(0,2.35,-.4);l.userData={base:1.15,alwaysOn:1};s.add(l);IS.extraL.push(l);IS.ledM=m;IS.ledL=l}
     if(it2.includes('fairy')){const fl=new THREE.Group();for(let i=0;i<28;i++){const k=i/27,x=-W/2+.35+k*(W-.7),y=2.53-Math.pow(Math.sin(k*Math.PI*3),2)*.12;mesh(sph(.022,6,5),basic([0xffe3a3,0xfff1c9,0xffd27a][i%3]),x,y,-D/2+.11,fl)}s.add(fl);const l=new THREE.PointLight(0xffc982,0,7,1.4);l.position.set(0,2.2,-D/2+.7);l.userData={base:.75,alwaysOn:1};s.add(l);IS.extraL.push(l)}
@@ -115,8 +124,8 @@ function enterRoom0(owner){fadeIn();
       for(let i=0;i<12;i++){const a=i/12*Math.PI*2;box(.008,i%3?.02:.035,.004,basic(0x333333),Math.sin(a)*.13,Math.cos(a)*.13,.02,G)}
       const hand=(len,w,c)=>{const h=new THREE.Group();h.position.z=.024+(len>.1?.003:0);box(w,len,.004,basic(c),0,len/2-.015,0,h);G.add(h);return h};IS.clock={hh:hand(.08,.012,0x111111),mh:hand(.12,.008,0x111111),sh:hand(.13,.003,0xc0392b)}}
     if(it2.includes('shelf')){const sx=Math.min(W/2-.7,winX+1.3),sz=-D/2+.17;[1.82,2.18].forEach(y=>{box(.95,.03,.22,lam(0x6b4a2e),sx,y,sz,s);let x=sx-.42;for(let i=0;i<9&&x<sx+.4;i++){const w=R(.04,.07),h=R(.16,.27);const b=box(w,h,.16,lam(pick([0x8e2a3a,0x2f4e6b,0xe8b24a,0x2a7b7b,0x3a3a3a,0xd9542b,0xf1ece3])),x+w/2,y+.015+h/2,sz,s);if(i===6){b.rotation.z=.35;b.position.x+=.05}x+=w+.01}});[-.47,.47].forEach(dx=>box(.02,.12,.18,lam(0x333333),sx+dx,1.76,sz,s))}
-    if(it2.includes('beanbag')){const q=free(.8,.8);if(q){const bb=mesh(sph(.42,18,12),stdM(P().ledCol?0x3b2a6a:0x8e2a3a,.95),q.x,.22,q.z,s);bb.scale.set(1,.55,1);const top=mesh(sph(.3,14,10),stdM(0x000000,1),q.x,.42,q.z-.05,s);top.visible=false;
-      IS.obst.push({x1:q.x-.38,x2:q.x+.38,z1:q.z-.38,z2:q.z+.38});IS.objs.push({id:'beanbag',label:'Beanbag',x:q.x,z:q.z+.65,r:.75});IS.spots.bean={x:q.x,z:q.z,ry:rt.tv?Math.PI/2:0,ly:-.2}}}
+    if(it2.includes('beanbag')){const tq=IS.tvSpot&&!IS.obst.some(o=>IS.tvSpot.x-.4<o.x2+.1&&IS.tvSpot.x+.4>o.x1-.1&&IS.tvSpot.z-.4<o.z2+.1&&IS.tvSpot.z+.4>o.z1-.1)?{x:IS.tvSpot.x,z:IS.tvSpot.z}:null;const q=tq||free(.8,.8);if(q){const bb=mesh(sph(.42,18,12),stdM(P().ledCol?0x3b2a6a:0x8e2a3a,.95),q.x,.22,q.z,s);bb.scale.set(1,.55,1);const top=mesh(sph(.3,14,10),stdM(0x000000,1),q.x,.42,q.z-.05,s);top.visible=false;
+      IS.obst.push({x1:q.x-.38,x2:q.x+.38,z1:q.z-.38,z2:q.z+.38});IS.objs.push({id:'beanbag',label:'Beanbag',x:q.x,z:q.z+.65,r:.75});IS.spots.bean={x:q.x,z:q.z,ry:IS.tvAt?Math.atan2(IS.tvAt.x-q.x,IS.tvAt.z-q.z):0,ly:-.2}}}
     if(it2.includes('fridge')){const q=free(.55,.55);if(q){const fw=lam(0xe9ecef);box(.5,.82,.5,fw,q.x,.41,q.z,s);box(.5,.01,.5,lam(0x777777),q.x,.6,q.z+.001,s);box(.03,.22,.03,lam(0x9a9a9a),q.x+.2,.5,q.z+.26,s);mesh(cyl(.07,.08,.16,12),lam(0xd9542b),q.x-.08,.9,q.z,s);
       IS.obst.push({x1:q.x-.28,x2:q.x+.28,z1:q.z-.28,z2:q.z+.28});IS.objs.push({id:'fridge',label:'Mini fridge',x:q.x,z:q.z+.65,r:.7})}}
     if(it2.includes('kettle')){const kx=(n===1?-.6:deskX(0))+.3,kz=-D/2+.3;mesh(cyl(.07,.08,.2,12),lam(0xd8d8d8),kx,.89,kz,s);box(.02,.1,.06,lam(0x222222),kx+.08,.92,kz,s)}
@@ -134,14 +143,15 @@ function enterRoom0(owner){fadeIn();
     if(mess>70)addBuff('messy');if(mess>70&&S.mates.length&&S['mc'+day()]!==1){S['mc'+day()]=1;const m=S.mates[0];m.friend=clamp(m.friend-2);setTimeout(()=>toast(`${m.name}: "Chale, this room is getting messy o. Let's clean small 🧹"`),400)}
   }else IS.objs.push({id:'hang',label:'Hang out',x:-.4,z:.6,r:9});
   IS.spots=Object.assign(IS.spots,{bed:{x:slots[0].x,z:slots[0].z+.85,ly:slots[0].y+.3},desk:{x:n===1?-.6:deskX(0),z:-D/2+1.02,ry:Math.PI}});
-  const placePerson=(who,slotIdx,sleeping)=>{const sl=slots[slotIdx]||slots[0],lbl=who.name+(who.mate?' · roommate':'');
-    if(sleeping)addInPerson(who.look,lbl,sl.x,sl.z+.85,0,'lie',{n:who,lie:true,y:sl.y+.32});
-    else if(who===owner)addInPerson(who.look,lbl,-.5,.3,.4,'talk',{n:who});
-    else addInPerson(who.look,lbl,n===1?-.6:deskX(Math.min(Math.max(who.bed,0),beds-1)),-D/2+1.02,Math.PI,pick(['sitWrite','type','sit']),{n:who})};
+  const placePerson=(who,slotIdx,sleeping)=>{const sl=slots[slotIdx]||slots[0],lbl=who.name+(who.mate?' · roommate':''),dk={x:n===1?-.6:deskX(Math.min(Math.max(who.bed,0),beds-1)),z:-D/2+1.02,ry:Math.PI};let q;
+    if(sleeping)q=addInPerson(who.look,lbl,sl.x,sl.z+.85,0,'lie',{n:who,lie:true,y:sl.y+.32});
+    else if(who===owner)q=addInPerson(who.look,lbl,-.5,.3,.4,'talk',{n:who});
+    else q=addInPerson(who.look,lbl,dk.x,dk.z,Math.PI,pick(['sitWrite','type','sit']),{n:who});
+    q.deskSpot=who===owner&&!mine?null:dk;q.bedSpot={x:sl.x,z:sl.z+.85,y:sl.y+.32};q.life=1;q.nightSleep=!!sleeping};
   IS.lightsOn=!(hour()>=23.5||hour()<5.5);
   const night=hour()<7||hour()>=22;
   const gst=mine?(S.guestId!=null&&S.guestHere&&S.guestUntil>S.min?npcById(S.guestId):(()=>{const b=S.npcs.find(n=>n.with>S.min&&!n.mate&&!n.hidden&&dist(n,P())<300);return b})()):null;
-  if(gst){IS.guest=gst;addInPerson(gst.look,gst.name+' · visiting',-.5,.4,.5,'talk',{n:gst});IS.objs.push({id:'hang',label:'Hang out',x:-.4,z:.6,r:9})}
+  if(gst){IS.guest=gst;const gq=addInPerson(gst.look,gst.name+' · visiting',-.5,.4,.5,'talk',{n:gst});gq.life=1;gq.visitor=1;IS.objs.push({id:'hang',label:'Hang out',x:-.4,z:.6,r:9})}
   let bm=null;const hh=hour();if(mine&&tier<=1&&!night&&((hh>=5.5&&hh<9)||(hh>=18&&hh<22))&&Math.random()<.4)bm=S.mates.find(m=>homeNow(m));
   if(bm){IS.bathBusy=addInPerson(bm.look,bm.name+' · bathing',IS.spots.shower.x,IS.spots.shower.z,Math.PI/4,'shower',{n:bm,noObst:1});IS.water.visible=true}
   if(mine)S.mates.forEach(m=>{if(m!==bm&&(homeNow(m)||night))placePerson(m,m.bed,night)});else if(!owner.real)placePerson(owner,0,false);
