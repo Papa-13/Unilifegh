@@ -82,3 +82,7 @@ Until the key is set, the in-game Gem Shop shows "coming soon".
 
 ## Saves
 Signed-in players (Google or guest) are saved to Firestore every 5 minutes and when they leave the game; everyone is saved in the browser every 30 s. Players can also copy a backup code / download a backup file (💾 Backup in the phone, or on the main menu) and restore it on any device.
+
+## Multiplayer on/off switch
+Online campuses are **off** unless the Vercel environment variable `VITE_ONLINE` is `on`. While off, "Play online" shows "Coming soon", nothing connects to the Realtime Database, and sign-in still works for cloud saves and the Gem Shop.
+To switch multiplayer on: Vercel → Settings → Environment Variables → add `VITE_ONLINE` = `on` → Redeploy. To switch it off again, delete it (or set `off`) and redeploy.

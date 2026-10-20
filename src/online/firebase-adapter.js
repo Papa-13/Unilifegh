@@ -8,6 +8,10 @@ import {getAuth,onAuthStateChanged,signInAnonymously,GoogleAuthProvider,signInWi
 import {getFirestore,doc as fsDoc,collection as fsColl,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot,query,where,orderBy,limit,getDocs} from 'firebase/firestore';
 import {getDatabase,ref,set,remove,onDisconnect,onValue,onChildAdded,onChildChanged,onChildRemoved,serverTimestamp,goOffline,push,query as rtQuery,limitToLast} from 'firebase/database';
 import cfg from './firebase-config.js';
+/* Multiplayer switch: live online campuses only run when the Vercel environment variable VITE_ONLINE is 'on'.
+   While it's off, sign-in still works for cloud saves and the Gem Shop, but nothing connects to the Realtime
+   Database, so the free plan's 100-connection limit never matters. */
+const ONLINE=String(import.meta.env.VITE_ONLINE||'').toLowerCase()==='on';window.__onlineOff=!ONLINE;
 
 if(!cfg||!cfg.apiKey||String(cfg.apiKey).includes('PASTE')){console.warn('Chale: no Firebase config, playing offline');window.__fbResolve(null)}
 else start().catch(e=>{console.error(e);window.__fbResolve(null)});
@@ -39,13 +43,14 @@ async function start(){
     /* status/<uid>: am I online and on which campus (tiny, so friends can see it without the lobby) */
     async status(v){const me=(auth.currentUser&&auth.currentUser.uid)||u.uid;if(!me)return;const r=ref(rtdb,'status/'+me);try{if(v){onDisconnect(r).remove();await set(r,{...v,t:serverTimestamp()})}else await remove(r)}catch(e){}},
     watchStatus(u,cb){if(!/^[A-Za-z0-9_-]{6,64}$/.test(u))return()=>{};return onValue(ref(rtdb,'status/'+u),s=>cb(s.val()),()=>cb(null))}};
-  window.__fbResolve({user:userApi(u),db:dbApi(fs),room:roomApi(rtdb,u.uid,null)});
+  if(!ONLINE){window.fbRT.status=async()=>{};window.fbRT.watchStatus=()=>()=>{};goOffline(rtdb)}
+  window.__fbResolve({user:userApi(u),db:dbApi(fs),room:ONLINE?roomApi(rtdb,u.uid,null):null});
 }
 
 /* ---------- sign-in screen ---------- */
 function signInScreen(auth){return new Promise(res=>{
   const o=document.createElement('div');o.id='fbSign';
-  o.innerHTML=`<div class="fbs-in"><div class="fbs-eye">A GHANAIAN STUDENT LIFE</div><h2>CHA<span style="color:#e8b24a">LE</span> 🎓</h2><p>Sign in to join an online campus with real students. Your student and your chats are saved to your account.</p>
+  o.innerHTML=`<div class="fbs-in"><div class="fbs-eye">A GHANAIAN STUDENT LIFE</div><h2>CHA<span style="color:#e8b24a">LE</span> 🎓</h2><p>${ONLINE?'Sign in to join an online campus with real students. Your student and your chats are saved to your account.':'Sign in with Google to save your student to your account and continue on any phone. Online campuses with real students are coming soon.'}</p>
    <button id="fbG" class="fbs-btn fbs-main">Continue with Google</button><button id="fbA" class="fbs-btn">Play as a guest</button><button id="fbO" class="fbs-btn fbs-ghost">Play offline</button>
    <small>Guest students are saved on this device only. Use Google to play from any device.</small><div id="fbErr"></div></div>`;
   const st=document.createElement('style');st.textContent=`#fbSign{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:radial-gradient(circle at 50% 0,#3a1d22,#0f0c0a 70%);color:#f6efe6;font:16px/1.5 Figtree,system-ui,sans-serif;padding:20px}

@@ -29,7 +29,7 @@ function mpWhenReady(fn){if(MP.ready)fn();else MP.readyFns.push(fn)}
   try{[room,user,db]=await Promise.all([use('room'),use('user'),use('db')])}catch(e){}
   if(user)try{MP.uid=await user.id()}catch(e){}
   MP.db=db&&MP.uid?db:null;
-  if(MP.db){try{MP.db.collection('members').onSnapshot(s=>{const m={};s.docs.forEach(d=>{const v=d.data()||{};if(typeof v.cp==='string'&&/^[a-z0-9]{1,8}$/.test(v.cp)){m[d.id]={cp:v.cp,nm:mpClean(v.nm,16)||'Student',room:typeof v.room==='string'?v.room:null,rn:+v.rn||1,at:+v.at||0};if(typeof v.cn==='string'&&v.cp[0]==='u'&&!MP.cnames[v.cp])MP.cnames[v.cp]=mpClean(v.cn,24)}});MP.members=m;mpSyncMates();mpBadge();mpRefreshMenus()},()=>{})}catch(e){}
+  if(MP.db&&!window.__onlineOff){try{MP.db.collection('members').onSnapshot(s=>{const m={};s.docs.forEach(d=>{const v=d.data()||{};if(typeof v.cp==='string'&&/^[a-z0-9]{1,8}$/.test(v.cp)){m[d.id]={cp:v.cp,nm:mpClean(v.nm,16)||'Student',room:typeof v.room==='string'?v.room:null,rn:+v.rn||1,at:+v.at||0};if(typeof v.cn==='string'&&v.cp[0]==='u'&&!MP.cnames[v.cp])MP.cnames[v.cp]=mpClean(v.cn,24)}});MP.members=m;mpSyncMates();mpBadge();mpRefreshMenus()},()=>{})}catch(e){}
     if(window.__pairMail){/* web build: one private document per sender→recipient pair */
       try{const s=await MP.db.collection('dm').where('from','==',MP.uid).get();s.docs.forEach(d=>{const v=d.data()||{};if(okId(v.to)&&Array.isArray(v.ms))MP.myMail.to[v.to]=v.ms.slice(-40)})}catch(e){}
       try{MP.db.collection('dm').where('to','==',MP.uid).onSnapshot(s=>mpMailSnap({docs:s.docs.map(d=>{const v=d.data()||{};return{id:v.from,data:()=>({nm:v.nm,seen:{[MP.uid]:+v.seen||0},to:{[MP.uid]:Array.isArray(v.ms)?v.ms:[]}})}}).filter(x=>okId(x.id))}),()=>{})}catch(e){}}
