@@ -69,7 +69,7 @@ function breakUp(n,byThem){const p=P();if(p.partner===n)p.partner=null;n.side=fa
 const isLove=n=>P().partner===n||n.side;
 
 /* ---- dates with someone who isn't your partner can go very wrong ---- */
-{const _ds=dateScene;dateScene=function(n){const p=P(),L=p.partner,ev=hour()>=17,where=ev?'Night Market':'Campus Lake',bid=ev?'night':'lake';_ds(n);
+{const _ds=dateGo;dateGo=function(n,k){const p=P(),L=p.partner,bid=k,where=BID[k]?BID[k].name:'the date';_ds(n,k);
   if(!L||L===n||!S.npcs.includes(n))return;S.cheat=S.cheat||{n:0,sus:0};S.cheat.sus=Math.min(100,S.cheat.sus+10);addBuff('guilty');
   if(Math.random()<.45)setTimeout(()=>msg(L.name,pick(['Babe where are you? I\'ve been calling you 🙄','You\'re not picking my calls. Everything okay?','Why is your phone off? 🤨'])),900);
   const ch=.1+(L.plan&&L.plan.b===bid?.45:0)+S.cheat.sus/400;if(Math.random()<ch)afterStory(()=>caught(L,n,'date','date',where));else cheatRisk(n,'date')}}

@@ -91,14 +91,17 @@ function roomTalk(owner){if(!IS||IS.kind!=='room'||S.busy||!$('story').hidden||(
     ['Tell everything','g',()=>{m.told.push(n.id);advance(20);const r=memReact(n,m,'full');setTimeout(()=>story(`<div class="eyebrow">💞 ${esc(n.name)}'s room</div><h3>You tell ${esc(n.name)} everything</h3>${gistHtml(m)}<p class="scene"><b>${esc(n.name)}:</b> "${esc(r.t)}"</p>`,[[r.cls==='bad'?'😬':'❤️','g',()=>{}]]),250)}],
     ['Keep it short','',()=>{const d=m.kind==='date'?-6:m.kind==='friendF'?-1:1;n.romance=clamp(n.romance+d);toast(`${n.name}: "${d>0?'Okay 😄 sounds fun.':d<-3?'That\'s all you\'ll say? 😒':'Hmm, okay.'}"`)}],
     ['Change the topic','',()=>{const d=m.kind==='date'?-8:m.kind==='friendF'?-4:-1;n.romance=clamp(n.romance+d);toast(`${n.name}: "${d<-3?'…Wow. Okay. 🤨':'Hmm, okay. What do you want to talk about then?'}"`)}]])}
-function dateScene(n){
-  const p=P(),evening=hour()>=17,where=evening?'Night Market':'Campus Lake',cost=evening?60:0;
-  if(p.money<cost){story(`<p class="scene">You suggest the Night Market, but your MoMo balance can't cover food for two (${cedi(cost)}). ${esc(n.name)} says, "Next time then. 😅"</p>`,[['OK','',()=>{}]]);return}
+/* pick where to go: restaurant dinner, Night Market, or a walk by the lake */
+function dateScene(n){const h=hour(),o=[];if(h>=11&&h<22)o.push(['resto',`🍽️ Dinner at Akwaaba Grill · ${cedi(150)}`]);if(h>=17)o.push(['night',`🌙 Night Market street food · ${cedi(60)}`]);o.push(['lake','🦆 A walk by the Campus Lake · free']);
+  placeSheet(`❤️ Where do you want to take ${esc(n.name)}?`,o.map(x=>x[1]),i=>dateGo(n,o[i][0]))}
+function dateGo(n,k){
+  const p=P(),R_=k==='resto',evening=k==='night',where=R_?'Akwaaba Grill':evening?'Night Market':'Campus Lake',cost=R_?150:evening?60:0;
+  if(p.money<cost){story(`<p class="scene">You suggest the ${where}, but your MoMo balance can't cover food for two (${cedi(cost)}). ${esc(n.name)} says, "Next time then. 😅"</p>`,[['OK','',()=>{}]]);return}
   if(IS)leaveRoom(true);
-  p.money-=cost;advance(120);n.dates++;const g=15+Math.round(n.chem*10);n.romance=clamp(n.romance+g);n.friend=clamp(n.friend+8);
-  p.needs.fun=clamp(p.needs.fun+30);p.needs.social=clamp(p.needs.social+30);if(evening)p.needs.hunger=clamp(p.needs.hunger+40);
-  const lines=evening?[`You share a plate of kelewele and fried rice under the string lights. ${n.name} laughs at every one of your stories.`,`The Night Market is packed. You find a bench, share indomie, and talk until the stalls start packing up.`]:[`You walk around the campus lake. ${n.name} tells you about home and their family.`,`You sit by the water. ${n.name} shows you their favourite songs and you argue about the best Afrobeats album.`];
-  const b=BID[evening?'night':'lake'];p.x=b.door[0];p.y=b.door[1];
+  p.money-=cost;advance(R_?110:120);n.dates++;const g=(R_?22:15)+Math.round(n.chem*10);n.romance=clamp(n.romance+g);n.friend=clamp(n.friend+8);
+  p.needs.fun=clamp(p.needs.fun+30);p.needs.social=clamp(p.needs.social+30);if(evening||R_)p.needs.hunger=clamp(p.needs.hunger+40);
+  const lines=R_?[`A candle on a red tablecloth, highlife playing softly. You share banku and grilled tilapia and ${n.name} steals your plantain 😂`,`Akwaaba Grill is cosy tonight. Jollof, grilled chicken, two cold sobolos, and ${n.name} can't stop smiling at you.`,`The waitress asks if it's a special occasion. ${n.name} says 'maybe 😏' and you both laugh.`]:evening?[`You share a plate of kelewele and fried rice under the string lights. ${n.name} laughs at every one of your stories.`,`The Night Market is packed. You find a bench, share indomie, and talk until the stalls start packing up.`]:[`You walk around the campus lake. ${n.name} tells you about home and their family.`,`You sit by the water. ${n.name} shows you their favourite songs and you argue about the best Afrobeats album.`];
+  const b=BID[R_?'resto':evening?'night':'lake'];p.x=b.door[0];p.y=b.door[1];
   const m=memAdd('date',[n],where,'us');
-  story(`<div class="eyebrow">Date · ${where}</div><h3>You and ${esc(n.name)}</h3><p class="scene">${pick(lines)}</p>${m?`<p style="font-size:13px;color:var(--muted);margin:6px 0 0">What you talked about</p>${gistHtml(m,true)}`:''}<p>Romance +${g}${cost?` · spent ${cedi(cost)}`:''}</p>`,[['Lovely','g',()=>{}]]);
+  story(`<div class="eyebrow">${R_?'🍽️ Dinner date':'Date'} · ${where}</div><h3>You and ${esc(n.name)}</h3><p class="scene">${pick(lines)}</p>${m?`<p style="font-size:13px;color:var(--muted);margin:6px 0 0">What you talked about</p>${gistHtml(m,true)}`:''}<p>Romance +${g}${cost?` · spent ${cedi(cost)}`:''}</p>`,[['Lovely','g',()=>{}]]);
 }

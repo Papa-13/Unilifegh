@@ -25,8 +25,8 @@ function sitWith(n){const names=[...new Set(BENCHES.map(b=>b.name))];placeSheet(
   startBusy(lbl,Object.assign({pose:'sitTalk',spot:s1,buddySpot:s2},{mins:40,fx:{social:20,fun:10,energy:6}}),0,()=>{applyAct(lbl,40,{social:20,fun:10,energy:6});togetherBonus(n,5);memTogether(n,b.name);if(Math.random()<.5)setTimeout(()=>toast(`${n.name}: "${pick(['This place is so peaceful 😌','We should do this more often','Chale, tell me more gist 😂','I needed this break, honestly'])}"`),2600)})})}
 function togetherBonus(n,f){const p=P(),k='tg'+n.id+day();S[k]=(S[k]||0)+1;if(S[k]<=4){n.friend=clamp(n.friend+f);n.met=true;if(p.partner===n||(n.romance>25&&n.chem>.5))n.romance=clamp(n.romance+3)}}
 /* meetups arranged over the phone */
-const MEETP=[['parade','Parade Grounds'],['night','Night Market'],['lib','University Library'],['canteen','Bush Canteen'],['lake','Campus Lake'],['square','Akwaaba Square'],['court','Basketball Court'],['field','Sports Field'],['mall','Campus Mall'],['pool','Swimming Pool'],['market','Campus Market'],['club','Club Vibes']];
-const OPENH={market:[6,19],pool:[6,19],night:[18,25],club:[20,27],canteen:[7,20],lib:[7,22],mall:[9,21]};
+const MEETP=[['parade','Parade Grounds'],['night','Night Market'],['lib','University Library'],['canteen','Bush Canteen'],['lake','Campus Lake'],['square','Akwaaba Square'],['court','Basketball Court'],['field','Sports Field'],['mall','Campus Mall'],['pool','Swimming Pool'],['market','Campus Market'],['club','Club Vibes'],['resto','Akwaaba Grill']];
+const OPENH={resto:[11,22],market:[6,19],pool:[6,19],night:[18,25],club:[20,27],canteen:[7,20],lib:[7,22],mall:[9,21]};
 function meetOk(b,at){let h=(at%1440)/60;const [o,c]=OPENH[b]||[7,23];if(c>24&&h<3)h+=24;return h>=o&&h<c}
 function proposeMeet(chat,bi,at,tl){const n=S.npcs.find(x=>x.name===chat),p=P(),[b,nm]=MEETP[bi];
   S.msgs.unshift({from:'You',chat,text:`Let's meet at the ${nm} ${tl}? 📍`,at:S.min,mine:true,read:true});S.typing={chat};drawChat();
