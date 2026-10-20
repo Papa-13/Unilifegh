@@ -264,7 +264,25 @@ const NPCS=[
  ['Fiifi','m','lodge',['Gaming','Afrobeats'],'funny'],['Ewurabena','f','sunrise',['Books','Church'],'serious'],
  ['Mawuli','m','bayview',['Football','Fashion'],'friendly'],['Dzifa','f','lodge',['Dance','Fashion'],'funny'],
  ['Kwesi','m','royal',['Business','Tech'],'serious'],['Abena','f','lodge',['Gaming','Books'],'friendly'],
- ['Kofi','m','lodge',['Football','Gaming'],'friendly'],['Efua','f','bayview',['Church','Afrobeats'],'shy']];
+ ['Kofi','m','lodge',['Football','Gaming'],'friendly'],['Efua','f','bayview',['Church','Afrobeats'],'shy'],
+ /* more of the campus: spread over all the hostels, so every area has people you can get to know */
+ ['Kwame','m','sankofa',['Football','Afrobeats'],'funny'],['Ama','f','volta',['Fashion','Dance'],'friendly'],
+ ['Nii Armah','m','kotei',['Business','Football'],'funny'],['Akosua','f','grace',['Books','Church'],'serious'],
+ ['Elikem','m','heights',['Tech','Gaming'],'shy'],['Selasi','f','heights',['Tech','Fashion'],'friendly'],
+ ['Fuseini','m','ayigya',['Football','Business'],'friendly'],['Aisha','f','nyamedua',['Fashion','Church'],'shy'],
+ ['Ebo','m','execs',['Business','Afrobeats'],'serious'],['Araba','f','execs',['Fashion','Business'],'funny'],
+ ['Prince','m','morning',['Afrobeats','Dance'],'funny'],['Gifty','f','canaan',['Church','Books'],'friendly'],
+ ['Kelvin','m','gyin',['Gaming','Tech'],'friendly'],['Naa Adjeley','f','gyin',['Dance','Afrobeats'],'funny'],
+ ['Paa Kwesi','m','boadi',['Business','Books'],'serious'],['Mansa','f','boadi',['Books','Fashion'],'serious'],
+ ['Edem','m','newsite',['Football','Church'],'shy'],['Esinam','f','newsite',['Dance','Church'],'friendly'],
+ ['Abdul-Rahman','m','peace',['Tech','Football'],'friendly'],['Zainab','f','peace',['Business','Books'],'shy'],
+ ['Kweku','m','hilltop',['Gaming','Football'],'funny'],['Afia','f','hilltop',['Afrobeats','Fashion'],'friendly'],
+ ['Bernard','m','kent',['Books','Tech'],'serious'],['Dede','f','kent',['Church','Dance'],'friendly'],
+ ['Ato','m','gaza',['Football','Afrobeats'],'friendly'],['Sedinam','f','gaza',['Books','Tech'],'shy'],
+ ['Kwadwo','m','volta',['Church','Business'],'serious'],['Maame Serwaa','f','sankofa',['Fashion','Afrobeats'],'funny'],
+ ['Ibrahim','m','canaan',['Football','Gaming'],'shy'],['Priscilla','f','morning',['Business','Dance'],'funny'],
+ ['Jeffrey','m','grace',['Afrobeats','Gaming'],'funny'],['Enyonam','f','ayigya',['Church','Books'],'friendly'],
+ ['Senyo','m','nyamedua',['Tech','Dance'],'friendly'],['Benedicta','f','kotei',['Fashion','Church'],'serious']];
 
 const R=(a,b)=>a+Math.random()*(b-a);
 const RI=(a,b)=>Math.floor(R(a,b+1));

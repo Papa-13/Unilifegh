@@ -44,7 +44,7 @@ function syncChar(c,dt,vis=true,x=wx(c.x),z=wz(c.y)){
   if(want!=null){let d=want-g.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));g.rotation.y+=d*(dt?Math.min(1,dt*(moving?11:6)):1)}
   if(c.head&&S&&c!==S.p){const p=P();if(p&&p!==c&&!IS){const dx2=p.x-c.x,dy2=p.y-c.y,dd2=Math.hypot(dx2,dy2);
     if(dd2<130&&dd2>4&&!c.lying&&c.pose!=='swim'){let rel=Math.atan2(dx2,dy2)-g.rotation.y;rel=Math.atan2(Math.sin(rel),Math.cos(rel));c.lookY=Math.abs(rel)<1.9?clamp(rel,-.95,.95):null}else c.lookY=null}}
-  posePerson(c,moving,dt);
+  const far=S&&c!==S.p&&!IS&&typeof camT!=='undefined'&&Math.hypot(x-camT.x,z-camT.z);c._pf=(c._pf||0)+1;if(!far||far<20||far<40&&c._pf%2===0||far<60&&c._pf%4===0)posePerson(c,moving,far>20?dt*2:dt);if(far>110)vis=false;
   if(c.pose==='swim'&&!c.lying){g.position.x-=Math.sin(g.rotation.y)*.85;g.position.z-=Math.cos(g.rotation.y)*.85}
   g.visible=vis}
 const dayCol=new THREE.Color(0x9fd3f0),duskCol=new THREE.Color(0xf0a070),nightCol=new THREE.Color(0x0e1631),sky=new THREE.Color();
