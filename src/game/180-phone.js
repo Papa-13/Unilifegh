@@ -1,5 +1,5 @@
 /* ================= phone ================= */
-function phone(tab='msgs'){
+function phone(tab='home'){
   S.paused=true;openSheet();const p=P();CHAT=null;stopRec();
   const contacts=S.npcs.filter(n=>n.contact||n.mate);
   const chats=[...new Set(S.msgs.map(m=>m.chat))];
@@ -11,17 +11,37 @@ function phone(tab='msgs'){
       ${p.requests.length?`<h3>Requests</h3><div class="list">${p.requests.map((r,i)=>`<div class="item"><div class="grow"><b>${esc(r.n.name)} wants to borrow ${cedi(r.amt)}</b><small>Promises to pay by ${DAYS[r.due%7]}</small></div><button class="btn sm" data-ok="${i}">Lend</button><button class="ghost sm" data-no="${i}">Decline</button></div>`).join('')}</div>`:''}
       <h3>Debts</h3>${p.debts.filter(x=>!x.done).length?`<div class="list">${p.debts.filter(x=>!x.done).map(x=>`<div class="item"><div class="grow"><b>${x.kind==='owe'?`You owe ${esc(x.n.name)}`:`${esc(x.n.name)} owes you`} ${cedi(x.amt)}</b><small>Due ${DAYS[x.due%7]}${day()>x.due?' · overdue':''}</small></div>${x.kind==='owe'?`<button class="btn sm" data-pay="${p.debts.indexOf(x)}">Pay back</button>`:''}</div>`).join('')}</div>`:'<p>No debts. 🙌</p>'}
       ${p.loanTaken?'<p style="font-size:13px">Student loan: GH₵1,500 (repay after graduation)</p>':''}`,
-    apps:()=>`${srcOn()?'<h3>🗳️ SRC election</h3><p style="font-size:13px">Real students on your campus elect an SRC President every week. Run, campaign, vote.</p><div class="row"><button class="btn sm" id="srcApp">🗳️ Open the election</button></div>':''}<h3>📸 Campus feed</h3><p style="font-size:13px">Post photos from the game for everyone on your campus. Like other people's posts.</p><div class="row"><button class="btn sm" id="fdApp">📸 Open the feed</button></div><h3 style="margin-top:8px">💼 Side hustles</h3><p style="font-size:13px">TikTok skits, design gigs, laundry, pasco and MC jobs. Extra money on your own time.</p><div class="row"><button class="btn sm" id="huApp">💼 Open Hustles</button></div><h3 style="margin-top:8px">🛒 HomeMart</h3><p style="font-size:13px">Order furniture and appliances (TV, fridge, rug, fan…) and they're delivered to your room.</p><div class="row"><button class="btn sm" id="hmApp">🛋️ Shop for your room</button></div>
-      <h3 style="margin-top:8px">🎵 Music</h3><p style="font-size:13px">${MUS.phone.on?`Playing <b>${esc(CLUB_TRACKS[MUS.phone.i].t)}</b> in your earphones. Only you hear it.`:'Play songs in your earphones, anywhere on campus. Only you hear them.'}</p><div class="row"><button class="btn sm" id="musApp">🎵 Choose a song</button>${MUS.phone.on?'<button class="ghost sm" id="musAppOff">⏹ Stop</button>':''}</div>
-      <h3 style="margin-top:8px">🚗 Ryde & Dash</h3><p style="font-size:13px">Get a car to anywhere on campus. Ryde is faster; Dash is cheaper.</p>
-      <select id="dest" style="font:inherit;background:var(--bg);color:var(--fg);border:1.5px solid var(--line);border-radius:10px;padding:10px;max-width:100%">${B.map(b=>`<option value="${b.id}">${b.name}</option>`).join('')}</select>
-      <p id="quote" style="font-size:14px"></p><div class="row"><button class="btn sm" id="ryde" ${S.ride?'disabled':''}>Book Ryde</button><button class="btn g sm" id="dash" ${S.ride?'disabled':''}>Book Dash</button></div>
-      <h3 style="margin-top:8px">🛵 ChopNow</h3><p style="font-size:13px">Food delivered to wherever you are. A rider comes on a motorbike.</p>
-      <div class="list">${FOOD.map(([n,c],i)=>`<div class="item"><div class="grow"><b>${n}</b><small>${cedi(c)} + GH₵12 delivery</small></div><button class="btn sm" data-f="${i}" ${S.del?'disabled':''}>Order</button></div>`).join('')}</div>`,
+    ride:()=>`<p style="font-size:13px;margin-top:0">Get a car to anywhere on campus. <b>Ryde</b> is faster; <b>Dash</b> is cheaper.</p>
+      <label style="font-size:12px;opacity:.8">Where to?</label><select id="dest" style="font:inherit;background:var(--bg);color:var(--fg);border:1.5px solid var(--line);border-radius:10px;padding:10px;width:100%;margin-top:4px">${B.map(b=>`<option value="${b.id}">${b.name}</option>`).join('')}</select>
+      <p id="quote" style="font-size:14px"></p><div class="row"><button class="btn sm" id="ryde" ${S.ride?'disabled':''}>🚗 Book Ryde</button><button class="btn g sm" id="dash" ${S.ride?'disabled':''}>🚙 Book Dash</button></div>${S.ride?'<p style="font-size:13px">You already have a ride on the way.</p>':''}`,
+    food:()=>`<p style="font-size:13px;margin-top:0">Food delivered to wherever you are. A rider comes on a motorbike. Delivery GH₵12.</p><div class="list">${FOOD.map(([n,c],i)=>`<div class="item"><div class="grow"><b>${n}</b><small>${cedi(c)} + GH₵12 delivery</small></div><button class="btn sm" data-f="${i}" ${S.del?'disabled':''}>Order</button></div>`).join('')}</div>${S.del?'<p style="font-size:13px">🛵 Your order is on the way.</p>':''}`,
     sched:()=>p.grad?acadHTML():`${acadHTML()}<p><strong>${esc(p.prog)}</strong> · ${COLLEGES[p.col].name}${p.office?` · ${esc(p.office)}`:''}</p><table><tr><th>Day</th><th>08:00</th><th>14:00</th></tr>${[0,1,2,3,4].map(d=>`<tr><td>${DAYS[d]}</td>${[8,14].map(h=>{const L=TT[d].find(x=>x[1]===h);return `<td>${L?esc(courseName(L[0])):'–'}</td>`}).join('')}</tr>`).join('')}</table>
       ${meetsHTML()}<p><strong>📝 Exams · ${esc(BID[p.col].name)}</strong></p><table>${EXAMS.map(([ed,eh,c])=>`<tr><td>${DAYS[(S.semStart+ed)%7]} ${eh}:00</td><td>${esc(courseName(c))}</td><td>${p.exams&&p.exams[c]?(p.exams[c].absent?'absent':'written ✅'):''}</td></tr>`).join('')}</table>${srcWeekHTML()}<table><tr><th>Course</th><th>Lecturer</th><th>Attended</th></tr>${[0,1,2].map(c=>`<tr><td>${esc(courseName(c))}</td><td>${lecturerOf(c)}</td><td class="n">${p.att[c]}</td></tr>`).join('')}</table>`};
-  const draw=t=>{$('sheetIn').innerHTML=`<div class="row" style="justify-content:space-between"><h3>📱 Phone</h3><button class="ghost sm" id="bye">Close</button></div>
-    <div class="tabs">${[['msgs','Chats'+(unreadN()?` (${unreadN()})`:'')],['apps','Apps'],['contacts','Contacts'],['money','MoMo & debts'+(p.requests.length?' •':'')],['sched','Academics']].map(([k,l])=>`<button class="pick" aria-pressed="${k===t}" data-t="${k}">${l}</button>`).join('')}</div>${body[t]()}`;
+  /* the phone: a home screen of app icons; tapping one opens it full-screen inside the phone */
+  const real=()=>{try{return MP.campus?allThreads().reduce((a,k)=>a+unreadOf(k),0):0}catch(e){return 0}};
+  const APPS=[
+    {k:'msgs',n:'ChatUp',ic:'💬',c:'#1fa855',b:()=>unreadN()},
+    ...(MP.campus?[{k:'campus',n:'Campus Chat',ic:'🌐',c:'#2f6bb5',b:real,go:()=>mpPanel('chats')}]:[]),
+    {k:'feed',n:'Campus Feed',ic:'📸',c:'linear-gradient(135deg,#f9a03f,#d62976 55%,#7b2fbe)',go:()=>feedSheet()},
+    {k:'contacts',n:'Contacts',ic:'👥',c:'#5c6470'},
+    {k:'money',n:'MoMo',ic:'💸',c:'#f2c230',fg:'#1c1c1c',b:()=>p.requests.length},
+    {k:'ride',n:'Ryde',ic:'🚗',c:'#151515'},
+    {k:'food',n:'ChopNow',ic:'🛵',c:'#e8562a'},
+    {k:'sched',n:'Academics',ic:'🎓',c:'#1f3b73'},
+    ...(srcOn()?[{k:'src',n:'SRC Vote',ic:'🗳️',c:'#8e2a3a',go:()=>srcSheet()}]:[]),
+    {k:'hustle',n:'Hustles',ic:'💼',c:'#2f7a4a',go:()=>hustleSheet()},
+    {k:'homemart',n:'HomeMart',ic:'🛋️',c:'#b5653a',go:()=>decorate('items')},
+    {k:'music',n:MUS.phone.on?'Music ▶':'Music',ic:'🎵',c:'#fc3c44',go:()=>musSongs('phone')}];
+  const DOCK=['msgs','money','ride','food'];
+  const icon=a=>{const n=a.b?a.b():0;return `<button class="phApp" data-app="${a.k}"><i style="background:${a.c};color:${a.fg||'#fff'}">${a.ic}</i><span>${esc(a.n)}</span>${n?`<em class="bd">${n>9?'9+':n}</em>`:''}</button>`};
+  const bar=()=>`<div class="phBar"><span>${hm(S.min)}</span><span class="nt"></span><span>📶 4G 🔋</span></div>`;
+  const draw=t=>{if(t==='apps')t='home';const A=APPS.find(a=>a.k===t);
+    const inner=t==='home'||!A||!body[t]?`<div class="phHome">${bar()}<div class="phClock"><b>${hm(S.min)}</b><small>${DAYS[wd()]} · ${esc(BID[p.home]?BID[p.home].name:'Campus')}</small></div>
+        <div class="phGrid">${APPS.filter(a=>!DOCK.includes(a.k)).map(icon).join('')}</div><div class="phDock">${DOCK.map(k=>icon(APPS.find(a=>a.k===k))).join('')}</div></div>`
+      :`<div style="background:${A.c}">${bar()}<div class="phHd" style="color:${A.fg||'#fff'}"><button id="phBack" style="color:${A.fg||'#fff'}" aria-label="Back">‹</button><span class="t">${A.ic} ${esc(A.n)}</span></div></div><div class="phBody">${body[t]()}</div>`;
+    $('sheetIn').innerHTML=`<div class="phOut"><button class="ghost sm" id="bye">Close</button></div><div class="ph">${inner}<div style="background:#0b0b0d;padding:2px 0"><button class="phHomeBtn" id="phHomeB" aria-label="Home"></button></div></div>`;
+    $('sheetIn').querySelectorAll('[data-app]').forEach(b=>b.onclick=()=>{const a=APPS.find(x=>x.k===b.dataset.app);if(a.go){closeSheet();a.go()}else draw(a.k)});
+    if($('phBack'))$('phBack').onclick=()=>draw('home');$('phHomeB').onclick=()=>draw('home');
     $('sheetIn').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>draw(b.dataset.t));
     $('sheetIn').querySelectorAll('[data-chat]').forEach(b=>b.onclick=()=>openChat(chats[+b.dataset.chat]));
     $('sheetIn').querySelectorAll('[data-rc]').forEach(b=>b.onclick=()=>mpChatKey(b.dataset.rc));
