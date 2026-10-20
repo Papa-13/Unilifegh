@@ -3,7 +3,7 @@
 The game and its server (gem shop, gem bank, MoMo bank, Paystack webhook) run as one small Node.js app.
 
 ## 1. Make the upload file
-`npm run package:namecheap` → `release/chale-namecheap.zip` (built game + server + api). Rebuild it after every change.
+`npm run package:namecheap` → `release/unilifegh-namecheap.zip` (built game + server + api). Rebuild it after every change.
 
 ## 2. Create the Node.js app (cPanel)
 1. cPanel → **Software → Setup Node.js App → Create Application**
@@ -12,7 +12,7 @@ The game and its server (gem shop, gem bank, MoMo bank, Paystack webhook) run as
    - Application root: `chale` (a folder in your home, NOT inside public_html)
    - Application URL: your domain (e.g. yourdomain.com)
    - Application startup file: `app.cjs`
-2. **Create**. Then cPanel → **File Manager** → open the `chale` folder → **Upload** `chale-namecheap.zip` → right-click → **Extract** (overwrite).
+2. **Create**. Then cPanel → **File Manager** → open the `chale` folder → **Upload** `unilifegh-namecheap.zip` → right-click → **Extract** (overwrite).
 3. Back in Setup Node.js App → your app → **Run NPM Install**.
 
 ## 3. Secrets (never in public_html, never in GitHub)
