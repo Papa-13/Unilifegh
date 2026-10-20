@@ -41,6 +41,10 @@ function sendChat(chat,text,vn){try{ev('chat',{vn:!!vn,fam:/mum|dad|auntie|uncle
   if(asleep){(S.pending=S.pending||[]).push({due:(hour()>=23.5?day()+1:day())*1440+6*60+RI(10,90),fn:reply});drawChat();return}
   if(n&&p.partner!==n&&!(n.mate&&Math.random()<.5)&&Math.random()<.14){drawChat();setTimeout(()=>{m.seen=true;if(CHAT===chat&&!$('sheet').hidden)drawChat();toast(`✓✓ ${chat} has seen your message… no reply 🙄`)},R(1800,3500));return}
   S.typing={chat,vn:vn?Math.random()<.55:false};drawChat();setTimeout(reply,R(1500,3400))}
+function chatChips(n,p){const h=hour(),L=n&&(p.partner===n||n.side),q=['Hey! 👋','How are you?','Where are you?','What are you doing?','Are you free?'];
+  if(h>=6&&h<11)q.push('Let\'s go and buy waakye 🍛');else if(h>=11&&h<18)q.push('Gob3 later? 😋');else if(h>=17&&h<22)q.push('Kelewele at the Night Market? 🔥');
+  if(h>=15&&h<18)q.push('Ball at the field? ⚽');if(h>=8&&h<23)q.push(p.items.includes('console')?'Come and play FIFA in my room 🎮':'FIFA in your room? 🎮');
+  q.push('Let\'s study together','😂😂');if(L)q.push('I miss you ❤️','I love you ❤️');if(h>=21||h<2)q.push('Good night 😴');else if(h<11)q.push('Good morning ☀️');q.push('Thank you 🙏');return q}
 function openChat(c){CHAT=c;stopRec();drawChat()}
 function stopRec(){if(REC){clearInterval(REC.iv);REC=null}}
 function waveBars(m){let h=(m.at*7+m.text.length*13)%97,out='';for(let i=0;i<26;i++){h=(h*31+17)%97;out+=`<i style="height:${5+(h%19)}px"></i>`}return out}
@@ -50,7 +54,7 @@ function drawChat(){const p=P(),chat=CHAT;if(!chat)return;const n=S.npcs.find(x=
   const status=n?((n.plan&&n.plan.sleep&&n.hidden)?'last seen last night':'online'):fam?'online':'broadcast · only admins can send';
   const bub=m=>m.sys?`<div class="sysm">${esc(m.text)}</div>`:`<div class="bub ${m.mine?'bout':'bin'}">${m.vn?`<div class="vn"><button data-play="${S.msgs.indexOf(m)}" aria-label="Play voice note">▶</button><div class="wave">${waveBars(m)}</div><span style="font-size:12px">0:${String(m.vn.secs).padStart(2,'0')}</span></div><div class="vt">“${esc(m.text)}”</div>`:esc(m.text)}<time>${hm(m.at)}${m.mine?` <span class="tick${m.seen?' seen':''}">✓✓</span>`:''}</time></div>`;
   const last=th.filter(m=>!m.mine).pop(),qs=fam?['I\'m fine 🙏','Please send me money 🥺','I love you ❤️','I\'m studying hard 📚']:
-    (last&&/\?\s*$/.test(last.text)?['Yes 👍','No o 😅','Maybe later']:[]).concat(['Hey! 👋','How are you?','Where are you? Let\'s link up','😂😂','Let\'s study together','Thank you 🙏']).concat(p.partner===n&&n?['I miss you ❤️']:[]);
+    (last&&/\?\s*$/.test(last.text)||n&&n.pend?['Yes 👍','No o 😅']:[]).concat(chatChips(n,p));
   const ty=S.typing&&S.typing.chat===chat?`<div class="typing">${S.typing.vn?'🎤 recording audio…':'typing…'}</div>`:'';
   $('sheetIn').innerHTML=`<div class="row" style="gap:10px;align-items:center;justify-content:space-between"><button class="ghost sm" id="back" aria-label="Back to chats">‹ Chats</button><span class="av" style="background:${avCol(chat)}">${esc(chat[0])}</span><div class="grow" style="min-width:0"><b>${esc(chat)}</b><small style="display:block;color:var(--muted)">${status}</small></div><button class="ghost sm" id="bye">Close</button></div>
     <div class="thread" id="thread">${th.map(bub).join('')}${ty}</div>

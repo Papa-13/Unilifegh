@@ -27,12 +27,15 @@ function talkMenu(n){
     if(n.met&&p.biz&&!n.customer)opts.push(['sell',`Tell them about your ${BIZ[p.biz.type].name.toLowerCase()}`]);
     if(p.race&&!p.race.done&&!p.race.endorse.includes(n)&&n.friend>=30)opts.push(['vote',`Ask for their vote (${p.race.title})`]);
     if(n.met&&n.friend>=30&&p.partner!==n)opts.push(['flirt','Flirt']);
-    if(n.romance>=35&&p.partner!==n)opts.push(['date','Ask on a date']);
-    if(n.romance>=65&&n.dates>=2&&p.partner!==n)opts.push(['ask',`Ask to be your ${role}`]);
-    if(p.partner===n)opts.push(['date','Go on a date']);
+    if(n.romance>=35&&p.partner!==n&&!n.side)opts.push(['date','Ask on a date']);
+    if(n.romance>=65&&n.dates>=2&&p.partner!==n&&!n.side)opts.push(['ask',p.partner?`🤫 Ask to be your ${role} (you're with ${esc(p.partner.name)})`:`Ask to be your ${role}`]);
+    if(n.side&&!p.partner)opts.push(['ask','💍 Make it official']);
+    if(p.partner===n||n.side)opts.push(['date','Go on a date']);
+    if(n.met&&(p.partner===n||n.side||n.romance>=55))opts.push(['kiss','😘 Kiss']);
+    if(p.partner===n||n.side)opts.push(['breakup','💔 Break up']);
     try{memTellOpts(n).forEach(o=>opts.push(o))}catch(e){}
-    $('sheetIn').innerHTML=`<div class="who"><i class="av" style="background:${PAL[n.look.pal].a};border-color:${PAL[n.look.pal].b}"></i><div><h3>${esc(n.name)}${p.partner===n?' ❤️':''}</h3>
-      <div class="tags"><span class="tag y">${n.met?stName(n):'Stranger'}</span><span class="tag">${esc(n.prog)}</span><span class="tag">${n.mate?'Your roommate':BID[n.home].name}</span>${n.ints.map(i=>`<span class="tag ${p.interests.includes(i)?'g':''}">${i}</span>`).join('')}<span class="tag y">${n.pers}</span>${n.prog===p.prog?'<span class="tag g">coursemate</span>':''}</div></div></div>
+    $('sheetIn').innerHTML=`<div class="who"><i class="av" style="background:${PAL[n.look.pal].a};border-color:${PAL[n.look.pal].b}"></i><div><h3>${esc(n.name)}${p.partner===n?' ❤️':n.side?' 🤫':''}</h3>
+      <div class="tags"><span class="tag y">${relStage(n)}</span><span class="tag">${esc(n.prog)}</span><span class="tag">${n.mate?'Your roommate':BID[n.home].name}</span>${n.ints.map(i=>`<span class="tag ${p.interests.includes(i)?'g':''}">${i}</span>`).join('')}<span class="tag y">${n.pers}</span>${n.prog===p.prog?'<span class="tag g">coursemate</span>':''}</div></div></div>
       <div class="rel"><span>Friendship</span><div class="bar"><i style="width:${n.friend}%"></i></div><span>Romance</span><div class="bar"><i class="rom" style="width:${n.romance}%"></i></div></div>
       ${said?`<div class="say">${said}</div>`:''}
       <div class="grid2">${opts.map(([k,t])=>`<button class="ghost sm" data-a="${k}">${t}</button>`).join('')}</div>
