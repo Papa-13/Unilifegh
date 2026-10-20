@@ -30,7 +30,7 @@ function placeActions(b,inside){
     a.push(['Buy a drink at the bar · GH₵20',()=>{if(spend(20))doAct('Having a drink at the bar',20,{fun:8,hunger:3})}]);
     a.push(['Chill in the lounge (30m)',()=>doAct('Chilling in the lounge',30,{energy:6,social:6,fun:5})]);
     a.push(['📣 Ask the DJ for a shout-out · GH₵10',()=>{if(!spend(10))return;p.needs.fun=clamp(p.needs.fun+8);toast(`DJ Kwaku Flames: "Shout out to ${p.name==='You'?'my fresher':p.name}! This one's for you!" 🎧🔥`)}])}
-  if(b.id==='market'){if(h>=6&&h<19){a.push(['🧺 Buy foodstuff',()=>marketSheet(),null,'b']);a.push(['Buy a provisions pack · GH₵50',()=>{if(!spend(50))return;p.prov+=6;doAct('Buying foodstuff at the market',15,{})}])}else a.push(['Market closed (06:00–19:00)',null])}
+  if(b.id==='market'){if(h>=6&&h<19){a.push(['🧺 Buy foodstuff',()=>marketSheet(),null,'b']);if(p.biz&&!BIZ[p.biz.type].service)a.push([`Buy business stock here (cheapest) · ${cedi(BIZ[p.biz.type].unit*BIZ[p.biz.type].pack)}`,()=>buyStock('market')]);a.push(['Buy a provisions pack · GH₵50',()=>{if(!spend(50))return;p.prov+=6;doAct('Buying foodstuff at the market',15,{})}])}else a.push(['Market closed (06:00–19:00)',null])}
   if(b.id==='pool'&&h>=6&&h<19&&typeof MP!=='undefined'&&MP.campus)sgRealHere('pool').slice(0,3).forEach(rp=>a.push([`🏊 Race ${rp.nm} (real student)`,()=>sgInvite(rp,'sw'),null,'b']));
   if(b.id==='pool'){if(h>=6&&h<19){const free=HT(p.home)==='royal';a.push([free?'🏊 Swim (45m, free for premium residents)':'🏊 Swim (45m) · GH₵15',()=>{if(!free&&!spend(15))return;p.fit++;doAct('Swimming',45,{fun:22,energy:-10,hygiene:8});meetRandom('pool')},null,'b']);a.push(['Chill by the pool (30m)',()=>doAct('Chilling by the pool',30,{fun:10,energy:5})])}else a.push(['Pool closed (06:00–19:00)',null])}
   if(b.id==='parade'){const ev=eventNow();
@@ -94,9 +94,10 @@ function placeActions(b,inside){
   if(b.id==='salon'){if(h>=8&&h<20)a.push([p.look.gender==='f'?'Get your hair done':'Get a haircut',()=>salon()]);else a.push(['Closed (08:00–20:00)',null])}
   if(b.id==='taxi')a.push(['🚕 Take a taxi',()=>taxiMenu(),null,'b']);
   if(b.id==='terminal'){a.push(['See the shuttle route',()=>story(`<div class="eyebrow">Campus Shuttle Terminal</div><h3>Free shuttles, all day</h3><p class="scene">Two buses loop around campus and stop at every 🚌 shelter. Walk to any shelter and wait.</p><p>${SH_STOPS.map(x=>esc(x.name)).join(' → ')} → back again</p>`,[['Got it','g',()=>{}]])]);a.push(['Sit on a bench at the terminal (30m)',()=>doAct('Sitting on a bench at the terminal',30,{energy:6,fun:3})])}
-  if(b.id==='trotro'){a.push(['Trotro to Madina Market: provisions (3h)',()=>{if(!spend(14+50))return;p.prov+=8;doAct('Shopping at Madina Market',180,{fun:15,energy:-12});toast('Bought 8 provisions for GH₵50. Fare GH₵14.')}]);
-    if(p.biz&&!BIZ[p.biz.type].service)a.push([`Buy business stock at Madina · ${cedi(BIZ[p.biz.type].unit*BIZ[p.biz.type].pack)}`,()=>buyStock('madina')]);
-    if(w===5&&h<14)a.push(['Go home for the weekend',()=>goHome()])}
+  if(b.id==='trotro'){/* the city (Kejetia, Adum, home trips) isn't on the map yet: the station is for catching trotros along the campus roads */
+    a.push(['🚐 Where do the trotros go?',()=>story(`<div class="eyebrow">Tech Junction trotro station</div><h3>"Kejetia! Kejetia! One more seat!"</h3><p class="scene">The mates shout for Kejetia, Adum and Ayeduase, but the city isn't open in the game yet. For now, trotros run along the roads around campus. Stand by the road and wave one down as it passes. GH₵${TROTRO_FARE} a ride.</p><p style="font-size:13px;color:var(--muted)">🏙️ Kejetia market, town, restaurants and going home are coming in a future update.</p>`,[['Okay','g',()=>{}]])]);
+    a.push(['Buy pure water from a hawker · GH₵1',()=>{if(!spend(1))return;doAct('Drinking a sachet of pure water',5,{hunger:3,energy:3})}]);
+    a.push(['Sit and watch the trotros (20m)',()=>doAct('Sitting at the station watching the trotros',20,{energy:4,fun:4})])}
   return a;
 }
 function nextLecture(){for(let k=0;k<7*48;k++){const m=S.min+k*30,d=Math.floor(m/1440)%7,h=(m%1440)/60,L=TT[d]&&TT[d].find(([c,st])=>Math.abs(h-st)<.01);if(L)return `Next: ${courseName(L[0])}, ${DAYS[d]} ${String(L[1]).padStart(2,'0')}:00`}return ''}

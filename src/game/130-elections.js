@@ -23,7 +23,7 @@ function supportScore(){const p=P(),r=p.race;return 12+friendsN()*3+r.endorse.le
 function rally(b){const p=P(),r=p.race;r.rallies++;const crowd=S.npcs.filter(n=>!n.hidden&&dist(n,p)<260);crowd.forEach(n=>{n.met=true;n.friend=clamp(n.friend+2)});
   doAct('Holding a campaign rally',45,{social:12,energy:-10});toast(`"Vote for change!" ${crowd.length+RI(8,25)} students stopped to listen. 📣`)}
 function manifesto(){const p=P(),r=p.race;
-  const promises=[['Fix water and Wi-Fi in hostels',8],['Push Rent Control to cap hostel fees',10],['Free printing for exam handouts',6],['More security lights from the Night Market to the hostels',7],['Monthly "Meet the Lecturers" town halls',5],['Free shuttle buses to Madina on weekends',7]];
+  const promises=[['Fix water and Wi-Fi in hostels',8],['Push Rent Control to cap hostel fees',10],['Free printing for exam handouts',6],['More security lights from the Night Market to the hostels',7],['Monthly "Meet the Lecturers" town halls',5],['Free shuttle buses to Kejetia on weekends',7]];
   const pickd=[];
   const draw=()=>story(`<div class="eyebrow">Manifesto reading · Akwaaba Square</div><h3>The microphone is yours.</h3><p class="scene">Hundreds of students are watching. Pick two promises to lead with.</p>${pickd.length?`<p>So far: <strong>${pickd.map(x=>x[0]).join(' · ')}</strong></p>`:''}`,
     promises.filter(x=>!pickd.includes(x)).map(x=>[x[0],'',()=>{pickd.push(x);if(pickd.length<2)setTimeout(draw,10);else{const v=pickd.reduce((a,x)=>a+x[1],0)+(p.needs.energy>40?5:0)+(p.needs.fun>50?3:0)+RI(-3,6);r.manifesto=v;advance(120);
