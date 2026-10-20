@@ -54,6 +54,7 @@ function realityHourly(){if(!S||!S.p)return;const r=RLS(),d=day(),h=Math.floor(h
   if(r.sick){addBuff('sick');if(d-r.sick.since>=3&&!r.sick.rushed){r.sick.rushed=1;p.money-=80;r.sick=null;const f=bestFriend();story(`<div class="eyebrow">🏥 Health Centre</div><h3>${f?esc(f.name):'Your roommate'} rushed you to the Health Centre</h3><p class="scene">You waited too long. The nurse put you on a drip and gave you medicine. GH₵80 for the treatment. You feel better, but you lost a whole day.</p>`,[['Thank you','',()=>{advance(8*60)}]])}}
   /* 10. departmental week */
   if(sd===5&&h===8&&!r['dj'+S.sem]){r['dj'+S.sem]=1;msg('Class rep',`👕 Departmental week! Today is jersey day, wear your jersey or Hall Week tee. Dinner & awards night is ${DAYS[(S.semStart+6)%7]} 19:00 at the Great Hall (GH₵60). Dress well! 🕺`);if(['jersey','halltee'].includes(p.look.outfit)){p.needs.fun=clamp(p.needs.fun+8);toast('You wore your jersey for jersey day. The whole department is in colours! 🎉')}}
+  if(wd()===4&&h===17&&!r['mn'+d]){r['mn'+d]=1;const hb=BID[p.home]&&BID[p.home].hall;msg(hb?'Hall JCR':`${homeB().name} group`,hb?'📣 MORALE NIGHT tonight from 20:30! Come out with your hall colours, drums and vuvuzelas. Oyiii! 🔥':'🎶 Friday night! Gist and music on the balcony from 20:30. Bring your speaker 🔊')}
   /* 8. faith reminders */
   if(wd()===3&&h===16&&!r['fl'+d])r['fl'+d]=1,msg('Fellowship','🙏 Fellowship tonight at the University Chapel, 18:30. Come with a friend!');
   if(wd()===4&&h===11&&!r['jm'+d])r['jm'+d]=1,BID.mosque&&msg('Campus Muslim Students','🕌 Jumu\'ah prayer today at the mosque, 12:30.');
@@ -90,8 +91,8 @@ function rlPlaceActs(b,inside,a){if(!b||!S||!S.p)return;const p=P(),r=RLS(),h=ho
   if(b.id==='senate'&&inside){if(!r['reg'+S.sem])a.unshift(['📋 Register your courses (queue ~1.5h)',()=>{r['reg'+S.sem]=1;doAct('Queueing at the Administration',90,{energy:-8,fun:-8});setTimeout(()=>toast('Finally! "Next!" Your courses are registered. ✅'),1200)},null,'b']);
     if(!r.idc)a.push(['🪪 Collect your student ID card',()=>{r.idc=1;advance(30);toast('Your student ID card is ready. Smile like the photo 😅🪪')}]);
     if(r['rs'+S.sem]==='missing')a.unshift(['📄 Fix your missing results (1h)',()=>{r['rs'+S.sem]='fixed';doAct('Sorting out missing results',60,{fun:-6});setTimeout(()=>toast('The officer found your script. Your grade now shows. Phew 😮‍💨'),1200)},null,'b'])}
-  /* 7. hall morale night (Wednesday) for your own hall/hostel */
-  if(b.id===p.home&&!inside&&w===2&&h>=20.5&&h<23)a.unshift([BID[p.home].hall?'📣 Join the hall morale night (1h)':'🎶 Hostel gist night on the balcony (1h)',()=>{doAct(BID[p.home].hall?'Singing hall chants at morale night':'Gisting with hostel mates',60,{fun:20,social:18,energy:-6});toast(BID[p.home].hall?'"Oyiii!" The whole hall chants, drums and all. Goosebumps 🔥':'Jokes, music and gist till late 😂')},null,'b']);
+  /* 7. hall morale night (Friday nights) for your own hall/hostel */
+  if(b.id===p.home&&!inside&&w===4&&h>=20.5&&h<23.9)a.unshift([BID[p.home].hall?'📣 Join the hall morale night (1h)':'🎶 Hostel gist night on the balcony (1h)',()=>{doAct(BID[p.home].hall?'Singing hall chants at morale night':'Gisting with hostel mates',60,{fun:20,social:18,energy:-6});toast(BID[p.home].hall?'"Oyiii!" The whole hall chants, drums and all. Goosebumps 🔥':'Jokes, music and gist till late 😂')},null,'b']);
   /* 8. faith */
   if(b.id==='chapel'){if(w===3&&h>=18&&h<20.5)a.unshift(['🙏 Campus fellowship (1.5h)',()=>{doAct('At fellowship',90,{social:14,fun:8});addBuff('blessed')},null,'b']);
     if(es&&w===4&&(h>=21.5||h<5))a.unshift(['🔥 All-night prayer meeting (3h)',()=>{doAct('At the all-night prayer meeting',180,{social:12,energy:-20});addBuff('blessed');r['ap'+S.sem]=1},null,'b'])}
