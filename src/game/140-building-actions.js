@@ -7,7 +7,6 @@ function placeActions(b,inside){
       pharm:[['💊 Buy painkillers · GH₵15',()=>{if(spend(15))doAct('Taking painkillers',5,{energy:8,fun:2})}],['🧴 Buy toiletries · GH₵25',()=>{if(spend(25)){p.needs.hygiene=clamp(p.needs.hygiene+10);toast('Soap, sponge, toothpaste and deodorant. Fresh! 🧼');hud()}}]],
       shawarma:[['🌯 Shawarma · GH₵55',()=>eat(55,50,'shawarma')],['🍕 Pizza slice & Coke · GH₵45',()=>eat(45,45,'pizza',8)]],
       books:[['📘 Past questions booklet · GH₵30',S.pq===S.sem?null:()=>{if(!spend(30))return;S.pq=S.sem;doAct('Going through past questions',60,{study:8})},S.pq===S.sem?'bought this semester':null],['📗 Buy a novel · GH₵40',()=>{if(spend(40))doAct('Reading a novel',60,{fun:15,energy:4})}]],
-      pavilion:[['🏟️ Watch training from the stands (30m)',()=>doAct('Watching training from the stands',30,{fun:8,energy:4})]],
       hall:[['🏐 Watch an inter-college volleyball match (1h)',()=>{doAct('Watching volleyball at the sports hall',60,{fun:16,social:8});meetRandom('hall')}]],
       heights:[['🏢 Private hostel · residents only',null]],kotei:[['🏢 Private hostel · residents only',null]],
       senate:[['📄 Collect your course registration slip',()=>{advance(20);toast(`Registry: ${p.prog}, ${COLLEGES[p.col].name}. Lectures and exams are in ${BID[p.col].name}. 📄`)}],['📜 Check your academic record',()=>{advance(10);toast(`Attendance ${p.att.join('/')} · Grade forecast ${forecast()}${S.sem>1?' · Semester '+S.sem:''}`)}]],
@@ -80,7 +79,7 @@ function placeActions(b,inside){
   if(b.id==='night'&&(h>=18||h<1))a.push(['Buy a chilled Malta · GH₵10',()=>{if(!spend(10))return;doAct('Having a drink',15,{fun:6,hunger:5})}]);
   if(b.id==='square')a.push(['Sit on a bench (30m)',()=>doAct('Sitting on a bench',30,{fun:6,energy:5})]);
   try{hallWeekActs(b,a)}catch(e){console.error(e)}
-  if(b.id==='field'){a.push(['⚽ Play football (1h)',()=>sportAsk('football')]);a.push(['Jog (30m)',()=>{p.fit++;doAct('Jogging',30,{fun:10,energy:-8,hygiene:-8})}])}
+  if(b.id==='field'){a.push(['⚽ Play football (1h)',()=>sportAsk('football')]);a.push(['🏟️ Watch a match from the stands (30m)',()=>doAct('Watching a match from the stands',30,{fun:8,energy:4})]);a.push(['Jog (30m)',()=>{p.fit++;doAct('Jogging',30,{fun:10,energy:-8,hygiene:-8})}])}
   if(b.id==='garden')a.push(['Relax by the pond (1h)',()=>doAct('Relaxing in the garden',60,{fun:18,energy:6})]);
   if(b.id==='lake')a.push(['Walk around the lake (1h)',()=>doAct('Walking by the lake',60,{fun:20,energy:4})]);
   if(b.id==='square'&&!fnight())a.push(['Hang out at the square (1h)',()=>{doAct('Hanging out at Akwaaba Square',60,{social:18,fun:12});meetRandom('square')}]);

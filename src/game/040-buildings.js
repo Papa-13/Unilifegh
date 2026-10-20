@@ -43,8 +43,8 @@ function buildArch(b,s,cx,cz,w,d,f){
   const bx=(k,sx,sy,sz,x,y,z,ry=0)=>add(k,AG.box,x,y,z,ry,sx,sy,sz);
   const H=b.ht,id=b.id,zone=b.zone,home=!!b.home;
   const style=id==='senate'?'senate':id==='lib'?'library':id==='greathall'?'hall':id==='chapel'?'chapel':id==='club'?'club':id==='mall'?'mall':(id==='unity'||id==='bank')?'bank':HT(id)==='royal'?'tower':
-    (id==='gym'||id==='hall')?'sports':id==='pavilion'?'pavilion':home?'hostel':zone==='c'?'shop':'college';
-  const roofT={hostel:HT(id)==='lodge'?'corr':'hip',chapel:'gable',sports:id==='hall'?'barrel':'flat',college:['canteen','office','print','clinic'].includes(id)?'hip':'flat',pavilion:'flat'}[style]||'flat';
+    (id==='gym'||id==='hall')?'sports':home?'hostel':zone==='c'?'shop':'college';
+  const roofT={hostel:HT(id)==='lodge'?'corr':'hip',chapel:'gable',sports:id==='hall'?'barrel':'flat',college:['canteen','office','print','clinic'].includes(id)?'hip':'flat'}[style]||'flat';
   const floors=Math.max(1,Math.round((H-.2)/1.2)),fh=(H-.2)/floors;
   const F=[{n:[0,f],ry:f>0?0:Math.PI,L:w,o:d/2,front:1},{n:[0,-f],ry:f>0?Math.PI:0,L:w,o:d/2},{n:[1,0],ry:Math.PI/2,L:d,o:w/2},{n:[-1,0],ry:-Math.PI/2,L:d,o:w/2}];
   const fp=(Fc,a,out)=>[cx+Fc.n[0]*(Fc.o+out)+Math.cos(Fc.ry)*a,cz+Fc.n[1]*(Fc.o+out)-Math.sin(Fc.ry)*a];
@@ -107,13 +107,12 @@ function buildArch(b,s,cx,cz,w,d,f){
     if(style==='club'){F.forEach(Fc=>{fb(Fc,'neon',Fc.L+.02,.05,.03,0,H-.1,0);fb(Fc,'neon2',Fc.L+.02,.05,.03,0,.32,0)});fb(FR,'neon',.05,1.6,.03,aD-.65,1.05,.06);fb(FR,'neon',.05,1.6,.03,aD+.65,1.05,.06);fb(FR,'neon2',1.35,.05,.03,aD,1.85,.06)}
     bx('trim',w+.3,.15,d+.3,cx,H+.07,cz);bx('wall',w+.1,.35,d+.1,cx,H+.3,cz);for(let i=0;i<2;i++)bx('metal',.6,.35,.5,cx-1+i*1.4,H+.62,cz-f*(d/2-.8));beds()}
   if(style==='sports'){if(id==='hall'){add('roof',AG.barrel,cx,H,cz,0,w+.3,1.6,d+.2);fb(FR,'cur',FR.L-1,1.1,.05,0,H-.8,.02)}else{fb(FR,'cur',FR.L-.6,1.0,.05,0,H-.9,.02);bx('trim',w+.3,.15,d+.3,cx,H+.07,cz)}ent();signY=id==='hall'?H-.25:H-.4}
-  if(style==='pavilion'){bx('trim',w+.4,.15,d+.4,cx,H+.07,cz);fb(FR,'roof',FR.L+.4,.12,1.8,0,H+.05,0);for(let a=-FR.L/2+.3;a<=FR.L/2;a+=1.4)fa(FR,'white',AG.cyl8,.1,H-.2,.1,a,.2+(H-.2)/2,1.65);ent()}
   if(roofT==='hip'&&style==='college'){bx('trim',w+.6,.12,d+.6,cx,H+.02,cz);add('roof',AG.hip,cx,H+.45,cz,0,w+.6,.85,d+.6)}
   if(id==='mosque'){add('accent',AG.sph,cx,H+.5,cz,0,w*.42,w*.36,w*.42);add('gold',AG.cyl8,cx,H+.5+w*.2,cz,0,.06,.5,.06);const mx=cx+w/2-.4,mz=cz-d/2+.4;add('white',AG.cyl,mx,(H+2.2)/2,mz,0,.45,H+2.2,.45);add('accent',AG.hip,mx,H+2.5,mz,0,.55,.7,.55);add('gold',AG.cyl8,mx,H+3,mz,0,.04,.35,.04)}
   if(id==='clinic'){fb(FR,'white',.5,.15,.05,FR.L/2-.6,H-.4,.04);fb(FR,'white',.15,.5,.05,FR.L/2-.6,H-.4,.04);fb(FR,'stain2',.42,.1,.04,FR.L/2-.6,H-.4,.06);fb(FR,'stain2',.1,.42,.04,FR.L/2-.6,H-.4,.065)}
   /* flat roofs: a darker concrete deck inside the parapet, AC condensers, a stair head and solar panels
      (what you actually see from above on Ghanaian campus buildings) */
-  {const top={college:roofT==='flat'&&id!=='mosque'?[H+.39,w+.1,d+.1]:null,senate:[H+.46,w+.16,d+.16],library:[H+.7,w-1.4,d-1.4],shop:[H+.475,w+.1,d+.1],mall:[H+.475,w+.1,d+.1],bank:[H+.475,w+.1,d+.1],club:[H+.475,w+.1,d+.1],pavilion:[H+.145,w+.4,d+.4],sports:id==='gym'?[H+.145,w+.3,d+.3]:null}[style];
+  {const top={college:roofT==='flat'&&id!=='mosque'?[H+.39,w+.1,d+.1]:null,senate:[H+.46,w+.16,d+.16],library:[H+.7,w-1.4,d-1.4],shop:[H+.475,w+.1,d+.1],mall:[H+.475,w+.1,d+.1],bank:[H+.475,w+.1,d+.1],club:[H+.475,w+.1,d+.1],sports:id==='gym'?[H+.145,w+.3,d+.3]:null}[style];
     if(top){const [ty,tw,td]=top,iw=tw-.32,idp=td-.32,hs=(Math.abs(Math.sin(b.x*.37+b.y*.11))*1000)|0;bx('deck',iw,.03,idp,cx,ty+.005,cz);
       const fz=cz+f*idp*.18;if(iw>2.2){for(let i=0;i<Math.min(4,Math.floor(iw/1.6));i++){const x=cx-iw/2+.6+i*.9;bx('white',.55,.38,.42,x,ty+.2,fz);add('dark',AG.cyl,x,ty+.4,fz,0,.3,.02,.3)}}
       bx(style==='sports'?'metal':'wall',.9,.75,.8,cx+iw/2-.7,ty+.38,cz+f*(idp/2-.6));bx('dark',.4,.6,.02,cx+iw/2-.7,ty+.32,cz+f*(idp/2-.6)+f*.41);bx('trim',1,.06,.9,cx+iw/2-.7,ty+.78,cz+f*(idp/2-.6));
@@ -159,8 +158,15 @@ const solidC=(x,y,r)=>SOLIDS.push({t:0,x,y,r}),solidR=(x1,y1,x2,y2)=>SOLIDS.push
   for(let i=0;i<4;i++){const x=450+i*82,y=850;box(1.2,.75,.5,0x8a6a4a,wx(x),.38,wz(y),s);mesh(cyl(.25,.25,.05,10),lam(0xd9a537),wx(x),.78,wz(y),s)}
   const bulbs=new THREE.Group();for(let i=0;i<24;i++)mesh(sph(.06,6,6),basic([0xffd27a,0xff8a6a,0x9ad7ff][i%3]),wx(430+i*13),1.95+Math.sin(i*.6)*.08,wz(775),bulbs);s.add(bulbs);
   const line=(x,y,w,h)=>{const l=mesh(new THREE.PlaneGeometry(w*U,h*U),basic(0xf2f2f2),wx(x+w/2),.012,wz(y+h/2),s);l.rotation.x=-Math.PI/2};
-  line(830,700,340,3);line(830,917,340,3);line(830,700,3,220);line(1167,700,3,220);line(998,700,3,220);
-  [[835,810],[1165,810]].forEach(([x,y])=>{box(.06,.9,.06,0xffffff,wx(x),.45,wz(y)-.9,s);box(.06,.9,.06,0xffffff,wx(x),.45,wz(y)+.9,s);box(.06,.06,1.86,0xffffff,wx(x),.9,wz(y),s)});
+  /* football pitch, drawn straight on the (stretched) Sports Field so the lines and goals match the match game */
+  {const NS=o=>{o.userData.noShift=1;return o},R=(x,y,w,h)=>{const a=TA('field',x,y),b=TA('field',x+w,y+h);return[a.x,a.y,b.x-a.x,b.y-a.y]},L=(x,y,w,h,t)=>{const [X,Y,W,H]=R(x,y,w,h);const l=NS(mesh(new THREE.PlaneGeometry(Math.max(W,t)*U,Math.max(H,t)*U),basic(0xf2f2f2),wx(X+Math.max(W,t)/2),.012,wz(Y+Math.max(H,t)/2),s));l.rotation.x=-Math.PI/2};
+   const t=4;L(830,700,340,0,t);L(830,878,340,0,t);L(830,700,0,180,t);L(1167,700,0,180,t);L(998,700,0,180,t);
+   {const c=TA('field',1000,790),cr=NS(mesh(new THREE.RingGeometry(1.7,1.82,40),basic(0xf2f2f2),wx(c.x),.013,wz(c.y),s));cr.rotation.x=-Math.PI/2}
+   [[830,1],[1170,-1]].forEach(([x,sd])=>{L(sd>0?x:x-50,750,50,0,t);L(sd>0?x:x-50,830,50,0,t);L(sd>0?x+50:x-50,750,0,80,t);
+     const g=TA('field',x,790),X=wx(g.x)+sd*.05,Z=wz(g.y);[-1.6,1.6].forEach(dz=>NS(box(.09,1.5,.09,0xffffff,X,.75,Z+dz,s)));NS(box(.09,.09,3.3,0xffffff,X,1.5,Z,s));
+     const net=NS(mesh(new THREE.PlaneGeometry(3.2,1.5),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.25,side:THREE.DoubleSide,depthWrite:false}),X-sd*.6,.75,Z,s));net.rotation.y=Math.PI/2})}
+  /* stands along the side of the pitch */
+  {const NS=o=>{o.userData.noShift=1;return o},a=TA('field',840,903),b=TA('field',1160,903),y=a.y,x0=a.x+60,x1=b.x-60;for(let r=0;r<3;r++){NS(box((x1-x0)*U,.25,.55,[0xf4f1ea,0x8e2a3a,0xf4f1ea][r],wx((x0+x1)/2),.15+r*.3,wz(y)+r*.5,s))}const sr={t:1,x1:x0,x2:x1,y1:y-12,y2:y+60,noShift:1};SOLIDS.push(sr)}
   [[110,1090,0xf2c230],[230,1100,0x3a7bd5]].forEach(([x,y,c])=>{box(2.6,1.1,1.1,c,wx(x),.75,wz(y),s);box(2.5,.4,1.12,0x24323f,wx(x),1.05,wz(y),s);[-.8,.8].forEach(dx=>[-.5,.5].forEach(dz=>{const w=mesh(cyl(.2,.2,.12,10),lam(0x111111),wx(x)+dx,.2,wz(y)+dz,s);w.rotation.x=Math.PI/2}))});
   box(3,.1,1,0x8e2a3a,wx(190),1.8,wz(1180),s);[-1.3,1.3].forEach(dx=>mesh(cyl(.04,.04,1.8,6),lam(0x666666),wx(190)+dx,.9,wz(1180),s));
   mesh(cyl(.8,.9,.4,16),lam(0xcfc3a5),wx(580),.2,wz(1140),s);mesh(cyl(.2,.25,1.4,10),lam(0x9a8a6a),wx(580),1.1,wz(1140),s);mesh(sph(.3,12,10),lam(0x9a8a6a),wx(580),2,wz(1140),s);
@@ -196,18 +202,25 @@ const solidC=(x,y,r)=>SOLIDS.push({t:0,x,y,r}),solidR=(x1,y1,x2,y2)=>SOLIDS.push
      if(i===3){for(let k=0;k<4;k++){const f=mesh(sph(.12,10,6),lam(0xaab4b8),X-.55+k*.3,.9,Z-.1,s);f.scale.set(1.6,.35,.6)}for(let k=0;k<5;k++)box(.2,.05,.14,0xe36a1e,X+.1+k*.12,.89+(k%2)*.05,Z+.2,s)}}
    const sg=mesh(new THREE.PlaneGeometry(3.2,.5),new THREE.MeshBasicMaterial({map:textTex('CAMPUS MARKET · FOODSTUFF',{font:'900 40px system-ui',color:'#1b1206',stroke:false,bg:'#e8b24a'})}),wx(980),2.9,wz(1318),s);
    [-1.5,1.5].forEach(dx=>{mesh(cyl(.04,.04,2.9,6),lam(0x555555),wx(980)+dx,1.45,wz(1318)-.02,s);solidC(980+dx/U,1318,5)})}
-  // Swimming pool: raised rim, translucent water so swimmers show through
-  {const X=wx(1320),Z=wz(1375),W2=170*U,D2=90*U,rimM=lam(0xf2efe8);solidR(1229,1324,1411,1426);
-   const bot=mesh(new THREE.PlaneGeometry(W2,D2),lam(0x2a8db8),X,.012,Z,s);bot.rotation.x=-Math.PI/2;
-   for(let i=1;i<4;i++){const ln=mesh(new THREE.PlaneGeometry(W2-.4,.06),basic(0x174a7a),X,.016,Z-D2/2+i*D2/4,s);ln.rotation.x=-Math.PI/2}
-   const wat=mesh(new THREE.PlaneGeometry(W2,D2),new THREE.MeshStandardMaterial({color:0x58c8ec,emissive:0x0d4f6a,transparent:true,opacity:.6,depthWrite:false,roughness:.05,metalness:.2}),X,.27,Z,s);wat.userData.water=1;wat.rotation.x=-Math.PI/2;
-   box(W2+.3,.3,.15,rimM,X,.15,Z-D2/2-.075,s);box(W2+.3,.3,.15,rimM,X,.15,Z+D2/2+.075,s);box(.15,.3,D2,rimM,X-W2/2-.075,.15,Z,s);box(.15,.3,D2,rimM,X+W2/2+.075,.15,Z,s);
-   [-.18,.18].forEach(dx=>{const r=mesh(new THREE.TorusGeometry(.18,.02,6,12,Math.PI),lam(0xcccccc),X+W2/2-.5+dx,.32,Z+D2/2,s);r.rotation.y=Math.PI/2});
-   [1265,1320,1375].forEach(x=>{solidBox(x,1446,50,20);box(1.3,.08,.5,0xf4f4f4,wx(x),.32,wz(1446),s);[-.55,.55].forEach(dx=>box(.05,.3,.45,0xbbbbbb,wx(x)+dx,.15,wz(1446),s));const br=box(.45,.06,.5,0xf4f4f4,wx(x)+.6,.5,wz(1446),s);br.rotation.z=.7});
-   solidC(1218,1442,6);mesh(cyl(.03,.03,2.1,6),lam(0x888888),wx(1218),1.05,wz(1442),s);mesh(new THREE.ConeGeometry(.9,.4,10),lam(0xe0483a),wx(1218),2.1,wz(1442),s);
-   solidBox(1424,1342,26,26);[-.25,.25].forEach(dx=>[-.25,.25].forEach(dz=>box(.05,1.3,.05,0xffffff,wx(1424)+dx,.65,wz(1342)+dz,s)));box(.6,.06,.6,0xe0483a,wx(1424),1.3,wz(1342),s);box(.6,.5,.06,0xe0483a,wx(1424),1.55,wz(1342)+.28,s);
-   const sg=mesh(new THREE.PlaneGeometry(2.6,.45),new THREE.MeshBasicMaterial({map:textTex('SWIMMING POOL',{font:'900 44px system-ui',color:'#ffffff',stroke:false,bg:'#1f6f8b'})}),wx(1260),1.4,wz(1316),s);
-   [-1.2,1.2].forEach(dx=>{mesh(cyl(.04,.04,1.6,6),lam(0x555555),wx(1260)+dx,.8,wz(1316)-.02,s);solidC(1260+dx/U,1316,5)})}
+  // Swimming pool (drawn on the stretched pool area): raised rim, lanes, translucent water, a diving board at the deep end
+  {const NS=o=>{o.userData.noShift=1;return o},P0=TA('pool',1235,1330),P1=TA('pool',1405,1420),PX=(P0.x+P1.x)/2,PY=(P0.y+P1.y)/2,X=wx(PX),Z=wz(PY),W2=(P1.x-P0.x)*U,D2=(P1.y-P0.y)*U,rimM=lam(0xf2efe8);
+   SOLIDS.push({t:1,x1:P0.x-6,y1:P0.y-6,x2:P1.x+6,y2:P1.y+6,noShift:1});
+   const bot=NS(mesh(new THREE.PlaneGeometry(W2,D2),lam(0x2a8db8),X,.012,Z,s));bot.rotation.x=-Math.PI/2;
+   const nL=Math.max(4,Math.round(D2/1.3));for(let i=1;i<nL;i++){const ln=NS(mesh(new THREE.PlaneGeometry(W2-.6,.07),basic(0x174a7a),X,.016,Z-D2/2+i*D2/nL,s));ln.rotation.x=-Math.PI/2}
+   const wat=NS(mesh(new THREE.PlaneGeometry(W2,D2),new THREE.MeshStandardMaterial({color:0x58c8ec,emissive:0x0d4f6a,transparent:true,opacity:.6,depthWrite:false,roughness:.05,metalness:.2}),X,.27,Z,s));wat.userData.water=1;wat.rotation.x=-Math.PI/2;
+   NS(box(W2+.5,.3,.25,rimM,X,.15,Z-D2/2-.125,s));NS(box(W2+.5,.3,.25,rimM,X,.15,Z+D2/2+.125,s));NS(box(.25,.3,D2,rimM,X-W2/2-.125,.15,Z,s));NS(box(.25,.3,D2,rimM,X+W2/2+.125,.15,Z,s));
+   /* lane ropes */for(let i=1;i<nL;i++)NS(box(W2-.3,.04,.04,[0xe0483a,0xf4f1ea,0x2f6bb5][i%3],X,.29,Z-D2/2+i*D2/nL,s));
+   [-.18,.18].forEach(dx=>{const r=NS(mesh(new THREE.TorusGeometry(.18,.02,6,12,Math.PI),lam(0xcccccc),X+W2/2-.6+dx,.32,Z+D2/2,s));r.rotation.y=Math.PI/2});
+   /* diving board (jump board) on the deep end: concrete stand, ladder, springboard over the water */
+   {const dx=X-W2/2-1.0,dz=wz(TA('pool',0,1363).y),st=lam(0xd8d4cc),blue=lam(0x1f6f8b);NS(box(1.1,1.2,1.1,st,dx,.6,dz,s));for(let k=0;k<5;k++)NS(box(.5,.05,.18,0xbbbbbb,dx-.62,.15+k*.22,dz,s));[-.25,.25].forEach(o=>NS(box(.05,1.3,.05,0xbbbbbb,dx-.72,.65,dz+o,s)));
+     NS(box(2.6,.08,.5,blue,dx+1.5,1.24,dz,s));NS(box(.25,.2,.55,0x333333,dx+.45,1.12,dz,s));[-.27,.27].forEach(o=>NS(box(.04,.5,.04,0xcccccc,dx-.2,1.45,dz+o,s)));NS(box(.04,.04,.8,0xcccccc,dx-.2,1.7,dz,s));
+     SOLIDS.push({t:0,x:(dx/U)+MW/2,y:(dz/U)+MH/2,r:24,noShift:1})}
+   /* sun loungers and an umbrella along the side */
+   for(let i=0;i<5;i++){const lx=TA('pool',1250+i*35,0).x,ly=TA('pool',0,1440).y;SOLIDS.push({t:1,x1:lx-25,x2:lx+25,y1:ly-10,y2:ly+10,noShift:1});NS(box(1.3,.08,.5,0xf4f4f4,wx(lx),.32,wz(ly),s));[-.55,.55].forEach(d=>NS(box(.05,.3,.45,0xbbbbbb,wx(lx)+d,.15,wz(ly),s)));const br=NS(box(.45,.06,.5,0xf4f4f4,wx(lx)+.6,.5,wz(ly),s));br.rotation.z=.7}
+   {const ux=P0.x-40,uy=TA('pool',0,1440).y;SOLIDS.push({t:0,x:ux,y:uy,r:6,noShift:1});NS(mesh(cyl(.03,.03,2.1,6),lam(0x888888),wx(ux),1.05,wz(uy),s));NS(mesh(new THREE.ConeGeometry(.9,.4,10),lam(0xe0483a),wx(ux),2.1,wz(uy),s))}
+   /* lifeguard chair */{const gx=P1.x+18,gy=P0.y+20;SOLIDS.push({t:1,x1:gx-13,x2:gx+13,y1:gy-13,y2:gy+13,noShift:1});[-.25,.25].forEach(a=>[-.25,.25].forEach(b=>NS(box(.05,1.3,.05,0xffffff,wx(gx)+a,.65,wz(gy)+b,s))));NS(box(.6,.06,.6,0xe0483a,wx(gx),1.3,wz(gy),s));NS(box(.6,.5,.06,0xe0483a,wx(gx),1.55,wz(gy)+.28,s))}
+   const sp=TA('pool',1260,1316),sg=NS(mesh(new THREE.PlaneGeometry(2.6,.45),new THREE.MeshBasicMaterial({map:textTex('SWIMMING POOL',{font:'900 44px system-ui',color:'#ffffff',stroke:false,bg:'#1f6f8b'})}),wx(sp.x),1.4,wz(sp.y),s));
+   [-1.2,1.2].forEach(dx=>{NS(mesh(cyl(.04,.04,1.6,6),lam(0x555555),wx(sp.x)+dx,.8,wz(sp.y)-.02,s));SOLIDS.push({t:0,x:sp.x+dx/U,y:sp.y,r:5,noShift:1})})}
   const C1=s.children.length,SC1=SOLIDS.length;
   // Club Vibes: neon facade, velvet rope, purple glow at night
   {const b=BID.club,cx=wx(b.x+b.w/2),fz=wz(b.y)-.03;b.meshes.push(box(b.w*U,.07,.05,basic(0xd16bff),cx,.3,fz,s),box(b.w*U,.07,.05,basic(0x45e0ff),cx,b.ht-.9,fz,s));

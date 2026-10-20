@@ -25,7 +25,7 @@ function returnNPCs(L){L.forEach(x=>{const s=x._save;if(!s)return;x.mirror=false
 function stepToward(c,tx,ty,spd,dt){const dx=tx-c.x,dy=ty-c.y,d=Math.hypot(dx,dy);if(d<3){c.fast=false;return d}const st=Math.min(d,spd*dt);c.x+=dx/d*st;c.y+=dy/d*st;c.fast=d>14;return d}
 function sportGame(kind){
   const FB=kind==='football',p=P(),id=FB?'field':'court',T=(x,y)=>TA(id,x,y);
-  const a0=FB?T(835,702):T(1527,1047),a1=FB?T(1165,918):T(1753,1233),X0=a0.x+4,X1=a1.x-4,Y0=a0.y+4,Y1=a1.y-4,CX=(X0+X1)/2,CY=(Y0+Y1)/2;
+  const a0=FB?T(835,702):T(1527,1047),a1=FB?T(1165,876):T(1753,1233),X0=a0.x+4,X1=a1.x-4,Y0=a0.y+4,Y1=a1.y-4,CX=(X0+X1)/2,CY=(Y0+Y1)/2;
   const hoop=[T(1745-15,1140),T(1535+15,1140)]; // hoop each team attacks: team0 -> right
   const bd=buddy(),fit=p.fit||0;let per=FB?4:3;
   const RO=S.sportRoster;S.sportRoster=null;const solo=!!RO&&!RO.length&&!bd;
@@ -108,15 +108,15 @@ function sportGame(kind){
       return{win:w,txt:`Full time · Gold (your side) ${score[0]} – ${score[1]} Blue${w>0?' · You won! 🎉':w<0?' · You lost 😩':' · Draw'}${myGoals?` · you scored ${myGoals}`:''}`}}};
   return g}
 function swimGame(){const p=P(),T=(x,y)=>TA('pool',x,y),bd=buddy();
-  const lanes=[1341,1363,1386,1408],L0=T(1226,lanes[1]),ent=T(1262,lanes[1]),ladder=T(1391,1408),out=T(1391,1432),Xa=T(1250,0).x,Xb=T(1392,0).x;
+  const lanes=[1341,1363,1386,1408],L0={x:T(1235,0).x+40,y:T(0,lanes[1]).y},ent={x:L0.x+90,y:L0.y},ladder=T(1391,1408),out=T(1391,1432),Xa=T(1250,0).x,Xb=T(1392,0).x;
   const sw=[{c:p,lane:T(0,lanes[1]).y,off:0}];if(bd&&!IS){bd.mirror=true;bd._save={x:bd.x,y:bd.y,hidden:false,pose:bd.pose,face:bd.face,spotY:bd.spotY};sw.push({c:bd,lane:T(0,lanes[2]).y,off:.35})}
   sw.forEach((o,i)=>swimSuit(o.c,true,i===0));
   const st=sw.map(o=>({x0:o.c.x,y0:o.c.y,dir:1,ph:'walk',x:0}));let t=0,DUR=1e9,outT=0;const prog=()=>S.busy&&S.busy.timed?clamp((S.min-S.busy.timed.start)/S.busy.timed.mins,0,1):0;
   const g={kind:'swim',swimmers:sw.map(o=>o.c),hud:()=>'🏊 Swimming laps'+(t>DUR-2.6?' · climbing out':''),focus:()=>({x:p.x,y:p.y}),zoomOut:1.05,
     step(dt){t+=dt;if(DUR>1e8&&prog()>=.86)DUR=t+2.6;sw.forEach((o,i)=>{const c=o.c,s=st[i],k=t-o.off,y0=o.lane,sx=L0.x,ex=ent.x;
       if(k<0)return;
-      if(k<.8){const f=k/.8;c.x=s.x0+(sx-s.x0)*f;c.y=s.y0+(y0-s.y0)*f;c.pose=null;c.fast=false;c.face=Math.PI/2;return}
-      if(k<1.55){const f=(k-.8)/.75;if(s.ph!=='dive'){s.ph='dive';setExpr(c,'surprised',.8)}c.pose='dive';c.x=sx+(ex-sx)*f;c.y=y0;c.face=Math.PI/2;c.mesh.rotation.y=Math.PI/2;c.diveY=.15+1.0*Math.sin(Math.PI*f)-f*.2;c.diveRot=f*2.0;return}
+      if(k<.8){const f=k/.8;c.x=s.x0+(sx-s.x0)*f;c.y=s.y0+(y0-s.y0)*f;c.pose=null;c.fast=false;c.face=Math.PI/2;if(i===0)c.diveY=1.15*Math.min(1,f*1.6);return}
+      if(k<1.55){const f=(k-.8)/.75;if(s.ph!=='dive'){s.ph='dive';setExpr(c,'surprised',.8)}c.pose='dive';c.x=sx+(ex-sx)*f;c.y=y0;c.face=Math.PI/2;c.mesh.rotation.y=Math.PI/2;c.diveY=.15+1.0*Math.sin(Math.PI*f)-f*.2+(i===0?1.15*(1-f):0);c.diveRot=f*2.0;return}
       if(s.ph==='dive'){s.ph='swim';const m=c.mesh.position;FXP.splash(m.x,.3,m.z,46,1.25);FXP.ring(m.x,.285,m.z,1.1,1.8);FXP.ring(m.x,.285,m.z,.6,1.2);c.diveRot=0;c.diveY=0;s.x=ex}
       if(k<DUR-2.6){c.pose='swim';c.face=null;s.x+=s.dir*92*dt;if(s.x>Xb){s.x=Xb;s.dir=-1;const m=c.mesh.position;FXP.splash(m.x,.3,m.z,14,.7)}if(s.x<Xa){s.x=Xa;s.dir=1;const m=c.mesh.position;FXP.splash(m.x,.3,m.z,14,.7)}c.x=s.x;c.y=y0;return}
       if(k<DUR-1.4){c.pose='swim';const tx=ladder.x-(i?24:0),ty=ladder.y;stepToward(c,tx,ty,95,dt);return}
