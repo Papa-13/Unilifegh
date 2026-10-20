@@ -31,6 +31,7 @@ const B=[
  {id:'cabe',name:'CABE · Built Env.',x:3740,y:675,w:240,h:180,ht:3.4,c:0xd8d8d8,roof:0x4a4a6a,door:[3860,873],zone:'f'},
  {id:'chs',name:'CHS · Health Sciences',x:4000,y:705,w:260,h:150,ht:3.2,c:0xeef0ee,roof:0x2a7b7b,door:[4130,873],zone:'f'},
  {id:'clinic',name:'Health Centre',x:3480,y:1145,w:200,h:150,ht:2.6,c:0xf3f3f0,roof:0xb83a3a,door:[3580,1127],zone:'f'},
+ {id:'mosque',name:'Ayeduase Central Mosque',x:5000,y:1110,w:200,h:150,ht:2.6,c:0xf2efe6,roof:0x2f7a4a,door:[5100,1092],zone:'a'},
  {id:'canteen',name:'Bush Canteen',x:3720,y:1145,w:180,h:150,ht:2.2,c:0xc9a27a,roof:0x7a5a2a,door:[3810,1127],zone:'f'},
  {id:'print',name:'Print & Type',x:3940,y:1145,w:160,h:150,ht:2.2,c:0xd8e1e6,roof:0x2a6f9b,door:[4020,1127],zone:'f'},
  {id:'lake',name:'Campus Lake',x:3480,y:1450,w:290,h:200,open:1,c:0x6f9a4c,door:[3620,1550],zone:'p'},

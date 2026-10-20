@@ -74,14 +74,14 @@ function lighting(dt=0){const h=hour();const s=Math.max(0,Math.sin((h-5.8)/13*Ma
 const camT=new THREE.Vector3(),want=new THREE.Vector3();
 function fitR(rend,cam,el){const w=el.clientWidth,h=el.clientHeight;if(!w||!h)return;const pr=rend.getPixelRatio();
   if(el.width!==Math.round(w*pr)||el.height!==Math.round(h*pr))rend.setSize(w,h,false);if(Math.abs(cam.aspect-w/h)>.001){cam.aspect=w/h;cam.updateProjectionMatrix()}}
-function roomLighting(sk){const h=hour(),d=Math.max(0,Math.sin((h-5.8)/13*Math.PI)),on=IS.lightsOn,L=IS.L;
+function roomLighting(sk){const h=hour(),d=Math.max(0,Math.sin((h-5.8)/13*Math.PI)),on=IS.lightsOn&&!IS.dark,L=IS.L;
   L.dl.color.copy(sk).lerp(new THREE.Color(0xfff2dc),.6);L.dl.intensity=.08+.6*d;L.rh.intensity=(on?.42:.08)+.38*d;
-  L.bulb.intensity=on?(d>.5?.55:1.15):0;if(IS.extraL)IS.extraL.forEach(l=>l.intensity=l.userData.base*(l.userData.alwaysOn||on||d<.3?1:0));if(IS.bulbMesh)IS.bulbMesh.material.color.setHex(on?0xfff2c8:0x777066);
+  L.bulb.intensity=on?(d>.5?.55:1.15):0;if(IS.extraL)IS.extraL.forEach(l=>l.intensity=l.userData.base*((l.userData.alwaysOn&&!IS.dark)||on||(d<.3&&!IS.dark)?1:0));if(IS.bulbMesh)IS.bulbMesh.material.color.setHex(on?0xfff2c8:0x777066);
   if(IS.clock){const m=S.min%1440,T2=Math.PI*2;IS.clock.hh.rotation.z=-((m/60)%12)/12*T2;IS.clock.mh.rotation.z=-(m%60)/60*T2;IS.clock.sh.rotation.z=-((performance.now()/1000)%60)/60*T2}}
 function render(dt,snap){if(S&&S.p)try{thoughtTick()}catch(e){}
   const p=P();const sk=lighting(dt);
   SKY.dome.visible=!IS;
-  if(IS){fitR(renderer,IS.cam,cv);if(IS.tick)IS.tick(dt);syncChar(p,dt,true,p.ix,p.iz);glideTick(dt);try{walkToTick()}catch(e){}try{roomLifeTick(dt)}catch(e){}try{mpInTick(dt)}catch(e){}IS.people.forEach(q=>posePerson(q,!!q.mov,dt));IS.win.material.color.copy(sk);if(IS.fan)IS.fan.rotation.y+=dt*8;if(IS.L)roomLighting(sk);
+  if(IS){fitR(renderer,IS.cam,cv);if(IS.tick)IS.tick(dt);syncChar(p,dt,true,p.ix,p.iz);glideTick(dt);try{walkToTick()}catch(e){}try{roomLifeTick(dt)}catch(e){}try{realityTick(dt)}catch(e){}try{mpInTick(dt)}catch(e){}IS.people.forEach(q=>posePerson(q,!!q.mov,dt));IS.win.material.color.copy(sk);if(IS.fan)IS.fan.rotation.y+=dt*8;if(IS.L)roomLighting(sk);
     const TQ=S.talkN&&IS.people.find(q=>q.n===S.talkN);let k=(IS.cam.aspect<1?1.55:1.08)*zoom*Math.max(1,(IS.camW||IS.W)/6.6),cx=IS.cam.aspect<1?p.ix*.8+(IS.cx0??.3)*.2:p.ix*.15+(IS.cx0??.3),cz=p.iz*.12;
     if(TQ){k=.42;cx=(p.ix+TQ.x)/2;cz=(p.iz+TQ.z)/2+.6}want.set(cx+IS.W*.28*k,7.4*k,cz+IS.D*1.2*k);
     if(snap)IS.cam.position.copy(want);else IS.cam.position.lerp(want,Math.min(1,dt*3));IS.cam.lookAt(cx,.2,cz);renderer.render(IS.scene,IS.cam);return}

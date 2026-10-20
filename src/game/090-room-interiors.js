@@ -56,7 +56,7 @@ function enterRoom0(owner){fadeIn();
       const tw=mesh(new THREE.PlaneGeometry(.64,1.52),new THREE.MeshLambertMaterial({color:0x9fdcf0,transparent:true,opacity:.55,depthWrite:false}),ux,.4,uz,s);tw.rotation.x=-Math.PI/2;OB(BX0,ux+.42,uz-.86,uz+.86);IS.spots.tub={x:ux,z:uz+.72,ly:.24}}
     else{box(.04,.04,.6,0xaaaaaa,BX0+.08,1.3,-.6,s);box(.03,.55,.5,lam([0xe8b24a,0x5aa9e6,0xe58fb0][tier]||0xe8b24a),BX0+.09,1.05,-.6,s)}
     if(HT(mine?P().home:owner.home)==='lodge'){[0,.3].forEach((dz,i)=>mesh(cyl(.13,.13,.42,12),lam(i?0x9fd3f0:0xf2c230),BX0+.25,.21,-.95+dz,s));mesh(cyl(.17,.14,.3,12),lam(0x2f6bb5),BX0+.65,.15,-.35,s);OB(BX0,BX0+.85,-1.15,-.15)}
-    IS.waterOff=mine&&HT(P().home)==='lodge'&&S.waterOffDay===day();
+    IS.waterOff=mine&&['lodge','sunrise'].includes(HT(P().home))&&S.waterOffDay===day();
     IS.objs.push({id:'bath',label:'Bathroom',x:cx,z:bz/2-.1,r:1.35})}
   const slots=bedSlots(beds,W,tier);IS.slots=slots;
   const others=[0x5aa9e6,0x4fb87a,0xe58fb0,0xf4f1ea];const drawn={};
@@ -151,7 +151,7 @@ function enterRoom0(owner){fadeIn();
   IS.lightsOn=!(hour()>=23.5||hour()<5.5);
   const night=hour()<7||hour()>=22;
   const gst=mine?(S.guestId!=null&&S.guestHere&&S.guestUntil>S.min?npcById(S.guestId):(()=>{const b=S.npcs.find(n=>n.with>S.min&&!n.mate&&!n.hidden&&dist(n,P())<300);return b})()):null;
-  if(gst){IS.guest=gst;const gq=addInPerson(gst.look,gst.name+' · visiting',-.5,.4,.5,'talk',{n:gst});gq.life=1;gq.visitor=1;IS.objs.push({id:'hang',label:'Hang out',x:-.4,z:.6,r:9})}
+  if(gst){IS.guest=gst;setTimeout(()=>toast(`🛂 ${gst.name} signed the visitors' book at the porter's lodge.`),900);const gq=addInPerson(gst.look,gst.name+' · visiting',-.5,.4,.5,'talk',{n:gst});gq.life=1;gq.visitor=1;IS.objs.push({id:'hang',label:'Hang out',x:-.4,z:.6,r:9})}
   let bm=null;const hh=hour();if(mine&&tier<=1&&!night&&((hh>=5.5&&hh<9)||(hh>=18&&hh<22))&&Math.random()<.4)bm=S.mates.find(m=>homeNow(m));
   if(bm){IS.bathBusy=addInPerson(bm.look,bm.name+' · bathing',IS.spots.shower.x,IS.spots.shower.z,Math.PI/4,'shower',{n:bm,noObst:1});IS.water.visible=true}
   if(mine)S.mates.forEach(m=>{if(m!==bm&&(homeNow(m)||night))placePerson(m,m.bed,night)});else if(!owner.real)placePerson(owner,0,false);
@@ -195,7 +195,7 @@ function roomActions(){
     if(o.id==='wardrobe'&&IS.mine)a.push(['Change clothes',()=>wardrobe()]);
     if(o.id==='bath'&&IS.mine){const bq=IS.bathBusy;
       if(bq){a.push([`Shower · ${bq.n.name} is bathing`,null]);a.push(['Knock: "Are you done?"',()=>knockBath()])}
-      else{a.push([IS.waterOff?'Shower (no water today 😩)':'🚿 Take a shower (20m)',IS.waterOff?null:()=>doAct('Taking a shower',20,{hygiene:100,fun:5,energy:4}),null,'b']);
+      else{a.push([IS.waterOff?'Shower (no water today 😩)':'🚿 Take a shower (20m)',IS.waterOff?null:()=>doAct('Taking a shower',20,{hygiene:100,fun:5,energy:4}),null,'b']);if(IS.waterOff)try{rlWaterActs(a)}catch(e){}
         if(HT(p.home)==='lodge')a.push(['Bucket bath with gallon water (30m)',()=>doAct('Bucket bath with water from the gallons',30,{hygiene:90,energy:-3})])}
       if(IS.spots.tub)a.push(['🛁 Soak in the bathtub (45m)',()=>doAct('Relaxing in the bathtub',45,{hygiene:100,fun:15,energy:10})]);
       a.push(['Brush & freshen up (10m)',()=>doAct('Brushing and freshening up',10,{hygiene:20})])}

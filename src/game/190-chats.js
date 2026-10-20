@@ -39,6 +39,7 @@ function sendChat(chat,text,vn){try{ev('chat',{vn:!!vn,fam:/mum|dad|auntie|uncle
     p.needs.social=clamp(p.needs.social+gainSoc);m.seen=true;S.typing=null;msg(chat,t,(vn?Math.random()<.55:Math.random()<.15)?{secs:RI(4,18)}:null);if(CHAT===chat&&!$('sheet').hidden)drawChat();hud()};
   const asleep=(hour()<6||hour()>=23.5)&&!(n&&p.partner===n)&&!FAMILY.includes(chat);
   if(asleep){(S.pending=S.pending||[]).push({due:(hour()>=23.5?day()+1:day())*1440+6*60+RI(10,90),fn:reply});drawChat();return}
+  if(n&&p.partner!==n&&!(n.mate&&Math.random()<.5)&&Math.random()<.14){drawChat();setTimeout(()=>{m.seen=true;if(CHAT===chat&&!$('sheet').hidden)drawChat();toast(`✓✓ ${chat} has seen your message… no reply 🙄`)},R(1800,3500));return}
   S.typing={chat,vn:vn?Math.random()<.55:false};drawChat();setTimeout(reply,R(1500,3400))}
 function openChat(c){CHAT=c;stopRec();drawChat()}
 function stopRec(){if(REC){clearInterval(REC.iv);REC=null}}

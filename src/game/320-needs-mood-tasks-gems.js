@@ -161,6 +161,7 @@ function acts0(force){
   if(!inside)try{hawkerActs(list)}catch(e){console.error(e)}
   try{dateActs(list)}catch(e){console.error(e)}
   if(!inside)try{hailActs(list)}catch(e){console.error(e)}
+  try{realityActs(list)}catch(e){console.error(e)}
   {const rp=mpNear();if(rp)list.unshift([`🌐 ${rp.nm} (real student)`,()=>mpCard(rp),null,'b']);if(!inside&&MP.room&&mpOnline().length)list.push(['🗨️ Say something out loud',()=>mpSay()])}
   const stp=!inside&&nearStop();if(stp)list.unshift([`🚌 Wait for the free shuttle (${stp.name})`,()=>waitShuttle(stp),null,'b']);
   if(p.food&&p.food.length)list.unshift([`🍱 Eat your ${p.food[0].name}`,()=>{const f=p.food.shift();doAct(`Eating ${f.name}`,25,{hunger:f.food,fun:8})},null,'b']);

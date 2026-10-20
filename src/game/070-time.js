@@ -6,7 +6,7 @@ function hourly(){
   const prevDay=Math.floor(S.lastHour/24);S.lastHour=key;const p=P(),sd=d-S.semStart;
   if(h===6&&!S['wh'+d]){S['wh'+d]=1;S.whims=S.whims.filter(w=>w.pin);S.swapDay=-1;fillWhims();if(d>0)toast('🎯 New daily tasks are in. Complete them to earn 💎 gems')}
   if(h===13&&!S['ms'+d]){S['ms'+d]=1;p.mess=clamp((p.mess||0)+9)}
-  if(h===6&&!S['wo'+d]){S['wo'+d]=1;if(Math.random()<.3){S.waterOffDay=d;if(HT(p.home)==='lodge')msg(`${homeB().name} manager`,'Good morning. No water flowing today, the pump is spoilt. Use the gallons of water in your bathroom. Sorry 🙏')}}
+  if(h===6&&!S['wo'+d]){S['wo'+d]=1;if(Math.random()<.3){S.waterOffDay=d;if(['lodge','sunrise'].includes(HT(p.home)))msg(`${homeB().name} manager`,'Good morning. No water flowing today, the pump is spoilt. Use the gallons of water in your bathroom. Sorry 🙏')}}
   if(p.needs.hygiene<22&&h>=8&&h<=21&&!S['hy'+d]){S['hy'+d]=1;const m=S.mates[0]||bestFriend();if(m)msg(m.name,pick(['Chale… please go and bath 😅 I say it with love.','Ei, when did you last shower? Just asking o 🫣']))}
   if(IS&&IS.bid==='club'&&h>=3&&h<20){leaveRoom(true);toast('Lights on! Club Vibes is closed. Time to go home. 🥱');acts(true)}
   if(h>=9&&h<=22&&!S['op'+d+h]&&Math.random()<.14){S['op'+d+h]=1;const f=shuffle(S.npcs.filter(n=>(n.contact||n.mate)&&n.friend>=25))[0];

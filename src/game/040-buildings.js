@@ -109,10 +109,11 @@ function buildArch(b,s,cx,cz,w,d,f){
   if(style==='sports'){if(id==='hall'){add('roof',AG.barrel,cx,H,cz,0,w+.3,1.6,d+.2);fb(FR,'cur',FR.L-1,1.1,.05,0,H-.8,.02)}else{fb(FR,'cur',FR.L-.6,1.0,.05,0,H-.9,.02);bx('trim',w+.3,.15,d+.3,cx,H+.07,cz)}ent();signY=id==='hall'?H-.25:H-.4}
   if(style==='pavilion'){bx('trim',w+.4,.15,d+.4,cx,H+.07,cz);fb(FR,'roof',FR.L+.4,.12,1.8,0,H+.05,0);for(let a=-FR.L/2+.3;a<=FR.L/2;a+=1.4)fa(FR,'white',AG.cyl8,.1,H-.2,.1,a,.2+(H-.2)/2,1.65);ent()}
   if(roofT==='hip'&&style==='college'){bx('trim',w+.6,.12,d+.6,cx,H+.02,cz);add('roof',AG.hip,cx,H+.45,cz,0,w+.6,.85,d+.6)}
+  if(id==='mosque'){add('accent',AG.sph,cx,H+.5,cz,0,w*.42,w*.36,w*.42);add('gold',AG.cyl8,cx,H+.5+w*.2,cz,0,.06,.5,.06);const mx=cx+w/2-.4,mz=cz-d/2+.4;add('white',AG.cyl,mx,(H+2.2)/2,mz,0,.45,H+2.2,.45);add('accent',AG.hip,mx,H+2.5,mz,0,.55,.7,.55);add('gold',AG.cyl8,mx,H+3,mz,0,.04,.35,.04)}
   if(id==='clinic'){fb(FR,'white',.5,.15,.05,FR.L/2-.6,H-.4,.04);fb(FR,'white',.15,.5,.05,FR.L/2-.6,H-.4,.04);fb(FR,'stain2',.42,.1,.04,FR.L/2-.6,H-.4,.06);fb(FR,'stain2',.1,.42,.04,FR.L/2-.6,H-.4,.065)}
   /* flat roofs: a darker concrete deck inside the parapet, AC condensers, a stair head and solar panels
      (what you actually see from above on Ghanaian campus buildings) */
-  {const top={college:roofT==='flat'?[H+.39,w+.1,d+.1]:null,senate:[H+.46,w+.16,d+.16],library:[H+.7,w-1.4,d-1.4],shop:[H+.475,w+.1,d+.1],mall:[H+.475,w+.1,d+.1],bank:[H+.475,w+.1,d+.1],club:[H+.475,w+.1,d+.1],pavilion:[H+.145,w+.4,d+.4],sports:id==='gym'?[H+.145,w+.3,d+.3]:null}[style];
+  {const top={college:roofT==='flat'&&id!=='mosque'?[H+.39,w+.1,d+.1]:null,senate:[H+.46,w+.16,d+.16],library:[H+.7,w-1.4,d-1.4],shop:[H+.475,w+.1,d+.1],mall:[H+.475,w+.1,d+.1],bank:[H+.475,w+.1,d+.1],club:[H+.475,w+.1,d+.1],pavilion:[H+.145,w+.4,d+.4],sports:id==='gym'?[H+.145,w+.3,d+.3]:null}[style];
     if(top){const [ty,tw,td]=top,iw=tw-.32,idp=td-.32,hs=(Math.abs(Math.sin(b.x*.37+b.y*.11))*1000)|0;bx('deck',iw,.03,idp,cx,ty+.005,cz);
       const fz=cz+f*idp*.18;if(iw>2.2){for(let i=0;i<Math.min(4,Math.floor(iw/1.6));i++){const x=cx-iw/2+.6+i*.9;bx('white',.55,.38,.42,x,ty+.2,fz);add('dark',AG.cyl,x,ty+.4,fz,0,.3,.02,.3)}}
       bx(style==='sports'?'metal':'wall',.9,.75,.8,cx+iw/2-.7,ty+.38,cz+f*(idp/2-.6));bx('dark',.4,.6,.02,cx+iw/2-.7,ty+.32,cz+f*(idp/2-.6)+f*.41);bx('trim',1,.06,.9,cx+iw/2-.7,ty+.78,cz+f*(idp/2-.6));
