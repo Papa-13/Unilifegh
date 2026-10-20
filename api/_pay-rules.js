@@ -21,9 +21,10 @@ export function creditOp(wallet, payment, verified, uid, ref, now) {
   if (md.uid !== uid) return { reply: { error: 'This payment belongs to another account.' }, wallet: null, payment: null };
   if (verified.currency !== 'GHS' || Number(verified.amount) < pack.cedis * 100) return { reply: { error: 'The amount paid does not match the pack.' }, wallet: null, payment: null };
   const w = wallet ? { ...wallet } : { gems: START, created: now, tasks: {}, miles: {}, dayEarned: 0, day: new Date(now).toISOString().slice(0, 10) };
-  w.gems = (w.gems || 0) + pack.gems; w.bought = (w.bought || 0) + pack.gems; w.updated = now;
+  const first = !(w.bought > 0), g = pack.gems * (first ? 2 : 1); // first top-up on an account: double gems
+  w.gems = (w.gems || 0) + g; w.bought = (w.bought || 0) + g; w.updated = now;
   if (pack.cash) w.cashOwed = (w.cashOwed || 0) + pack.cash;
-  return { reply: { gems: w.gems, added: pack.gems, cash: pack.cash || 0, pack: md.pack }, wallet: w, payment: { uid, ref, pack: md.pack, cedis: pack.cedis, gems: pack.gems, cash: pack.cash || 0, done: true, at: now } };
+  return { reply: { gems: w.gems, added: g, first, cash: pack.cash || 0, pack: md.pack }, wallet: w, payment: { uid, ref, pack: md.pack, cedis: pack.cedis, gems: g, cash: pack.cash || 0, done: true, at: now } };
 }
 
 /* the game collects the bonus cedis once: online (MoMo bank wallet) they go straight into wallet.cedi; offline the game adds them */

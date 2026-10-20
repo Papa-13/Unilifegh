@@ -119,6 +119,14 @@ function enterRoom0(owner){fadeIn();
     IS.extraL=[];
     if(it2.includes('led')){const col=P().ledCol||0x8a4bff,m=new THREE.MeshBasicMaterial({color:col});box(W,.035,.035,m,0,2.63,-D/2+.1,s);box(.035,.035,D/2,m,-W/2+.1,2.63,D/4,s);const l=new THREE.PointLight(col,0,9,1.3);l.position.set(0,2.35,-.4);l.userData={base:1.15,alwaysOn:1};s.add(l);IS.extraL.push(l);IS.ledM=m;IS.ledL=l}
     if(it2.includes('fairy')){const fl=new THREE.Group();for(let i=0;i<28;i++){const k=i/27,x=-W/2+.35+k*(W-.7),y=2.53-Math.pow(Math.sin(k*Math.PI*3),2)*.12;mesh(sph(.022,6,5),basic([0xffe3a3,0xfff1c9,0xffd27a][i%3]),x,y,-D/2+.11,fl)}s.add(fl);const l=new THREE.PointLight(0xffc982,0,7,1.4);l.position.set(0,2.2,-D/2+.7);l.userData={base:.75,alwaysOn:1};s.add(l);IS.extraL.push(l)}
+    /* 💎 flex items from the Drip & Flex store */
+    if(it2.includes('neon')){const nm=(P().name||'UNILIFE').split(' ')[0].toUpperCase().slice(0,10),sg=mesh(new THREE.PlaneGeometry(1.5,.42),new THREE.MeshBasicMaterial({map:textTex(nm+' ✦',{font:'900 64px system-ui',color:'#ff4fd8',stroke:false,bg:'rgba(0,0,0,0)'}),transparent:true}),W/2-.07,2.05,-.2,s);sg.rotation.y=-Math.PI/2;const gl=new THREE.PointLight(0xff4fd8,.7,3.2,1.8);gl.position.set(W/2-.4,2.05,-.2);s.add(gl)}
+    if(it2.includes('ac')){box(.85,.28,.2,lam(0xf4f4f4),-W/2+.12,2.32,-D/2+1.1,s).rotation.y=Math.PI/2;box(.02,.04,.7,basic(0x9ad8ff),-W/2+.23,2.22,-D/2+1.1,s)}
+    if(it2.includes('ringlight')){const q=free(.45,.45);if(q){mesh(cyl(.02,.02,1.5,6),lam(0x222222),q.x,.75,q.z,s);const rl=mesh(new THREE.TorusGeometry(.2,.03,8,24),new THREE.MeshBasicMaterial({color:0xfff6e0}),q.x,1.55,q.z,s);void rl;[-1,0,1].forEach(k=>box(.02,.02,.3,lam(0x222222),q.x+k*.12,.02,q.z,s).rotation.y=k);
+      IS.obst.push({x1:q.x-.2,x2:q.x+.2,z1:q.z-.2,z2:q.z+.2});IS.objs.push({id:'ringlight',label:'Ring light',x:q.x,z:q.z+.6,r:.65})}}
+    if(it2.includes('gchair')){const q=free(.6,.6);if(q){box(.55,.12,.55,lam(0x1b1b1b),q.x,.48,q.z,s);box(.55,.8,.1,lam(0xc8102e),q.x,.95,q.z-.24,s);box(.4,.5,.11,lam(0x1b1b1b),q.x,.95,q.z-.235,s);mesh(cyl(.04,.04,.42,6),lam(0x555555),q.x,.24,q.z,s);
+      IS.obst.push({x1:q.x-.3,x2:q.x+.3,z1:q.z-.3,z2:q.z+.3})}}
+    if(it2.includes('ps5')){const q=free(.4,.3);if(q){box(.12,.42,.3,lam(0xf4f4f4),q.x,.21,q.z,s);box(.04,.42,.3,lam(0x111111),q.x,.21,q.z,s);IS.obst.push({x1:q.x-.15,x2:q.x+.15,z1:q.z-.18,z2:q.z+.18})}}
     if(it2.includes('photos'))for(let i=0;i<3;i++){const z=.38+i*.4,y=2.08+(i%2)*.14;box(.03,.34,.28,lam(0x2b1d12),-W/2+.08,y,z,s);const ph=mesh(new THREE.PlaneGeometry(.22,.28),new THREE.MeshBasicMaterial({map:photoTex(i)}),-W/2+.1,y,z,s);ph.rotation.y=Math.PI/2}
     if(it2.includes('clock')){const G=new THREE.Group();G.position.set(-W/2+.08,2.33,dz);G.rotation.y=Math.PI/2;s.add(G);const fc=mesh(cyl(.16,.16,.03,28),lam(0xf7f4ec),0,0,0,G);fc.rotation.x=Math.PI/2;const rim=mesh(new THREE.TorusGeometry(.16,.014,6,28),lam(0x1e1e1e),0,0,.012,G);
       for(let i=0;i<12;i++){const a=i/12*Math.PI*2;box(.008,i%3?.02:.035,.004,basic(0x333333),Math.sin(a)*.13,Math.cos(a)*.13,.02,G)}
@@ -181,11 +189,12 @@ function roomActions(){
   if(IS.mine&&!IS.rt.kitchen)a.push(['🍳 Go to the shared kitchen',()=>enterBuilding('hkitchen','room'),null,'b']);
   near.forEach(o=>{
     if(o.id==='bed'){a.push(['Sleep',()=>sleep()]);a.push(['Nap (2h)',()=>nap()]);if(IS.mine)a.push(['📱 Scroll on your phone in bed (30m)',()=>doAct('Scrolling in bed',30,{fun:9,energy:2,social:3})])}
+    if(o.id==='ringlight')a.push(['📸 Film a TikTok (30m)',()=>filmTikTok(),null,'b']);
     if(o.id==='beanbag'){a.push(['🛋️ Chill on the beanbag (30m)',()=>doAct('Chilling on the beanbag',30,{fun:9,energy:6})]);if(p.items.includes('console')&&IS.tv)a.push(['🎮 Play FIFA on the TV (1h)',()=>playFifa()])}
     if(o.id==='fridge'){const ok=!(p.fridgeT>S.min);a.push([ok?'🥤 Grab a cold drink':'🥤 Fridge is empty, restocking',ok?()=>{p.fridgeT=S.min+180;doAct('Having a cold drink',10,{hunger:6,fun:5,energy:3})}:null])}
     if(o.id==='room'&&IS.mine){if((p.mess||0)>=30)a.push([`🧹 Clean & tidy your room (30m)${p.mess>70?' · it\'s really messy':''}`,()=>{doAct('Cleaning and tidying your room',30,{energy:-5,fun:-2});const t=S.busy;if(t){const d=t.done;t.done=()=>{d();p.mess=0;refreshRoom();toast('Room is spotless now ✨')}}},null,'b']);
       if(IS.ledL)a.push(['🌈 Change LED colour',()=>{const L=[0x8a4bff,0x2fd4ff,0xff3c9a,0x3cff8a,0xffb03c,0xffffff];const i=(L.indexOf(p.ledCol||0x8a4bff)+1)%L.length;p.ledCol=L[i];IS.ledM.color.setHex(L[i]);IS.ledL.color.setHex(L[i])}])}
-    if(o.id==='desk'&&IS.mine){const m=roomMult()*(p.items.includes('lamp')?1.25:1)*(p.items.includes('shelf')?1.1:1);a.push([`Study at your desk (2h, +${Math.round(9*m)})`,()=>doAct('Studying at your desk',120,{study:Math.round(9*m),energy:-8,fun:-6})]);
+    if(o.id==='desk'&&IS.mine){const m=roomMult()*(p.items.includes('lamp')?1.25:1)*(p.items.includes('shelf')?1.1:1)*(p.items.includes('gchair')?1.08:1);a.push([`Study at your desk (2h, +${Math.round(9*m)})`,()=>doAct('Studying at your desk',120,{study:Math.round(9*m),energy:-8,fun:-6})]);
       if(p.items.includes('speaker'))a.push([MUS.src&&MUS.src.kind==='room'?'🔊 Speaker: change the song':'🔊 Play music on your speaker',()=>musSongs('room')]);
       if(IS.tv)a.push(['Watch TV (1h)',()=>doAct('Watching TV',60,{fun:18})]);
       if(p.items.includes('kettle'))a.push(['☕ Make tea or Milo (10m)',()=>doAct('Sipping hot Milo',10,{hunger:6,energy:5,fun:3})]);

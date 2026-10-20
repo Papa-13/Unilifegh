@@ -148,7 +148,7 @@ function meetFromPend(n,pd){const at=Math.ceil((S.min+(pd.in||45))/10)*10;if(!BI
   if(intent==='where'){const [w,d]=npcDoing(n);return{text:w==='with you'?'I\'m right here with you 😂':pick([`I'm ${w}. ${d[0].toUpperCase()+d.slice(1)}`,`${w[0].toUpperCase()+w.slice(1)}. Why? 👀`]),gain:2}}
   if(intent==='wyd'){const [,d]=npcDoing(n);return{text:pick([`Nothing much, ${d}`,`I'm ${d}. You?`]),gain:2}}
   if(intent==='free'){const [,d]=npcDoing(n);const busy=/lecture|sleep|studying|church|mosque/.test(d);if(!busy)n.pend={kind:'meet',b:'square',nm:'Akwaaba Square',in:30,ts:S.min};return{text:busy?`Not really, I'm ${d}`:pick(['Yes o, I\'m free. Let\'s link? 😄','Free like air 😂 What\'s up?']),gain:2}}
-  if(intent==='fifa'){if(p.items.includes('console')&&(n.friend>=25||isLove(n))&&h>=8&&h<23&&Math.random()<.85)return fifaComing(n);
+  if(intent==='fifa'){if(p.items.includes('console')&&(n.friend>=25||isLove(n))&&h>=8&&h<23&&Math.random()<(p.items.includes('ps5')?.97:.85))return fifaComing(n);
     if(npcConsole(n)){n.visitOK=day();return{text:`Come to my room then! ${BID[n.home].name}. I'll beat you 😂🎮`,gain:3}}
     return{text:pick(['Who even has a console? 😂 Buy one and invite me','I don\'t have FIFA o. You buy the PS, I\'ll bring the drinks 😂']),gain:2}}
   if(intent==='ball'){if(h>=6&&h<18&&n.friend>=25)return meetFromPend(n,{b:'field',nm:'Sports Field',in:40});return{text:'It\'s too late for ball now 😂 Tomorrow evening?',gain:1}}

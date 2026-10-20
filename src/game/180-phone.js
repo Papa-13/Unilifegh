@@ -33,6 +33,7 @@ function phone(tab='home'){
     {k:'homemart',n:'HomeMart',ic:'🛋️',c:'#b5653a',go:()=>decorate('items')},
     {k:'music',n:MUS.phone.on?'Music ▶':'Music',ic:'🎵',c:'#fc3c44',go:()=>musSongs('phone')},
     {k:'gems',n:'Gem Shop',ic:'💎',c:'linear-gradient(135deg,#3a8dde,#7b2fbe)',go:()=>gemShop()},
+    {k:'drip',n:'Drip & Flex',ic:'✨',c:'linear-gradient(135deg,#d4a52a,#8e2a3a)',go:()=>{closeSheet();dripStore()}},
     {k:'daily',n:'Daily Gift',ic:'🎁',c:'linear-gradient(135deg,#e0483a,#f5b41f)',go:()=>{closeSheet();dailySheet()}},
     {k:'backup',n:'Backup',ic:'💾',c:'#3a3f47',go:()=>progressSheet()}];
   const DOCK=['msgs','money','ride','food'];
