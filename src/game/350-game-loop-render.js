@@ -46,6 +46,7 @@ function syncChar(c,dt,vis=true,x=wx(c.x),z=wz(c.y)){
     if(dd2<130&&dd2>4&&!c.lying&&c.pose!=='swim'){let rel=Math.atan2(dx2,dy2)-g.rotation.y;rel=Math.atan2(Math.sin(rel),Math.cos(rel));c.lookY=Math.abs(rel)<1.9?clamp(rel,-.95,.95):null}else c.lookY=null}}
   const far=S&&c!==S.p&&!IS&&typeof camT!=='undefined'&&Math.hypot(x-camT.x,z-camT.z);c._pf=(c._pf||0)+1;if(!far||far<20||far<40&&c._pf%2===0||far<60&&c._pf%4===0)posePerson(c,moving,far>20?dt*2:dt);if(far>110)vis=false;
   if(c.pose==='swim'&&!c.lying){g.position.x-=Math.sin(g.rotation.y)*.85;g.position.z-=Math.cos(g.rotation.y)*.85}
+  if(c.met!==undefined&&g.userData.tag)g.userData.tag.visible=!!(c.met||c.mate||c.mirror);
   g.visible=vis}
 const dayCol=new THREE.Color(0x9fd3f0),duskCol=new THREE.Color(0xf0a070),nightCol=new THREE.Color(0x0e1631),sky=new THREE.Color();
 const SKYK=[[0,0x050a1a,0x16203a],[5,0x0a1430,0x2a3050],[6,0x4a6fa5,0xf6c08a],[7.5,0x3d8fd6,0xcfe8f5],[16.5,0x3d8fd6,0xcfe8f5],[18,0x3a5a9a,0xf0a070],[19.2,0x1c2350,0xb06a60],[20.5,0x050a1a,0x16203a],[24,0x050a1a,0x16203a]].map(([h,a,b])=>[h,new THREE.Color(a),new THREE.Color(b)]);

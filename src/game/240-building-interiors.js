@@ -8,7 +8,7 @@ function spotTaken(x,z,skip){if(!IS)return false;if(IS.people&&IS.people.some(q=
 /* the nearest free alternative to a spot (another seat in the row, another treadmill); the spot itself if it is free */
 function freeAlt(sp,me){if(!sp||!IS||!IS.people)return sp;const T=(x,z)=>IS.people.some(q=>q.mesh&&q.mesh.parent&&!q.gone&&!q.mp&&Math.hypot(q.mesh.position.x-x,q.mesh.position.z-z)<.38);if(!T(sp.x,sp.z))return sp;
   const pool=(sp.alt||(IS.seatList&&IS.seatList.includes(sp)?IS.seatList:null)||[]).filter(q=>q!==sp&&!T(q.x,q.z)).sort((a,b)=>Math.hypot(a.x-sp.x,a.z-sp.z)-Math.hypot(b.x-sp.x,b.z-sp.z));return pool[0]||sp}
-function addInPerson(look,label,x,z,ry,pose,o={}){
+function addInPerson(look,label,x,z,ry,pose,o={}){if(o.n&&!o.n.met&&!o.n.mate&&label===o.n.name)label='';
   if(!o.lie&&IS&&IS.seatList&&IS.seatList.length&&spotTaken(x,z)){const q=IS.seatList.filter(q=>!spotTaken(q.x,q.z)).sort((a,b)=>Math.hypot(a.x-x,a.z-z)-Math.hypot(b.x-x,b.z-z))[0];if(q){x=q.x;z=q.z;ry=q.ry;if(q.ly!=null)o=Object.assign({},o,{y:q.ly})}else if(!label)return {mesh:{position:{x,z},parent:null},gone:1}}
   const h=makeHuman(look,{label,labelColor:o.color||'#f6f0e8'});h.g.position.set(x,0,z);h.g.rotation.y=ry;IS.scene.add(h.g);
   if(!o.lie&&!o.noObst)IS.obst.push({x1:x-.17,x2:x+.17,z1:z-.17,z2:z+.17});const q={n:o.n||null,mesh:h.g,legs:h.legs,knees:h.knees,arms:h.arms,elbows:h.elbows,head:h.head,lids:h.lids,torso:h.torso,pose,phase:Math.random()*6,id:Math.random()*9,x,z,sleeping:!!o.lie,lying:!!o.lie,spotY:o.y||0};IS.people.push(q);return q}

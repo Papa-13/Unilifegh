@@ -72,7 +72,7 @@ function makeRealHuman(L,{label=null,labelColor='#f6f0e8',ring=false}={}){const 
   /* the forearms carry a socket for held things (phone, bottle, mic…), lined up with the model's axes */
   const elbows=R.elbows.map(nm=>{const b=bone(nm),s=o3();b.add(s);const W=I.bones[nm].W.clone(),Cp=I.K[nm]||new THREE.Quaternion();s.quaternion.copy(Cp.clone().multiply(W).invert());s.scale.setScalar(1/k);s.userData.q=s.quaternion.clone();return s});
   const rg=mesh(new THREE.RingGeometry(.36,.44,32),basic(0xe8b24a),0,.03,0,g);rg.rotation.x=-Math.PI/2;rg.visible=ring;g.userData.ring=ring?rg:null;
-  let tag=null;if(label){tag=sprite(label,labelColor,.7);tag.position.y=2.05;g.add(tag)}
+  let tag=null;if(label){tag=sprite(label,labelColor,.7);tag.position.y=2.05;g.add(tag)}g.userData.tag=tag;
   g.userData.real={bones:Object.fromEntries(Object.keys(I.bones).map(nm=>[nm,bone(nm)])),I,elbows};
   return {g,legs,knees,arms,elbows,tag,head,lids:[],torso}}
 /* every frame, after the pose is worked out: pose values → bone rotations */

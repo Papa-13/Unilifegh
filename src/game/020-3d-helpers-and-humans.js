@@ -325,7 +325,7 @@ function makeHumanProc(L,{label=null,labelColor='#f6f0e8',ring=false}={}){
     if(L.extra==='earrings'){mesh(sph(.012,8,6),gold,s*.124,-.035,.005,head);mesh(new THREE.TorusGeometry(.016,.003,6,14),gold,s*.124,-.055,.005,head)}});
   hairBlock(L,f,head,hair,cloth,gold);
   const rg=mesh(new THREE.RingGeometry(.36,.44,32),basic(0xe8b24a),0,.03,0,g);rg.rotation.x=-Math.PI/2;rg.visible=ring;g.userData.ring=ring?rg:null;
-  let tag=null;if(label){tag=sprite(label,labelColor,.7);tag.position.y=2.05;g.add(tag)}
+  let tag=null;if(label){tag=sprite(label,labelColor,.7);tag.position.y=2.05;g.add(tag)}g.userData.tag=tag;
   if(SHADOWS)g.traverse(o=>{if(o.isMesh){if(!o.geometry.boundingSphere)o.geometry.computeBoundingSphere();const r=o.geometry.boundingSphere.radius*Math.max(o.scale.x,o.scale.y,o.scale.z);if(r<.07||o.parent===head&&o!==head.children[0]){o.castShadow=false;o.receiveShadow=false}}});
   return {g,legs,knees,arms,elbows,tag,head,lids,torso};
 }

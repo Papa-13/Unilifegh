@@ -121,7 +121,7 @@ function meetRandom(where){const n=pick(S.npcs.filter(n=>n.plan&&n.plan.b===wher
 function freshersNight(){if(S.fnDone)return toast('You already partied tonight. Your legs need rest. 😅');S.fnDone=true;advance(180);const p=P();p.needs.fun=100;p.needs.social=clamp(p.needs.social+40);p.needs.energy=clamp(p.needs.energy-25);
   const met=shuffle(S.npcs).slice(0,4);met.forEach(n=>{n.met=true;n.friend=clamp(n.friend+10)});
   story(`<div class="eyebrow">Freshers' Night · Akwaaba Square</div><h3>The whole campus is outside. 🔥</h3><p class="scene">The DJ plays back-to-back Afrobeats and amapiano. Every hostel chants its name when the bass drops. You dance with ${met.slice(0,3).map(n=>n.name).join(', ')} and ${met[3].name} until the SRC president begs everyone to go home.</p><p>Fun maxed · 4 new friendships</p>`,[['What a night','g',()=>{}]])}
-function goHome(){const p=P();const t=(day()+1)*1440+18*60;S.min=t;S.lastHour=-1;
+function goHomeWeekend(){const p=P();const t=(day()+1)*1440+18*60;S.min=t;S.lastHour=-1;
   const gift={rich:600,avg:150,poor:40}[p.bg];p.needs.energy=100;p.needs.hunger=95;p.needs.fun=clamp(p.needs.fun+25);p.needs.social=clamp(p.needs.social-10);p.money+=gift;p.prov+=6;hourly();
   const b=homeB();p.x=b.door[0];p.y=b.door[1]+22*outDir(b);
   const scene={rich:'The driver picks you up at the trotro station. At home there is jollof, chicken and a long lecture from Dad about your grades.',avg:'You sleep in your own bed, eat fufu and light soup, and listen to Mum warn you about "these university boys and girls".',poor:'You help Mum at the market on Saturday. On Sunday she cooks palm nut soup and packs your provisions with gari and shito.'}[p.bg];

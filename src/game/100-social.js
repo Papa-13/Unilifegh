@@ -37,8 +37,8 @@ function talkMenu(n){
     if(n.met&&(p.partner===n||n.side||n.romance>=55))opts.push(['kiss','😘 Kiss']);
     if(p.partner===n||n.side)opts.push(['breakup','💔 Break up']);
     try{memTellOpts(n).forEach(o=>opts.push(o))}catch(e){}
-    $('sheetIn').innerHTML=`<div class="who"><i class="av" style="background:${PAL[n.look.pal].a};border-color:${PAL[n.look.pal].b}"></i><div><h3>${esc(n.name)}${p.partner===n?' ❤️':n.side?' 🤫':''}</h3>
-      <div class="tags"><span class="tag y">${relStage(n)}</span><span class="tag">${esc(n.prog)}</span><span class="tag">${n.mate?'Your roommate':BID[n.home].name}</span>${n.ints.map(i=>`<span class="tag ${p.interests.includes(i)?'g':''}">${i}</span>`).join('')}<span class="tag y">${n.pers}</span>${n.prog===p.prog?'<span class="tag g">coursemate</span>':''}</div></div></div>
+    $('sheetIn').innerHTML=`<div class="who"><i class="av" style="background:${PAL[n.look.pal].a};border-color:${PAL[n.look.pal].b}"></i><div><h3>${n.met||n.mate?esc(n.name):(n.gender==='f'?'A girl you don\'t know':'A guy you don\'t know')}${p.partner===n?' ❤️':n.side?' 🤫':''}</h3>
+      <div class="tags"><span class="tag y">${relStage(n)}</span>${knowsCourse(n)?`<span class="tag">${esc(n.prog)}</span>`:''}${n.mate?'<span class="tag">Your roommate</span>':knowsHostel(n)?`<span class="tag">${BID[n.home].name}</span>`:''}${n.talks>=2||n.friend>=25?n.ints.map(i=>`<span class="tag ${p.interests.includes(i)?'g':''}">${i}</span>`).join(''):''}${n.friend>=20?`<span class="tag y">${n.pers}</span>`:''}${knowsCourse(n)&&n.prog===p.prog?'<span class="tag g">coursemate</span>':''}</div></div></div>
       <div class="rel"><span>Friendship</span><div class="bar"><i style="width:${n.friend}%"></i></div><span>Romance</span><div class="bar"><i class="rom" style="width:${n.romance}%"></i></div></div>
       ${said?`<div class="say">${said}</div>`:''}
       <div class="grid2">${opts.map(([k,t])=>`<button class="ghost sm" data-a="${k}">${t}</button>`).join('')}</div>
@@ -149,3 +149,6 @@ function sleepoverAsk(n,mine){const p=P(),yes=Math.random()<(n.romance>=60?.9:.5
 function npcHash(n,salt){let h=7;for(const c of String(n.id)+salt)h=(h*31+c.charCodeAt(0))%9973;return h}
 function npcLevel(n){return [100,100,100,200,200,300,400][npcHash(n,'lvl')%7]}
 function npcTown(n){return ['Kumasi','Accra','Tamale','Cape Coast','Ho','Takoradi','Sunyani','Koforidua','Obuasi','Techiman','Tema','Bolgatanga'][npcHash(n,'town')%12]}
+
+/* what you actually know about someone: you learn their course and hostel by asking (or by being friends a while) */
+const knowsCourse=n=>!!(n.mate||n.know&&n.know.course||n.friend>=30),knowsHostel=n=>!!(n.mate||n.know&&n.know.hostel||n.friend>=30);

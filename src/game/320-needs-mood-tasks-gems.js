@@ -89,7 +89,7 @@ function needFixes(k){const p=P(),a=[],mine=IS&&IS.mine;
     const f=foodPlaces()[0];if(f)a.push([`🚶 Get food at ${f.name}`,()=>walkTo(f)]);a.push(['🛵 Order food to you',()=>phone('apps')])}
   if(k==='energy'){if(mine){a.push(['😴 Sleep',()=>sleep()]);a.push(['💤 Nap (2h)',()=>nap()])}else a.push(['🏠 Go home to rest',()=>walkTo(homeB())]);if(BID.pharm)a.push(['☕ Grab an energy drink (pharmacy)',()=>walkTo(BID.pharm)])}
   if(k==='hygiene'){if(mine)a.push(['🚿 Take a shower',()=>doAct('Taking a shower',20,{hygiene:100,fun:5,energy:4})]);else a.push(['🏠 Go home and shower',()=>walkTo(homeB())])}
-  if(k==='social'){const n=!IS&&nearNPC();if(n)a.push([`💬 Talk to ${n.name}`,()=>talkMenu(n)]);a.push(['📱 Text a friend',()=>phone()]);if(BID.parade)a.push(['🚶 Go where people are (Parade Grounds)',()=>walkTo(BID.parade)])}
+  if(k==='social'){const n=!IS&&nearNPC();if(n)a.push([`💬 Talk to ${n.met||n.mate?n.name:'someone new'}`,()=>talkMenu(n)]);a.push(['📱 Text a friend',()=>phone()]);if(BID.parade)a.push(['🚶 Go where people are (Parade Grounds)',()=>walkTo(BID.parade)])}
   if(k==='fun'){a.push(['💃 Dance a little',()=>doEmote('dance')]);if(!IS){a.push(['⚽ Go to the Sports Field',()=>walkTo(BID.field)])}else if(mine&&p.items.includes('console'))a.push(['🎮 Play FIFA',()=>playFifa()])}
   return a}
 function showNeedCard(k,lvl){const p=P(),el=$('needCard'),N=NEEDN[k],fx=needFixes(k);S.cardK=k;
@@ -174,7 +174,7 @@ function acts0(force){
   const bdy=!inside&&!S.busy&&buddy();if(bdy){list.unshift([`🪑 Sit with ${bdy.name}`,()=>sitWith(bdy),null,'b'],[`🚶 Walk with ${bdy.name}`,()=>walkWith(bdy),null,'b']);
     if(!bdy.mate&&hour()>=8&&hour()<22)list.push([`🏠 Go to ${bdy.name}'s room`,()=>{advance(15);visitRoom(bdy)}]);list.push([`👋 Bye, ${bdy.name}`,()=>{bdy.with=0;bdy.lastPlan=-1;toast(`${bdy.name}: "Later! 👋"`);acts(true)}])}
   if(inside&&!list.some(x=>x[0]==='Leave the room'))list.push([IS.kind==='bld'?(IS.back==='room'?'Back to your room':`Leave ${IS.title}`):'Leave the room',()=>leaveRoom(),null,'']);
-  $('acts').innerHTML=`<button class="btn m" id="phoneBtn">📱 Phone${S.unread?` (${S.unread})`:''}</button>`+(p.biz?`<button class="ghost sm" id="bizBtn">💼 Business</button>`:'')+(n?`<button class="btn" id="talkBtn">Talk to ${esc(n.name)}</button>`:'')+(!S.busy&&!rideBusy()&&!p.onBus?`<button class="ghost sm" id="emoBtn">😀 Emote</button>`:'')+
+  $('acts').innerHTML=`<button class="btn m" id="phoneBtn">📱 Phone${S.unread?` (${S.unread})`:''}</button>`+(p.biz?`<button class="ghost sm" id="bizBtn">💼 Business</button>`:'')+(n?`<button class="btn" id="talkBtn">Talk to ${n.met||n.mate?esc(n.name):(n.gender==='f'?'her':'him')}</button>`:'')+(!S.busy&&!rideBusy()&&!p.onBus?`<button class="ghost sm" id="emoBtn">😀 Emote</button>`:'')+
     list.map(([t,fn,sub,cls],i)=>`<button class="${fn?(cls==='b'?'btn b':cls===''?'ghost':'btn g'):'ghost'} sm" data-x="${i}" ${fn?'':'disabled'}>${esc(t)}${sub?` · ${esc(sub)}`:''}</button>`).join('');
   $('phoneBtn').onclick=()=>phone();if(n)$('talkBtn').onclick=()=>talkMenu(n);if($('emoBtn'))$('emoBtn').onclick=()=>emoteSheet();if(p.biz)$('bizBtn').onclick=()=>bizSheet();
   $('acts').querySelectorAll('[data-x]').forEach(bt=>bt.onclick=()=>{const f=list[+bt.dataset.x][1];if(f)f()});
