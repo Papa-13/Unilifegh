@@ -33,3 +33,14 @@ The game and its server (gem shop, gem bank, MoMo bank, Paystack webhook) run as
 
 ## Updating later
 Make a new zip, upload + extract over the old one in `chale`, then **Restart** the app.
+
+## Automatic updates (GitHub → Namecheap)
+`.github/workflows/deploy-namecheap.yml` builds and uploads on every push to main, then restarts the app (tmp/restart.txt).
+One-time setup:
+1. cPanel → **FTP Accounts** → create an account whose **Directory** is the app root (`chale`).
+2. GitHub repo → **Settings → Secrets and variables → Actions → New repository secret**:
+   - `FTP_SERVER` = your server hostname from cPanel (e.g. `server123.web-hosting.com`, shown in FTP Accounts → Configure FTP Client)
+   - `FTP_USERNAME` = the full FTP username (e.g. `deploy@yourdomain.com`)
+   - `FTP_PASSWORD`
+3. GitHub → **Actions → Deploy to Namecheap → Run workflow** to test.
+If a deploy adds new server packages, click **Run NPM Install** in Setup Node.js App once.

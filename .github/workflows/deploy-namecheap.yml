@@ -1,0 +1,44 @@
+# Every push to main: build the game, then upload it to the Namecheap Node.js app over FTP and restart it.
+# Needs repo secrets FTP_SERVER, FTP_USERNAME, FTP_PASSWORD (an FTP account whose folder is the app root, "chale").
+# Until those secrets exist this workflow does nothing.
+name: Deploy to Namecheap
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+concurrency: deploy-namecheap
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      HAS_FTP: ${{ secrets.FTP_SERVER != '' && secrets.FTP_USERNAME != '' && secrets.FTP_PASSWORD != '' }}
+    steps:
+      - name: FTP not set up yet
+        if: env.HAS_FTP != 'true'
+        run: echo "Add FTP_SERVER, FTP_USERNAME and FTP_PASSWORD in repo secrets to turn on deploys."
+      - uses: actions/checkout@v4
+        if: env.HAS_FTP == 'true'
+      - uses: actions/setup-node@v4
+        if: env.HAS_FTP == 'true'
+        with:
+          node-version: 20
+          cache: npm
+      - name: Build the upload folder
+        if: env.HAS_FTP == 'true'
+        run: |
+          npm ci
+          npm run package:namecheap
+          mkdir -p release/namecheap/tmp
+          date -u +%s > release/namecheap/tmp/restart.txt   # Passenger restarts the app when this file changes
+      - name: Upload to Namecheap
+        if: env.HAS_FTP == 'true'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          local-dir: ./release/namecheap/
+          server-dir: ./
+          exclude: |
+            **/node_modules/**
