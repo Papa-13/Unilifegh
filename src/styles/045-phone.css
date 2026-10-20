@@ -23,3 +23,5 @@
 /* other apps' screens shown inside the phone: tidy their own headings */
 .phSub>h3:first-child,.phSub>.row:first-child h3{margin-top:0}
 .phSub .tabs{flex-wrap:wrap}
+/* phone held sideways: a shorter in-game phone so it fits on screen */
+@media (max-height:520px){.phHome{min-height:0;padding-bottom:8px}.phClock{margin:2px 0 8px}.phClock b{font-size:30px}.phBody{min-height:0;max-height:52vh}.phGrid{gap:8px 4px}.phApp i{width:42px;height:42px;font-size:21px;border-radius:12px}.phDock{margin-top:8px;padding:6px}}
