@@ -81,7 +81,7 @@ export function momoOp(uid, me, other, reps, body, now) {
     const amt = Math.floor(Number(body.amt) || 0);
     const kind = ['gift', 'loan', 'repay'].includes(body.kind) ? body.kind : 'gift';
     if (!to || to === uid) return fail('Choose who to send money to.');
-    if (!other || other.cedi == null) return fail('They need to open YOLO online once before they can receive money.');
+    if (!other || other.cedi == null) return fail('They need to open Chale online once before they can receive money.');
     if (!(amt >= 1 && amt <= SEND_MAX)) return fail(`You can send between GH₵1 and GH₵${SEND_MAX.toLocaleString('en-GB')} at a time.`);
     syncCedis(me, body.money, body.ack, now, false);
     const d = today(now);

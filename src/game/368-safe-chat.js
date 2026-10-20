@@ -14,7 +14,7 @@ function swearMask(t){if(!t||typeof t!=='string')return t;return t.replace(SWEAR
 /* 🚩 report a player */
 function mpReport(ck,nm){S.paused=true;openSheet();const msgs=(typeof thread==='function'?thread(ck):[]).filter(m=>!m.me&&!m.sys&&m.k==='m').slice(-10).map(m=>({tx:mpClean(m.tx,240),t:+m.t||0}));
   const R=[['harass','Bullying or harassment'],['sexual','Sexual messages or behaviour'],['hate','Hate or slurs'],['scam','Scam or asking for money / numbers'],['spam','Spam'],['other','Something else']];
-  $('sheetIn').innerHTML=`<h3>🚩 Report ${esc(nm)}</h3><p style="font-size:13px;opacity:.85">Reports go to the people who run YOLO. ${msgs.length?`Their last ${msgs.length} message${msgs.length>1?'s':''} to you will be included.`:''} ${esc(nm)} won't know who reported them.</p>
+  $('sheetIn').innerHTML=`<h3>🚩 Report ${esc(nm)}</h3><p style="font-size:13px;opacity:.85">Reports go to the people who run Chale. ${msgs.length?`Their last ${msgs.length} message${msgs.length>1?'s':''} to you will be included.`:''} ${esc(nm)} won't know who reported them.</p>
     <div class="list">${R.map(([k,l],i)=>`<label class="item" style="cursor:pointer"><input type="radio" name="rr" value="${k}" ${i?'':'checked'}> <span class="grow">${l}</span></label>`).join('')}</div>
     <textarea id="rNote" maxlength="300" rows="3" placeholder="What happened? (optional)" style="width:100%;border-radius:12px;padding:10px;font:inherit;background:var(--bg);color:var(--fg);border:1.5px solid var(--line)"></textarea>
     <label style="display:flex;gap:8px;align-items:center;font-size:14px"><input type="checkbox" id="rBlock" checked> Also block ${esc(nm)}</label>

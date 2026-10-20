@@ -23,10 +23,10 @@
 #splash .sp-logo{position:relative;display:grid;place-items:center}
 #splash .sp-band{position:absolute;left:50%;width:100vw;margin-left:-50vw;top:50%;height:22px;margin-top:-11px;background:var(--kente);transform:scaleX(0);transform-origin:left;
   animation:spBand .8s cubic-bezier(.6,0,.2,1) .15s forwards,spWeave 1.2s linear 1s infinite;box-shadow:0 0 0 3px #140a18,0 0 40px rgba(245,180,31,.35)}
-#splash .yolo{position:relative;font-size:clamp(84px,24vw,210px)}
+#splash .yolo{position:relative;font-size:clamp(70px,19vw,190px)}
 #splash .yolo span{opacity:0;transform:translateY(-70%) rotate(-8deg) scale(1.3);animation:spDrop .55s cubic-bezier(.2,1.6,.4,1) forwards}
 #splash .yolo span:nth-child(1){animation-delay:.6s}#splash .yolo span:nth-child(2){animation-delay:.75s;--r:5deg}
-#splash .yolo span:nth-child(3){animation-delay:.9s}#splash .yolo span:nth-child(4){animation-delay:1.05s}
+#splash .yolo span:nth-child(3){animation-delay:.9s}#splash .yolo span:nth-child(4){animation-delay:1.05s;--r:-4deg}#splash .yolo span:nth-child(5){animation-delay:1.2s;--r:6deg}
 #splash .sp-tag{position:relative;font:800 clamp(15px,4vw,22px)/1.2 var(--body);letter-spacing:.32em;text-transform:lowercase;opacity:0;animation:spFade .6s ease 1.5s forwards;
   background:var(--dusk);padding:4px 12px}
 #splash .sp-sub{position:absolute;left:0;right:0;text-align:center;bottom:calc(var(--sab,0px) + 30px);font:600 13px var(--body);color:#d8c3c9;opacity:0;animation:spFade .6s ease 1.9s forwards}
@@ -80,7 +80,7 @@ body.setup #panel.intro>.sunball{width:min(58vw,300px)}
 /* ---------- welcome ---------- */
 .wl{display:flex;flex-direction:column;justify-content:space-between;gap:16px;width:100%;max-width:520px;margin:0 auto;height:100%;padding-top:4vh}
 .wl-top{display:flex;flex-direction:column;gap:10px}
-.wl .yolo{font-size:clamp(84px,25vw,150px);margin:0 0 4px}
+.wl .yolo{font-size:clamp(70px,20vw,140px);margin:0 0 4px}
 .wl .tagl{font:800 14px var(--body);letter-spacing:.24em;color:#ffd9a8;margin:-4px 0 0}
 .wl .acts{display:flex;flex-direction:column;gap:12px;margin-top:6px}
 .wl .looking{font-size:14px;color:#ffe2c4;opacity:.85}

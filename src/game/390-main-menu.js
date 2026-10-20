@@ -6,7 +6,7 @@ async function welcome(soft){MENU='welcome';document.body.classList.remove('play
   const sv=welcome.sv,on=MP.lobbyPeers.length,cl=MP.lobby?campList():[];panelMode('intro');
   if(sv&&sv.campus&&sv.cn&&String(sv.campus)[0]==='u'&&!MP.cnames[sv.campus])MP.cnames[sv.campus]=mpClean(sv.cn,24);const svPal=sv&&sv.p&&sv.p.look&&PAL[sv.p.look.pal],svLvl=sv&&sv.p?(sv.p.grad?'Graduate':'Level '+((sv.p.yr||1)*100)):'';
   $('panel').innerHTML=`${introScene()}<div class="iw wl">
-    <div class="wl-top"><h1 class="yolo" aria-label="YOLO"><span>Y</span><span>O</span><span>L</span><span>O</span></h1><p class="tagl">a ghanaian life game</p>
+    <div class="wl-top"><h1 class="yolo" aria-label="Chale"><span>C</span><span>H</span><span>A</span><span>L</span><span>E</span></h1><p class="tagl">a ghanaian student life</p>
     <p class="ilead">From Level 100 to graduation day: lectures, hostel life, friends, love and hustles. Online, every student you meet is a real person.</p></div>
     <div class="acts">
       ${sv===undefined?'<p class="looking">Looking for your saved student…</p>':sv?`<button class="sbtn" id="wCont"><span class="ph" style="background:${svPal?svPal.a:'#fbf3e2'};border:3px solid #120a12;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font:400 20px var(--sign);flex:none">${esc((mpClean(sv.p.name,16)||'Y')[0])}</span><span>Continue as ${esc(mpClean(sv.p.name,16))}<small>${esc(sv.p.prog||'')} · ${svLvl}${sv.campus?' · 🌐 '+esc(campName(sv.campus)):' · solo'}</small></span></button>`:''}

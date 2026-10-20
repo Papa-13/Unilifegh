@@ -27,7 +27,7 @@ async function mbRep(uid){if(MB.rep[uid]&&Date.now()-MB.rep[uid].t<60000)return 
 const mbRepTxt=r=>r?`${r.repaid?`✅ paid back ${r.repaid} loan${r.repaid>1?'s':''}`:'No loans paid back yet'}${r.late?` · ⚠️ ${r.late} late`:''}`:'';
 
 /* send money: a gift, a loan (after they asked) or paying back */
-async function mbSend(ck,nm,amt,kind,extra={}){if(!MB.on)return toast('Sending money works on the YOLO website, on an online campus.');
+async function mbSend(ck,nm,amt,kind,extra={}){if(!MB.on)return toast('Sending money works on the Chale website, on an online campus.');
   const j=await mbCall({op:'send',to:ck,amt,kind,nm:P().name,toNm:nm,money:Math.round(P().money),ack:MB.ack.splice(0),...extra});
   if(!j||j.offline){toast('💸 Couldn\'t reach the MoMo bank. Check your connection.');return null}if(j.error){toast('💸 '+j.error);return null}
   try{mpSend(ck,'mo',kind)}catch(e){}const t=kind==='loan'?`You lent ${nm} ${cedi(amt)} 💸`:kind==='repay'?`You paid ${nm} back ${cedi(amt)} 💸`:`You sent ${nm} ${cedi(amt)} 💸`;mpSys(ck,t);toast('✅ '+t);return j}

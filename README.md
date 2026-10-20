@@ -1,4 +1,4 @@
-# YOLO 🎓
+# Chale 🎓
 
 Live the life of a Ghanaian university student, from Level 100 to graduation: lectures, hostels, friends, love and hustles, on online campuses of up to 50 real players.
 
