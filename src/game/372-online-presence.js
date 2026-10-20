@@ -7,6 +7,11 @@ function mpPresence(){if(!S||!S.p)return null;const p=P(),inB=myInKey(),L=p.look
     x:Math.round(p.x),y:Math.round(p.y),f:p.face!=null?+p.face.toFixed(2):null,ps:p.inCar?'car':(['sit','sitTalk','phone','talk','dance','lie'].includes(p.pose)?p.pose:null),in:inB,car:!!p.inCar,
     mo:(()=>{try{return moodInfo().ic}catch(e){return''}})(),hm:p.home,pr:mpClean(lvlLabel()+' · '+p.prog,40),ty:MP.typing&&Date.now()-MP.typing.t<4000?MP.typing.to:null,wk:S.follow||null,rl:(()=>{const r=relGet();return r?{k:r.ck,n:mpClean(r.nm,16)}:null})(),ix:IS?Math.round(p.ix*100)/100:null,iz:IS?Math.round(p.iz*100)/100:null,mu:MUS.room&&inMyRoom()&&MUS.room.key===inB?{i:MUS.room.i,s:Math.round(MUS.room.s)}:null,out:MP.out}}
 function mpTick(){document.body.classList.toggle('live',sharedClock());if(!MP.lobby)return;
+  /* the lobby is only listened to on the menu / campus picker; during play we only write our tiny lobby record */
+  {const onMenu=!S||$('game').hidden||MENU==='campus';if(MP.lobby.watch&&MP.lobby.watching()!==onMenu)MP.lobby.watch(onMenu)}
+  /* friends see whether I'm online (and where) from a tiny status record, not from the whole lobby */
+  try{if(window.fbRT&&fbRT.status){const st={cp:MP.campus||null,st:S&&!$('game').hidden?'play':'menu'},sk=JSON.stringify(st);if(sk!==MP.lastSt){MP.lastSt=sk;fbRT.status(st)}
+    Object.keys(MP.friends||{}).slice(0,80).forEach(k=>{MP.fw=MP.fw||{};if(!MP.fw[k]&&!k.startsWith('p:')){MP.fw[k]=fbRT.watchStatus(k,v=>{MP.fst=MP.fst||{};MP.fst[k]=v})}})}}catch(e){}
   const lp={g:'freshers',cp:MP.campus,cn:MP.campus&&MP.campus[0]==='u'?MP.cnames[MP.campus]||null:null,nm:mpClean(S&&S.p?P().name:(myLook&&myLook.name)||'',16),uid:MP.uid,st:S&&!$('game').hidden?'play':'menu'},lk=JSON.stringify(lp);if(lk!==MP.lastLobby){MP.lastLobby=lk;MP.lobby.presence(lp).catch(()=>{})}
   if(!MP.croom)return;let pr=mpPresence();if(!pr)return;let k=JSON.stringify(pr);const enc=new TextEncoder();while(enc.encode(k).length>3700&&MP.out.length){MP.out.shift();pr=mpPresence();k=JSON.stringify(pr)}
   if(k===MP.lastPres&&performance.now()-MP.lastT<4000)return;MP.lastPres=k;MP.lastT=performance.now();MP.croom.presence(pr).catch(()=>{})}

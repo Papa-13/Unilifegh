@@ -31,6 +31,7 @@ function allThreads(){const ks=new Set([...Object.keys(MP.mailIn),...Object.keys
 /* who is online (anywhere) and where */
 function onlineInfo(k){const rp=[...MP.peers.values()].find(r=>!r.isMe&&mpKey(r)===k);if(rp)return{on:1,here:1,txt:'🟢 '+mpWhere(rp),rp};
   const q=MP.lobbyPeers.find(q=>(q.by||q.presence.uid)===k&&!q.isMe);if(q)return{on:1,txt:'🟢 online'+(q.presence.cp?' · '+campName(q.presence.cp):'')};
+  const fs=MP.fst&&MP.fst[k];if(fs)return{on:1,txt:'🟢 online'+(fs.cp?' · '+campName(fs.cp):'')};
   const m=MP.members[k];return{on:0,txt:m&&m.at?'⚪ last seen '+ago(m.at):'⚪ offline'}}
 function ago(t){const s=(Date.now()-t)/1000;return s<90?'just now':s<3600?Math.round(s/60)+' min ago':s<86400?Math.round(s/3600)+' h ago':Math.round(s/86400)+' days ago'}
 /* speech bubble over a player's head */

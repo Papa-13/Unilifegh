@@ -65,3 +65,8 @@ If Vercel shows a build error, open the deployment's **Build Logs**; `npm run ch
 - Firestore: 50,000 reads and 20,000 writes per day.
 
 Plenty for testing. When players grow, switch to the pay-as-you-go **Blaze** plan (also needed for Cloud Functions, e.g. payments).
+
+## Scaling (thousands of players)
+Live positions are split into 900×900 map cells (`rooms/<campus>/f/<cell>/<uid>`) and each player only receives the cells around them; indoor places are their own cell. Far-away players are shown from a rough position in their `slow` record, which is written at most every 1.2 s. The lobby is only listened to on the menu and campus picker. Friends see each other online through tiny `status/<uid>` records.
+These paths need the current `firebase/database.rules.json`. With older rules the game falls back to the old layout automatically (it still works, just costs more).
+To lift the 100 simultaneous connection limit, switch the Firebase project to the Blaze plan and set a budget alert.

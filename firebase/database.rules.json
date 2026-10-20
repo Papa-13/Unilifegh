@@ -13,6 +13,14 @@
             ".write": "auth != null && (newData.exists() ? newData.child('by').val() === auth.uid && (!data.exists() || data.child('by').val() === auth.uid) : data.child('by').val() === auth.uid)",
             ".validate": "newData.child('x').isNumber() && newData.child('y').isNumber()"
           }
+        },
+        "f": {
+          "$cell": {
+            "$uid": {
+              ".write": "auth != null && auth.uid === $uid",
+              ".validate": "newData.child('x').isNumber() && newData.child('y').isNumber() && $cell.matches(/^(-?[0-9]{1,3}_-?[0-9]{1,3}|i[A-Za-z0-9_-]{1,40})$/)"
+            }
+          }
         }
       }
     },
@@ -50,6 +58,13 @@
             }
           }
         }
+      }
+    },
+    "status": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "!newData.exists() || newData.hasChildren(['t'])"
       }
     }
   }

@@ -29,7 +29,10 @@ async function start(){
     watch(path,cb){if(!okP(path))return()=>{};return onValue(ref(rtdb,path),s=>cb(s.val()))},
     async push(path,v){if(!okP(path))throw new Error('bad path');const r=push(ref(rtdb,path));await set(r,v);return r.key},
     async set(path,v){if(!okP(path))throw new Error('bad path');await set(ref(rtdb,path),v)},
-    uid:()=>auth.currentUser&&auth.currentUser.uid};
+    uid:()=>auth.currentUser&&auth.currentUser.uid,
+    /* status/<uid>: am I online and on which campus (tiny, so friends can see it without the lobby) */
+    async status(v){const me=(auth.currentUser&&auth.currentUser.uid)||u.uid;if(!me)return;const r=ref(rtdb,'status/'+me);try{if(v){onDisconnect(r).remove();await set(r,{...v,t:serverTimestamp()})}else await remove(r)}catch(e){}},
+    watchStatus(u,cb){if(!/^[A-Za-z0-9_-]{6,64}$/.test(u))return()=>{};return onValue(ref(rtdb,'status/'+u),s=>cb(s.val()),()=>cb(null))}};
   window.__fbResolve({user:userApi(u),db:dbApi(fs),room:roomApi(rtdb,u.uid,null)});
 }
 
@@ -73,36 +76,69 @@ function dbApi(fs){
   return Object.freeze({doc:docRef,collection:p=>collRef(p)})}
 
 /* ---------- room (Realtime Database) ----------
-   rooms/<name>/slow/<peer> = {by, p:{...everything except position}, t}   (changes rarely)
-   rooms/<name>/fast/<peer> = {by, x, y, f, t}                            (several times a second)
-   Both are removed automatically when the tab closes or loses connection. */
-const FAST=['x','y','f'];
-function roomApi(rtdb,uid,name){
-  const myPeer=(window.__fbPeer=window.__fbPeer||Math.random().toString(36).slice(2,12)),rn=name||'lobby',base=`rooms/${rn}`;
-  const slowR=ref(rtdb,`${base}/slow/${myPeer}`),fastR=ref(rtdb,`${base}/fast/${myPeer}`);
-  let mine={},lastSlow='',lastFast='',fastT=0,fastTimer=null,dead=false;const peers=new Map(),hs=[],ch=[],unsubs=[];
-  const peerOf=id=>{let p=peers.get(id);if(!p){p={slow:null,fast:null};peers.set(id,p)}return p};
+   Built so thousands of players can be online without everyone downloading everyone:
+   rooms/<name>/slow/<peer>      = {by, p:{look, name, mood, rough position...}, t}   changes rarely (and at most every ~1.2 s)
+   rooms/<name>/f/<cell>/<uid>   = {x, y, f, ix, iz}                                  several times a second while moving
+   The map is cut into 900x900 cells (and each indoor place is its own cell). You only receive the
+   live positions of players in your cell and the 8 around it (or inside the same place as you);
+   everyone else you see from the rough position in their slow record (updated every ~20 s or 300 units).
+   The lobby room is "lazy": the game only listens to it while you are on the menu or picking a campus.
+   Everything is removed automatically when the tab closes or loses connection.
+   If the database rules are still the old ones, it falls back to the old layout (rooms/<name>/fast/<peer>). */
+const FAST=['x','y','f','ix','iz'],CELL=900;
+function roomApi(rtdb,uid,name,opts={}){
+  const myPeer=(window.__fbPeer=window.__fbPeer||Math.random().toString(36).slice(2,12)),rn=name||'lobby',base=`rooms/${rn}`,lazy=rn==='lobby';
+  const slowR=ref(rtdb,`${base}/slow/${myPeer}`);
+  let mine={},lastSlow='',slowT=0,slowTimer=null,lastFast='',fastT=0,fastTimer=null,dead=false,coarse=null,legacy=!!window.__fbLegacyFast,fastR=null,fastCell=null;
+  const peers=new Map(),fastBy=new Map(),hs=[],ch=[],unsubs=[],cellSubs=new Map();
   let fireT=null;const fire=()=>{if(fireT)return;fireT=setTimeout(()=>{fireT=null;const list=snapshot();hs.forEach(h=>{try{h({peers:list,joined:[],left:[],updated:[]})}catch(e){console.error(e)}})},80)};
   const snapshot=()=>{const out=[{peer:myPeer,by:uid,isMe:true,sameTab:true,kind:'viewer',guest:false,presence:Object.freeze({...mine}),updatedAt:Date.now()}];
-    for(const [id,p] of peers){if(!p.slow||id===myPeer)continue;const pr=Object.assign({},p.slow.p||{});if(p.fast){FAST.forEach(k=>{if(k in p.fast)pr[k]=p.fast[k]})}
-      out.push({peer:id,by:typeof p.slow.by==='string'?p.slow.by:null,isMe:p.slow.by===uid,sameTab:false,kind:'viewer',guest:false,presence:Object.freeze(pr),updatedAt:(p.fast&&p.fast.t)||p.slow.t||Date.now()})}
+    for(const [id,p] of peers){if(!p.slow||id===myPeer)continue;const by=typeof p.slow.by==='string'?p.slow.by:null,pr=Object.assign({},p.slow.p||{}),fs=by&&fastBy.get(by);
+      if(fs&&fs.v){FAST.forEach(k=>{if(k in fs.v)pr[k]=fs.v[k]})}
+      out.push({peer:id,by,isMe:by===uid,sameTab:false,kind:'viewer',guest:false,presence:Object.freeze(pr),updatedAt:(fs&&fs.t)||p.slow.t||Date.now()})}
     return Object.freeze(out)};
-  const watch=(kind)=>{const r=ref(rtdb,`${base}/${kind}`);
+  /* ---- slow records (who is here) ---- */
+  let slowOn=false;const slowUn=[];
+  const watchSlow=on=>{if(on===slowOn||dead)return;slowOn=on;if(!on){slowUn.splice(0).forEach(f=>{try{f()}catch(e){}});return}
+    const r=ref(rtdb,`${base}/slow`);
     // an entry with my account but a different peer id is me from before a refresh: remove it so I don't see a copy of myself
-    const stale=s=>{const v=s.val();if(v&&v.by===uid&&s.key!==myPeer){remove(ref(rtdb,`${base}/slow/${s.key}`)).catch(()=>{});remove(ref(rtdb,`${base}/fast/${s.key}`)).catch(()=>{});return true}return false};
-    unsubs.push(onChildAdded(r,s=>{if(stale(s))return;peerOf(s.key)[kind]=s.val();fire()}),onChildChanged(r,s=>{peerOf(s.key)[kind]=s.val();fire()}),
-      onChildRemoved(r,s=>{const p=peers.get(s.key);if(p){p[kind]=null;if(!p.slow&&!p.fast)peers.delete(s.key);if(kind==='slow')peers.delete(s.key)}fire()}))};
-  watch('slow');watch('fast');
-  let connected=false;unsubs.push(onValue(ref(rtdb,'.info/connected'),s=>{connected=!!s.val();if(connected&&!dead){onDisconnect(slowR).remove();onDisconnect(fastR).remove();lastSlow='';lastFast='';push()}ch.forEach(h=>h(connected))}));
-  const push=()=>{if(dead)return;const slow={},fast={};for(const k in mine){if(FAST.includes(k))fast[k]=mine[k];else slow[k]=mine[k]}
-    const sj=JSON.stringify(slow);if(sj!==lastSlow){lastSlow=sj;set(slowR,{by:uid,p:slow,t:serverTimestamp()}).catch(()=>{})}
-    const fj=JSON.stringify(fast);if(fj!==lastFast&&'x' in fast){const now=Date.now(),wait=Math.max(0,350-(now-fastT));clearTimeout(fastTimer);fastTimer=setTimeout(()=>{fastT=Date.now();lastFast=JSON.stringify(fastNow());set(fastR,{by:uid,...fastNow(),t:serverTimestamp()}).catch(()=>{})},wait)}};
-  const fastNow=()=>{const o={};FAST.forEach(k=>{if(mine[k]!=null)o[k]=mine[k]});return o};
+    const stale=s=>{const v=s.val();if(v&&v.by===uid&&s.key!==myPeer){remove(ref(rtdb,`${base}/slow/${s.key}`)).catch(()=>{});return true}return false};
+    const put=s=>{if(stale(s))return;const p=peers.get(s.key)||{};p.slow=s.val();peers.set(s.key,p);fire()};
+    slowUn.push(onChildAdded(r,put),onChildChanged(r,put),onChildRemoved(r,s=>{peers.delete(s.key);fire()}))};
+  if(!lazy)watchSlow(true);
+  /* ---- live positions, by cell ---- */
+  const safe=v=>String(v).replace(/[^A-Za-z0-9_-]/g,'_').slice(0,40);
+  const cellOf=()=>mine.in?'i'+safe(mine.in):(mine.x==null?null:Math.floor(mine.x/CELL)+'_'+Math.floor(mine.y/CELL));
+  const wantCells=()=>{const c=cellOf();if(!c)return[];if(c[0]==='i')return[c];const [a,b]=c.split('_').map(Number),o=[];for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++)o.push((a+i)+'_'+(b+j));return o};
+  const subCells=()=>{if(dead)return;const want=new Set(legacy?['*']:wantCells());
+    for(const [c,un] of cellSubs)if(!want.has(c)){un.forEach(f=>{try{f()}catch(e){}});cellSubs.delete(c);for(const [u,v] of fastBy)if(v.c===c)fastBy.delete(u);fire()}
+    for(const c of want){if(cellSubs.has(c))continue;const r=ref(rtdb,legacy?`${base}/fast`:`${base}/f/${c}`);
+      const put=s=>{const v=s.val()||{},u=legacy?v.by:s.key;if(!u||u===uid)return;fastBy.set(u,{v,c,t:Date.now()});fire()};
+      cellSubs.set(c,[onChildAdded(r,put),onChildChanged(r,put),onChildRemoved(r,s=>{const v=s.val()||{},u=legacy?v.by:s.key;const cur=fastBy.get(u);if(cur&&cur.c===c){fastBy.delete(u);fire()}})])}};
+  const goLegacy=()=>{if(legacy)return;legacy=window.__fbLegacyFast=true;console.warn('YOLO: old database rules, using the old live-position layout');
+    if(fastR){remove(fastR).catch(()=>{})}fastR=null;fastCell=null;for(const [,un] of cellSubs)un.forEach(f=>{try{f()}catch(e){}});cellSubs.clear();fastBy.clear();lastFast='';subCells();push()};
+  let connected=false;unsubs.push(onValue(ref(rtdb,'.info/connected'),s=>{connected=!!s.val();if(connected&&!dead){onDisconnect(slowR).remove();if(fastR)onDisconnect(fastR).remove();lastSlow='';lastFast='';push()}ch.forEach(h=>h(connected))}));
+  const fastNow=()=>{const o={};FAST.forEach(k=>{if(mine[k]!=null)o[k]=typeof mine[k]==='number'?Math.round(mine[k]*(k==='ix'||k==='iz'||k==='f'?100:1))/(k==='ix'||k==='iz'||k==='f'?100:1):mine[k]});return o};
+  const writeSlow=()=>{if(dead)return;const slow={};for(const k in mine)if(!FAST.includes(k))slow[k]=mine[k];
+    /* rough position for players far away: refreshed every 20 s or after moving 300 units */
+    if(mine.x!=null){const now=Date.now();if(!coarse||Math.hypot(mine.x-coarse.x,mine.y-coarse.y)>300||now-coarse.t>20000||mine.in!==coarse.in)coarse={x:Math.round(mine.x/10)*10,y:Math.round(mine.y/10)*10,t:now,in:mine.in};slow.x=coarse.x;slow.y=coarse.y}
+    const sj=JSON.stringify(slow);if(sj===lastSlow)return;const wait=Math.max(0,1200-(Date.now()-slowT));clearTimeout(slowTimer);
+    slowTimer=setTimeout(()=>{if(dead)return;const again={};for(const k in mine)if(!FAST.includes(k))again[k]=mine[k];if(coarse&&mine.x!=null){again.x=coarse.x;again.y=coarse.y}const aj=JSON.stringify(again);if(aj===lastSlow)return;lastSlow=aj;slowT=Date.now();set(slowR,{by:uid,p:again,t:serverTimestamp()}).catch(()=>{})},wait)};
+  const writeFast=()=>{if(dead||mine.x==null)return;const f=fastNow(),fj=JSON.stringify(f);if(fj===lastFast)return;
+    const now=Date.now(),wait=Math.max(0,400-(now-fastT));clearTimeout(fastTimer);
+    fastTimer=setTimeout(()=>{if(dead)return;const v=fastNow(),vj=JSON.stringify(v);if(vj===lastFast)return;fastT=Date.now();
+      const cell=legacy?'*':cellOf();if(cell!==fastCell){if(fastR){const old=fastR;onDisconnect(old).cancel&&onDisconnect(old).cancel();remove(old).catch(()=>{})}
+        fastR=ref(rtdb,legacy?`${base}/fast/${myPeer}`:`${base}/f/${cell}/${uid}`);fastCell=cell;onDisconnect(fastR).remove();subCells()}
+      lastFast=vj;set(fastR,legacy?{by:uid,...v,t:serverTimestamp()}:v).catch(e=>{if(!legacy&&/permission/i.test(String(e&&(e.code||e.message))))goLegacy()})},wait)};
+  const push=()=>{writeSlow();writeFast()};
   const api={name:name||undefined,
     presence:async patch=>{for(const k in patch){if(patch[k]===null)delete mine[k];else mine[k]=patch[k]}push();fire()},
     peers:()=>snapshot(),onPeers:(h)=>{hs.push(h);setTimeout(fire,0);return()=>{const i=hs.indexOf(h);if(i>=0)hs.splice(i,1)}},
     connected:()=>connected,onConnection:(h)=>{ch.push(h);setTimeout(()=>h(connected),0);return()=>{const i=ch.indexOf(h);if(i>=0)ch.splice(i,1)}},
     emit:async()=>{},on:()=>()=>{},
+    /* lobby only: listen to who is online while on the menu, stop listening during play */
+    watch:on=>{watchSlow(!!on);if(!on){peers.clear();fire()}},watching:()=>slowOn,
     join:async n=>roomApi(rtdb,uid,n),
-    leave:async()=>{dead=true;clearTimeout(fastTimer);unsubs.forEach(f=>{try{f()}catch(e){}});await Promise.all([remove(slowR),remove(fastR)]).catch(()=>{});peers.clear()}};
+    leave:async()=>{dead=true;clearTimeout(fastTimer);clearTimeout(slowTimer);watchSlow(false);unsubs.forEach(f=>{try{f()}catch(e){}});for(const [,un] of cellSubs)un.forEach(f=>{try{f()}catch(e){}});cellSubs.clear();
+      await Promise.all([remove(slowR),fastR?remove(fastR):null]).catch(()=>{});peers.clear();fastBy.clear()}};
   return Object.freeze(api)}
