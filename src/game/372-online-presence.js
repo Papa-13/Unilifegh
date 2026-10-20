@@ -6,7 +6,7 @@ function mpPresence(){if(!S||!S.p)return null;const p=P(),inB=myInKey(),L=p.look
   return{g:'freshers',nm:mpClean(p.name,16),uid:MP.uid,lk:{gender:L.gender,skin:L.skin,hair:L.hair,outfit:L.outfit,pal:L.pal,shoes:L.shoes,extra:L.extra,bag:L.bag,beard:L.beard||'none'},
     x:Math.round(p.x),y:Math.round(p.y),f:p.face!=null?+p.face.toFixed(2):null,ps:p.inCar?'car':(['sit','sitTalk','phone','talk','dance','lie'].includes(p.pose)?p.pose:null),in:inB,car:!!p.inCar,
     mo:(()=>{try{return moodInfo().ic}catch(e){return''}})(),hm:p.home,pr:mpClean(lvlLabel()+' · '+p.prog,40),ty:MP.typing&&Date.now()-MP.typing.t<4000?MP.typing.to:null,wk:S.follow||null,rl:(()=>{const r=relGet();return r?{k:r.ck,n:mpClean(r.nm,16)}:null})(),ix:IS?Math.round(p.ix*100)/100:null,iz:IS?Math.round(p.iz*100)/100:null,mu:MUS.room&&inMyRoom()&&MUS.room.key===inB?{i:MUS.room.i,s:Math.round(MUS.room.s)}:null,out:MP.out}}
-function mpTick(){document.body.classList.toggle('live',sharedClock());if(!MP.lobby)return;
+function mpTick(){document.body.classList.toggle('live',sharedClock());document.body.classList.toggle('noonline',!MP.lobby);if(!MP.lobby)return;
   /* the lobby is only listened to on the menu / campus picker; during play we only write our tiny lobby record */
   {const onMenu=!S||$('game').hidden||MENU==='campus';if(MP.lobby.watch&&MP.lobby.watching()!==onMenu)MP.lobby.watch(onMenu)}
   /* friends see whether I'm online (and where) from a tiny status record, not from the whole lobby */

@@ -114,7 +114,7 @@ function freeWill(){const p=P(),n=p.needs;S.idleT=0;
     const f=foodPlaces()[0];if(f&&p.money>=15){toast(`${simN()} is hungry and heads to ${f.name} (free will). Tap anywhere to take over.`);walkTo(f);S.auto={k:'eat',b:f.id};return}}
   if(n.energy<12){if(IS&&IS.mine){const h=hour();toast(`${simN()} is exhausted and lies down (free will)`);h>=20||h<5?sleep():nap();return}if(!IS){toast(`${simN()} is exhausted and walks home (free will). Tap anywhere to take over.`);walkTo(homeB());S.auto={k:'sleep'};return}}
   if(n.hygiene<12&&IS&&IS.mine&&!IS.bathBusy){toast(`${simN()} can't stand the smell any more and showers (free will)`);doAct('Taking a shower',20,{hygiene:100,fun:5,energy:4})}}
-function hud(){if(!S)return;const p=P();
+function hud(){document.body.classList.toggle('noonline',typeof MP==='undefined'||!MP.lobby);if(!S)return;const p=P();
   $('hDayL').textContent=`${typeof wxIcon==='function'?wxIcon():''}${DAYS[wd()].slice(0,3)} · ${p.grad?'Graduate 🎓':`L${levelOf(p)} · Sem ${S.sy||1}`}`;$('hTime').textContent=hm(S.min);$('hMoney').textContent=cedi(p.money).replace('GH₵','');
   $('hCwa').textContent=day()<=S.semStart?'–':forecast();$('hFr').textContent=friendsN();
   $('needs').innerHTML=[['hunger','🍛','Hunger'],['energy','⚡','Energy'],['social','💬','Social'],['fun','🎉','Fun'],['hygiene','🚿','Hygiene']].map(([k,ic,l])=>{const v=Math.round(p.needs[k]),c=v<15?'#ff5a4e':v<35?'#ffc24a':'#5fe08f';return `<div class="nrow"><span class="nring${v<15?' crit':''}" style="--v:${v};--c:${c}" title="${l} ${v}"><em>${ic}</em></span><span class="nlab"><b>${l}</b><span class="bar"><i style="width:${v}%;background:${c}"></i></span></span></div>`}).join('');

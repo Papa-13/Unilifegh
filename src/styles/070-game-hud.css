@@ -73,3 +73,5 @@ body.playing .app,body.setup .app{max-width:none;gap:0}
 #acts.pie.plist>button{position:static!important;transform:none!important;width:100%;max-width:520px!important;margin:0 auto;text-align:left;white-space:normal;line-height:1.3;font-size:14px!important;padding:11px 15px!important;flex:none}
 #acts.pie.plist>button:first-of-type{margin-top:auto}
 #acts.pie.plist>button#talkBtn{order:-1}
+/* while online play is off: no globe / real-player buttons in the game */
+body.noonline #mpB{display:none!important}

@@ -74,7 +74,7 @@ function relCaught(ck,nm,onm,where,kind,how){
      ['💬 Talk to them first','',()=>{mpSys(ck,`You found out about ${nm} and ${onm} 😠`);setTimeout(()=>mpChatKey(ck),300)}]])}
 
 /* ---- your real friends in the phone's contacts ---- */
-function realContactsHTML(){const fr=Object.entries(MP.friends).filter(([k])=>!MP.blocked[k]);if(!fr.length)return '';const r=relGet();
+function realContactsHTML(){if(!MP.lobby)return '';const fr=Object.entries(MP.friends).filter(([k])=>!MP.blocked[k]);if(!fr.length)return '';const r=relGet();
   return `<p style="margin:4px 0"><strong>🌐 Real friends</strong></p><div class="list">${fr.sort((a,b)=>(r&&b[0]===r.ck)-(r&&a[0]===r.ck)||(romOf(b[0])+(b[1].lv||0))-(romOf(a[0])+(a[1].lv||0))).map(([k,f])=>{const o=onlineInfo(k);
     return `<div class="item"><i class="sw2" style="border-radius:50%;background:${o.on?'#2f9e5a':'#666'}"></i><div class="grow"><b>${esc(threadName(k))}${r&&r.ck===k?' 💍':''}</b><small>${esc(o.txt)} · friendship ${f.lv||20}%${romOf(k)?` · ❤️ ${romOf(k)}%`:''}</small></div><button class="btn sm" data-rc="${esc(k)}">💬 Chat</button></div>`}).join('')}</div>`}
 /* how relationship messages read in a chat */
