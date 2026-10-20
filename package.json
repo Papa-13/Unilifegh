@@ -9,7 +9,9 @@
     "build": "npm run check && vite build",
     "preview": "vite preview",
     "check": "node tools/check.js",
-    "build:artifact": "node tools/build-artifact.js"
+    "build:artifact": "node tools/build-artifact.js",
+    "package:namecheap": "node tools/package-namecheap.js",
+    "start": "node server.js"
   },
   "dependencies": {
     "firebase": "12.19.0",
