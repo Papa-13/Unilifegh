@@ -12,7 +12,7 @@ const ZONES={c:{name:'Commercial Area',col:'#c8a57e',mini:'rgba(230,150,70,.55)'
   y:{name:'Ayigya',col:'#a3956c',mini:'rgba(200,170,120,.45)',town:1,rects:[[2400,0,1600,330]]},
   n:{name:'Kentinkrono',col:'#a3956c',mini:'rgba(200,170,120,.45)',town:1,rects:[[4000,0,5400-4000,330]]},
   a:{name:'Ayeduase',col:'#a89170',mini:'rgba(220,160,110,.45)',town:1,rects:[[4400,330,5400-4400,2470]]},
-  z:{name:'Gaza · Ayeduase New Site',col:'#a89170',mini:'rgba(220,160,110,.45)',town:1,rects:[[4400,2800,5400-4400,4000-2800]]},
+  z:{name:'Appiadu',col:'#a89170',mini:'rgba(220,160,110,.45)',town:1,rects:[[4400,2800,5400-4400,4000-2800]]},
   o:{name:'Boadi',col:'#a89170',mini:'rgba(220,160,110,.45)',town:1,rects:[[3400,2800,1000,4000-2800]]},
   k:{name:'Kotei',col:'#a89170',mini:'rgba(220,160,110,.45)',town:1,rects:[[2000,2800,1400,4000-2800]]},
   g:{name:'Gyinyaase',col:'#a89170',mini:'rgba(220,160,110,.45)',town:1,rects:[[0,1000,600,1800],[0,2800,2000,4000-2800]]}};

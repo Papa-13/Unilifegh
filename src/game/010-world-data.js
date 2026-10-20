@@ -10,7 +10,7 @@ const wx=x=>(x-MW/2)*U, wz=y=>(y-MH/2)*U;
 const MAPR={h:[[330,0,5400],[1000,600,5400],[2150,600,5400],[2800,0,5400],[3400,0,5400]].map(r=>r.map(KMf)),v:[600,2000,3400,4400].map(KMf)};
 const B=[
  /* KNUST-style: Accra–Kumasi Road on top; Tech Junction & Commercial Area (west), Administration, halls and Parade Grounds (centre),
-    Faculty Area (east, next to Ayeduase), sports (south); hostels spread over Bomso, Ayigya, Kentinkrono, Ayeduase, Gaza, Boadi, Kotei and Gyinyaase */
+    Faculty Area (east, next to Ayeduase), sports (south); hostels spread over Bomso, Ayigya, Kentinkrono, Ayeduase, Appiadu, Boadi, Kotei and Gyinyaase */
  {id:'taxi',name:'Tech Junction Taxi Rank',x:680,y:475,w:260,h:150,open:1,c:0x6d665e,door:[810,550],zone:'c'},
  {id:'trotro',name:'Tech Junction Trotro Station',x:980,y:475,w:260,h:170,open:1,c:0x7a7166,door:[1110,560],zone:'c'},
  {id:'terminal',name:'Main Gate Shuttle Terminal',x:1280,y:475,w:320,h:150,open:1,c:0x8a8378,door:[1440,550],zone:'c'},
@@ -63,7 +63,7 @@ const B=[
  {id:'grace',name:'Grace Court · Ayeduase',x:4820,y:475,w:300,h:170,ht:4,c:0xf2e2c8,roof:0x9a5a32,door:[4970,457],zone:'r',home:1},
  {id:'execs',name:'Executive Suites · Ayeduase',x:4500,y:1145,w:300,h:175,ht:6,c:0x2f3a44,roof:0xd9a537,door:[4650,1127],zone:'r',home:1},
  {id:'newsite',name:'New Site Residence · Ayeduase',x:4500,y:2945,w:300,h:170,ht:4.4,c:0xe6efe9,roof:0x2f6b3a,door:[4650,2927],zone:'r',home:1},
- {id:'gaza',name:'Gaza Annex',x:4880,y:2945,w:280,h:165,ht:3.2,c:0xe9d9b8,roof:0x8a4a2a,door:[5020,2927],zone:'r',home:1},
+ {id:'gaza',name:'Appiadu Annex',x:4880,y:2945,w:280,h:165,ht:3.2,c:0xe9d9b8,roof:0x8a4a2a,door:[5020,2927],zone:'r',home:1},
  {id:'peace',name:'Peace Villa · Kotei',x:2900,y:2945,w:300,h:175,ht:4.6,c:0xdfe9ee,roof:0x1f6f8b,door:[3050,2927],zone:'r',home:1},
  {id:'boadi',name:'Boadi Executive Hostel',x:3500,y:2945,w:300,h:175,ht:4.8,c:0xe8e0d0,roof:0x5b3a7a,door:[3650,2927],zone:'r',home:1},
  {id:'gyin',name:'Gyinyaase Gardens',x:700,y:2945,w:300,h:175,ht:3.8,c:0xe9e0d0,roof:0x2f6b3a,door:[850,2927],zone:'r',home:1},
@@ -155,7 +155,7 @@ const HOSTELS=[
  ['heights','Ayeduase Heights','Ayeduase',2,1,'Comfortable, AC and Wi-Fi, on the main Ayeduase road near the Faculty Area.'],
  ['execs','Executive Suites','Ayeduase',3,.95,'Premium apartments in Ayeduase: AC, smart TV, kitchenette, en-suite.'],
  ['newsite','New Site Residence','Ayeduase New Site',1,.92,'Ayeduase New Site: newer and cheaper, but a longer walk to campus.'],
- ['gaza','Gaza Annex','Gaza',0,.85,'Far out in Gaza, cheap and quiet. You will need the shuttle or an okada.'],
+ ['gaza','Appiadu Annex','Appiadu',0,.85,'Far out in Appiadu, cheap and quiet. You will need the shuttle or an okada.'],
  ['sunrise','Sunrise Hostel','Kotei',1,1,'Mid-range in Kotei, surrounded by campus on three sides. Generator and tiled bathrooms.'],
  ['kotei','Kotei Court','Kotei',0,.94,'Budget in Kotei. Shared kitchen, lively compound, chop bars outside.'],
  ['peace','Peace Villa','Kotei',2,.96,'Comfortable in Kotei: AC, Wi-Fi and your own bathroom.'],
