@@ -73,7 +73,7 @@ function startBusy(label,a,dur,done){
     if(/^sit|type/.test(a.pose)){if(seated)q.pose=a.pose}else if(a.spot){q.mesh.position.set(a.spot.x+.75,0,a.spot.z+.1);q.mesh.rotation.y=a.spot.ry??q.mesh.rotation.y;q.pose=a.pose;q.spotY=0}}}
   acts(true)}
 function finishBusy(){const b=S.busy;if(b.game){try{S.lastGame=b.game.end();if(S.lastGame)S.lastGame.kind=b.game.kind}catch(e){console.error(e)}}S.busy=null;const p=P();if(IS&&IS.water)IS.water.visible=false;
-  if(b.buddy){const n=b.buddy;n.mirror=false;n.pose=null;n.spotY=0;n.face=null;n.x=clamp(p.x+22,20,MW-20);n.y=p.y+8;unstick(n);n.path=null;togetherBonus(n,3)}
+  if(b.buddy){const n=b.buddy;n.chatWith=null;if(p.chatWith===n)p.chatWith=null;n.mirror=false;n.pose=null;n.spotY=0;n.face=null;n.x=clamp(p.x+22,20,MW-20);n.y=p.y+8;unstick(n);n.path=null;togetherBonus(n,3)}
   if(b.bq){const q=b.bq;q.pose=b.bq0.pose;q.mesh.position.x=b.bq0.x;q.mesh.position.z=b.bq0.z;if(IS&&IS.buddy)togetherBonus(IS.buddy,3)}
   if(b.a.spot&&p.lying&&IS){p.ix=b.a.spot.x-.95;p.iz=b.a.spot.z-.9}
   p.pose=null;p.lying=false;p.spotY=0;p.face=null;unstick(p);if(!b.cancel){S.timedDone=!!b.timed;try{b.done&&b.done()}finally{S.timedDone=false}}const bn=b.buddy||(b.bq&&IS&&IS.buddy);if(bn&&!$('toast').hidden)toast($('toast').textContent+` · with ${bn.name} 🤝`);acts(true);hud()}
@@ -83,7 +83,8 @@ function busyStep(dt=.016){const b=S.busy;if(!b)return;const p=P();let k;
   else k=Math.min(1,(performance.now()-b.t0)/b.dur);
   if(b.game){b.game.step(Math.min(.05,dt));const hk=b.game.hud();if(hk!==b.hk){b.hk=hk;const el=$('busyL');if(el)el.textContent=hk}}
   if(b.a.path){const q=pathPos(b.a.path,k);p.x=q.x;p.y=q.y}
-  if(b.buddy&&b.a.path){const q=pathPos(b.a.path,Math.max(0,k*(b.a.path==='pool'?1:1)-.03));b.buddy.x=q.x;b.buddy.y=q.y}
+  if(b.buddy&&b.a.path){const q=pathPos(b.a.path,k),q2=pathPos(b.a.path,Math.min(1,k+.004)),tx=q2.x-q.x,ty=q2.y-q.y,l=Math.hypot(tx,ty)||1,off=b.a.path==='pool'?0:19;
+    b.buddy.x=q.x-ty/l*off;b.buddy.y=q.y+tx/l*off;b.buddy.chatWith=p;p.chatWith=b.buddy;if(b.a.path==='pool'){const q3=pathPos(b.a.path,Math.max(0,k-.03));b.buddy.x=q3.x;b.buddy.y=q3.y}}
   if(k>=1)finishBusy()}
 
 /* ---------- real actions indoors: walk to the thing first, then use it ----------

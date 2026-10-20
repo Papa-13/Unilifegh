@@ -108,7 +108,8 @@ function posePerson(c,moving,dt){poseX(c);
   else{g.rotation.x=lean;g.rotation.z=pv.rz;g.position.y=pv.y+(c.spotY||0)}
   const tt=performance.now()/1000,cid=c.id||0;
   if(c.lids){const bt=(tt*.8+cid*1.3)%4.2;const cl=c.lying||bt<.13||(c.expr&&c.expr.e==='sleep');c.lids.forEach(l=>l.rotation.x=cl?.95:-.78)}
-  if(c.head){const hy0=c.lookY!=null?c.lookY:(pose==='idle'||pose==='phone'||pose==='sit')?Math.sin(tt*.35+cid)*.25:0;const hyT=hy!=null?hy:hy0;c.head.rotation.y+=(hyT-c.head.rotation.y)*(dt?Math.min(1,dt*7):1);c.head.rotation.x=hx!=null?hx:pose==='phone'?.35:(pose==='sitWrite'||pose==='type')?.22:c.lying?0:Math.sin(tt*.5+cid)*.03}
+  let chatYaw=null;if(c.chatWith&&c.chatWith.mesh&&!c.lying){const o=c.chatWith.mesh.position,dx=o.x-g.position.x,dz=o.z-g.position.z;if(dx*dx+dz*dz<9){let a=Math.atan2(dx,dz)-g.rotation.y;a=Math.atan2(Math.sin(a),Math.cos(a));const ph=(tt*.3+(c===P()?0:.5))%1;if(ph<.75)chatYaw=clamp(a,-1,1)}}
+  if(c.head){const hy0=chatYaw!=null?chatYaw:c.lookY!=null?c.lookY:(pose==='idle'||pose==='phone'||pose==='sit')?Math.sin(tt*.35+cid)*.25:0;const hyT=hy!=null?hy:hy0;c.head.rotation.y+=(hyT-c.head.rotation.y)*(dt?Math.min(1,dt*7):1);c.head.rotation.x=hx!=null?hx:pose==='phone'?.35:(pose==='sitWrite'||pose==='type')?.22:c.lying?0:Math.sin(tt*.5+cid)*.03}
   if(c.torso){c.torso.scale.y=1+Math.sin(tt*1.7+cid)*.01;const tw=moving&&pose==='walk'?Math.sin(c.phase)*.11:moving&&pose==='run'?Math.sin(c.phase)*.18:0;c.torso.rotation.y+=(tw-c.torso.rotation.y)*(dt?Math.min(1,dt*12):1)}
   faceExpr(c,pose,tt,dt);if(g.userData.ring){const rg=g.userData.ring;rg.visible=!(pose==='swim'||pose==='dive'||c.lying);rg.rotation.x=-Math.PI/2-g.rotation.x;rg.rotation.y=-g.rotation.z;rg.position.y=.03-(g.position.y-(c.spotY||0))}
   setProp(c,c.gest&&c.gest.k==='phonecall'?'phone':pose,t);
@@ -120,6 +121,7 @@ function setExpr(c,e,dur=3){if(!c)return;c.expr={e,end:performance.now()/1000+du
 function faceExpr(c,pose,tt,dt){const F=c.mesh&&c.mesh.userData.face;if(!F)return;
   if(c.expr&&tt>c.expr.end)c.expr=null;
   let e=c.expr?c.expr.e:null;
+  if(!e&&c.chatWith&&c.chatWith.mesh){const mine=c===P();e=(Math.floor(tt/2.6)%2===0)===mine?'talk':'smile'}
   if(!e){if(['dance','dance2','dance3','cheer','sing','hop'].includes(pose))e=pose==='sing'?'sing':'smile';else if(pose==='talk'||pose==='sitTalk')e='talk';else if(c.lying)e='sleep';else if(c.mood!=null)e=c.mood<35?'sad':c.mood>70?'content':null}
   if(c._mouth!=null&&!e)e='eat';
   const talk=e==='talk'||e==='sing'?Math.max(0,Math.sin(tt*11+(c.id||0))*Math.sin(tt*4.3)):0;

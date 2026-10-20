@@ -25,13 +25,20 @@ function updateNPCs(dt){
   const hk=day()*24+Math.floor(hour()),G=campusGrid(),p=P();let budget=4;
   S.npcs.forEach(n=>{
     if(n.mirror){n.hidden=false;return}
-    if(n.with>S.min&&!IS){n._fT=(n._fT||0)-dt;if(n._fT<=0){n._fT=.8;if(dist(n,p)>42){const q=freeSpot(p.x+R(-28,28),p.y+R(-28,28));n.tx=q.x;n.ty=q.y;n.needPath=true}}}
-    else if(n.lastPlan!==hk){n.lastPlan=hk;const np=planFor(n);if(n.hidden&&n.plan&&np.hide&&np.b===n.plan.b){n.plan=np;return}n.plan=np;const b=BID[n.plan.b];
+    if(n.with>S.min&&!IS&&!n.mirror){/* walking with you: stay at your side, keep pace, and chat */
+      const hx=p._hx||0,hy=p._hy||1,side=n._side||(n._side=Math.random()<.5?1:-1),moving=(p.spd||0)>20,
+        sx=p.x-hy*20*side+(moving?hx*6:0),sy=p.y+hx*20*side+(moving?hy*6:0),d=Math.hypot(sx-n.x,sy-n.y);
+      n.fol=1;n.chatWith=p;p.chatWith=n;
+      if(dist(n,p)>220){n._fT=(n._fT||0)-dt;if(n._fT<=0){n._fT=.8;n.tx=p.x;n.ty=p.y;n.needPath=true}}
+      else if(d>4){n.path=[{x:sx,y:sy}];n.needPath=false;n.pose=null;n.folSpd=clamp(Math.max((p.spd||0)*1.12,d*4),40,210)}
+      else{n.path=null;if(!moving){n.pose='talk';n.face=Math.atan2(p.x-n.x,p.y-n.y)}}}
+    else if(n.fol){n.fol=0;n.chatWith=null;if(p.chatWith===n)p.chatWith=null}
+    else if(n.lastPlan!==hk&&!(n.with>S.min)){n.lastPlan=hk;const np=planFor(n);if(n.hidden&&n.plan&&np.hide&&np.b===n.plan.b){n.plan=np;return}n.plan=np;const b=BID[n.plan.b];
       const pt=n.plan.spot?n.plan.spot():b.open?{x:R(b.x+30,b.x+b.w-30),y:R(b.y+30,b.y+b.h-30)}:{x:b.door[0]+R(-50,50),y:b.door[1]+(b.door[1]>b.y?R(6,30):R(-30,-6))};const q=freeSpot(pt.x,pt.y);n.tx=q.x;n.ty=q.y;n.needPath=true}
     if(n.needPath&&budget>0){budget--;n.needPath=false;n.path=findPath(G,n.x,n.y,n.tx,n.ty)}
     const dT=Math.hypot(n.tx-n.x,n.ty-n.y);n.fast=!!n.path&&(dT>1600||(typeof WX!=='undefined'&&WX.ri>.3&&!npcUmb(n)));
     if(n.path&&n.path.length&&S.talkN!==n&&crossWait(n,n.path[0].x,n.path[0].y)){n.pose=null;n.fast=false}
-    else if(n.path&&n.path.length&&S.talkN!==n){const q=n.path[0],d=Math.hypot(q.x-n.x,q.y-n.y),st=(n.fast||n.hurry?150:62)*dt;
+    else if(n.path&&n.path.length&&S.talkN!==n){const q=n.path[0],d=Math.hypot(q.x-n.x,q.y-n.y),st=(n.fol&&n.folSpd?n.folSpd:n.fast||n.hurry?150:62)*dt;
       if(d<=st){n.x=q.x;n.y=q.y;n.path.shift();if(!n.path.length)n.path=null}
       else if(!slideMove(n,(q.x-n.x)/d*st,(q.y-n.y)/d*st)){n.stuck=(n.stuck||0)+dt;if(n.stuck>1.2){n.stuck=0;n.path=null;n.needPath=true}}}
     else if(!n.path&&!n.needPath&&n.amb!==n.lastPlan&&S.talkN!==n){n.amb=n.lastPlan;n.pose=pick(ambientPose(n.plan.b));n.face=R(0,6.28)}

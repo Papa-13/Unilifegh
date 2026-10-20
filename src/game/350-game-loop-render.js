@@ -117,7 +117,7 @@ function update(dt){
     let dx=0,dy=0,last=0;
     if(kb){const l=Math.hypot(vx,vy);dx=vx/l;dy=vy/l}
     else if(p.path&&p.path.length){const q=p.path[0],d=Math.hypot(q.x-p.x,q.y-p.y);if(d<.5){p.path.shift();if(!p.path.length){p.path=null;p.target=null}}else if(crossWait(p,q.x,q.y)){if(!p._cw){p._cw=1;toast('👀 Checking for cars before crossing…')}p.spd=Math.max(0,(p.spd||0)-mx*dt*6)}else{p._cw=0;dx=(q.x-p.x)/d;dy=(q.y-p.y)/d;last=d}}
-    if(dx||dy){p.spd=Math.min(mx,(p.spd||0)+mx*dt*4);const st=p.spd*dt;
+    if(dx||dy){p._hx=dx;p._hy=dy;p.spd=Math.min(mx,(p.spd||0)+mx*dt*4);const st=p.spd*dt;
       if(last&&st>=last){p.x=p.path[0].x;p.y=p.path[0].y;p.path.shift();if(!p.path.length){p.path=null;p.target=null}}
       else if(!slideMove(p,dx*st,dy*st)&&!kb){const V=vehAt(p.x+dx*12,p.y+dy*12,7);p.vw=V?(p.vw||0)+dt:0;if(V&&p.vw>.6&&!p._dt){const q=p.path&&p.path[0],dt2=vehDetour(p,V,q?q.x:p.x,q?q.y:p.y);if(dt2){p.path.unshift(...dt2);p._dt=1;p.vw=0;setTimeout(()=>p._dt=0,1500)}}if(!V||p.vw>8||(S.ride&&S.ride.phase==='board')){p.vw=0;p.path=null;p.target=null}}else p.vw=0}else p.spd=0;
     p.x=clamp(p.x,10,MW-10);p.y=clamp(p.y,10,MH-10);pushOut(p)}
