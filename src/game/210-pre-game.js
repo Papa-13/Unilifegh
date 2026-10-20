@@ -45,7 +45,7 @@ function hostelPick(next){
   document.body.classList.remove('playing');document.body.classList.add('setup');panelMode('form');$('game').hidden=true;$('top').hidden=true;$('story').hidden=true;$('sheet').hidden=true;$('panel').hidden=false;
   const bg=BG[next?P().bg:PRE.bg],have=next?P().money:bg.momo-(PRE.feePaying?3500:0);
   let hi=HOSTELS.findIndex(h=>h.id==='lodge');if(hi<0)hi=0;const TOWNS=[...new Set(HOSTELS.map(h=>h.town))];const draw=()=>{const h=HOSTELS[hi];
-  $('panel').innerHTML=`<div class="scr">${next?'':stepBar(4)}<h2 class="it">${next?`Level ${levelOf(P())+(S.nextKind==='newyear'?100:0)}: choose a hostel`:'Choose a hostel'}</h2>
+  $('panel').innerHTML=`<div class="scr hscr">${next?'':stepBar(4)}<h2 class="it">${next?`Level ${levelOf(P())+(S.nextKind==='newyear'?100:0)}: choose a hostel`:'Choose a hostel'}</h2>
    <div class="sum"><span>Family pays <b>${cedi(bg.fund)}</b></span><span>Your MoMo <b>${cedi(have)}</b></span><span>Keep at least <b>${cedi(MINPOCKET)}</b></span></div>
    <p style="font-size:13px;opacity:.85;margin:0 0 4px">Like at KNUST, most students live in the towns around campus. Closer to lectures costs more.</p>
    <div class="htabs" style="margin-bottom:6px">${TOWNS.map(t=>`<button class="pick" data-town="${esc(t)}" aria-pressed="${t===h.town}"><b>📍 ${esc(t)}</b><small>${HOSTELS.filter(x=>x.town===t).length} place${HOSTELS.filter(x=>x.town===t).length>1?'s':''}</small></button>`).join('')}</div>

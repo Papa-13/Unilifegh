@@ -67,3 +67,9 @@ body.playing .app,body.setup .app{max-width:none;gap:0}
 .needcard{top:calc(var(--sat) + 108px)!important;z-index:7}
 .nc{background:rgba(24,19,16,.82)!important;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-radius:18px!important}
 .fade{border-radius:0!important;z-index:9}
+/* actions on phones: a scrolling list at the bottom of the screen (tap outside to close) */
+#acts.pie.plist{display:flex!important;flex-direction:column;align-items:stretch;gap:8px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+  padding:calc(var(--sat) + 70px) calc(14px + var(--sar)) calc(var(--sab) + 92px) calc(14px + var(--sal));background:linear-gradient(180deg,rgba(10,6,4,.15),rgba(10,6,4,.78) 55%)}
+#acts.pie.plist>button{position:static!important;transform:none!important;width:100%;max-width:520px!important;margin:0 auto;text-align:left;white-space:normal;line-height:1.3;font-size:14px!important;padding:11px 15px!important;flex:none}
+#acts.pie.plist>button:first-of-type{margin-top:auto}
+#acts.pie.plist>button#talkBtn{order:-1}

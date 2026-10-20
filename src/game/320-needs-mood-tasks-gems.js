@@ -132,9 +132,11 @@ function pieLayout(){const A=$('acts'),it=$('interact');if(!A||!it)return;const 
   const items=[...A.children].filter(b=>b.tagName==='BUTTON'&&b.id!=='phoneBtn'&&b.id!=='emoBtn');
   if(WIDEV&&!status){PIE=false;A.classList.remove('pie');A.classList.toggle('docked',!!S&&!S.paused&&items.length>0);it.hidden=true;[...A.children].forEach(b=>{if(b.style)b.style.cssText=''});const hb=A.querySelector('.pie-hub');if(hb)hb.remove();return}
   A.classList.remove('docked');
-  if(status||!S||S.paused&&!PIE){if(status)PIE=false;A.classList.remove('pie');it.hidden=status||!items.length;[...A.children].forEach(b=>{b.style.cssText=''});return}
+  if(status||!S||S.paused&&!PIE){if(status)PIE=false;A.classList.remove('pie','plist');it.hidden=status||!items.length;[...A.children].forEach(b=>{b.style.cssText=''});return}
   it.hidden=!items.length;$('intN').textContent=items.filter(b=>!b.disabled).length||'';const tk=items.find(b=>b.id==='talkBtn');$('intL').textContent=tk?tk.textContent.replace('Talk to ','💬 '):'Actions';
   A.classList.toggle('pie',PIE);if(!PIE){items.forEach(b=>b.style.cssText='');const h=A.querySelector('.pie-hub');if(h)h.remove();return}
+  /* phones: a tidy scrolling list from the bottom instead of a ring of bubbles (bubbles overlap when there are many actions) */
+  {const R0=$('game').getBoundingClientRect(),narrow=R0.width<700||items.length>12;A.classList.toggle('plist',narrow);if(narrow){items.forEach((b,i)=>b.style.cssText=`animation-delay:${Math.min(i,10)*18}ms`);const h=A.querySelector('.pie-hub');if(h)h.remove();return}}
   const R=$('game').getBoundingClientRect(),W=R.width,H=R.height;let cx=W/2,cy=H*.46;{const v=P().mesh.position.clone();v.y+=1.1;v.project(IS?IS.cam:camera);if(Math.abs(v.x)<1.2&&Math.abs(v.y)<1.2){cx=clamp((v.x+1)/2*W,W*.4,W*.6);cy=clamp((1-v.y)/2*H,H*.3,H*.62)}}A.style.setProperty('--px',cx+'px');A.style.setProperty('--py',cy+'px');
   let hub=A.querySelector('.pie-hub');if(!hub){hub=document.createElement('div');hub.className='pie-hub';A.appendChild(hub)}const p=P();hub.innerHTML=`<span class="avatar" style="background:linear-gradient(145deg,${PAL[p.look.pal].a},${PAL[p.look.pal].b})"><i>✦</i></span>`;hub.style.left=cx+'px';hub.style.top=cy+'px';
   const half=Math.ceil(items.length/2),Lc=items.slice(0,half),Rc=items.slice(half),rowH=Math.max(34,Math.min(50,(H-250)/Math.max(1,half))),fs=rowH<40?12:13.5,mw=Math.max(120,cx-58);

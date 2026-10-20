@@ -43,3 +43,9 @@ body.setup #panel.bleed{padding:0}
 .feats{display:flex;flex-wrap:wrap;gap:3px}.feats i{font-style:normal;font-size:10.5px;background:rgba(255,255,255,.07);border-radius:6px;padding:2px 5px;color:#ddd2c5}
 .hcard .room .left{font-size:11px}
 @media (max-height:700px){.hblurb{-webkit-line-clamp:2}.cas-opts{height:108px}.slot{min-height:38px}}
+/* hostel picker: the whole screen scrolls on phones instead of squeezing the cards on top of each other */
+.scr.hscr{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:24px}
+.scr.hscr>*,.scr.hscr .hcard>*{flex-shrink:0}
+.scr.hscr .hcard{min-height:auto}
+@media (max-width:420px){.hcard .rooms{grid-template-columns:1fr!important}.htabs .pick{flex:1 1 30%}}
+.htabs .pick[aria-pressed="true"] small{color:#5a3a06!important}
