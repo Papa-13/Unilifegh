@@ -12,29 +12,63 @@ const P_SEG=[[PC_,0,PW_-PC_,0],[PC_,PL_,PW_-PC_,PL_],[0,PC_,0,PL_/2-PSM_],[0,PL_
   [PC_,0,PC_-PJ_,-PJ_],[0,PC_,-PJ_,PC_-PJ_],[PW_-PC_,0,PW_-PC_+PJ_,-PJ_],[PW_,PC_,PW_+PJ_,PC_-PJ_],[PC_,PL_,PC_-PJ_,PL_+PJ_],[0,PL_-PC_,-PJ_,PL_-PC_+PJ_],[PW_-PC_,PL_,PW_-PC_+PJ_,PL_+PJ_],[PW_,PL_-PC_,PW_+PJ_,PL_-PC_+PJ_],
   [0,PL_/2-PSM_,-PJ_,PL_/2-PSM_+1.3],[0,PL_/2+PSM_,-PJ_,PL_/2+PSM_-1.3],[PW_,PL_/2-PSM_,PW_+PJ_,PL_/2-PSM_+1.3],[PW_,PL_/2+PSM_,PW_+PJ_,PL_/2+PSM_-1.3]];
 const P_PK=[[-2.1,-2.1,4.3],[PW_+2.1,-2.1,4.3],[-3.1,PL_/2,4.5],[PW_+3.1,PL_/2,4.5],[-2.1,PL_+2.1,4.3],[PW_+2.1,PL_+2.1,4.3]];
-/* one physics step for a set of balls (also used by the opponent to test shots) */
+/* one physics step for a set of balls (also used by the opponent to test shots).
+   Each ball has linear velocity (vx,vy) and spin (wx,wy,wz) in a frame where z points into the table.
+   A struck ball first SLIDES; cloth friction turns that into natural ROLL (about 5/7 of the speed for a centre hit),
+   which is what makes stun, follow and draw work for real. Side spin (wz) bites on the cushions. */
+const P_AS=.0026,P_K=5/(2*PR_);
 function poolStep(B,ev){const R=PR_,lb=B.filter(b=>!b.in);let mv=false;
-  for(const b of lb){if(!b.vx&&!b.vy)continue;b.x+=b.vx;b.y+=b.vy;if(b.x>R+3.5&&b.x<PW_-R-3.5&&b.y>R+3.5&&b.y<PL_-R-3.5)continue;
+  for(const b of lb){if(!b.vx&&!b.vy)continue;b.x+=b.vx;b.y+=b.vy;if(ev.vis){b.dist=(b.dist||0)+Math.hypot(b.vx,b.vy)}if(b.x>R+3.5&&b.x<PW_-R-3.5&&b.y>R+3.5&&b.y<PL_-R-3.5)continue;
     for(const s of P_SEG){const dx=s[2]-s[0],dy=s[3]-s[1],l2=dx*dx+dy*dy,t=Math.max(0,Math.min(1,((b.x-s[0])*dx+(b.y-s[1])*dy)/l2)),cx=s[0]+t*dx,cy=s[1]+t*dy,ex=b.x-cx,ey=b.y-cy,d=Math.hypot(ex,ey);
-      if(d<R&&d>1e-6){const nx=ex/d,ny=ey/d,vn=b.vx*nx+b.vy*ny;b.x=cx+nx*R;b.y=cy+ny*R;if(vn<0){const tx=-ny,ty=nx,vt=b.vx*tx+b.vy*ty;let nvt=vt*.95;
-        if(b.id===0&&ev.side&&!ev.sideDone){nvt+=ev.side*Math.abs(vn)*.55;ev.sideDone=true}b.vx=-vn*.7*nx+nvt*tx;b.vy=-vn*.7*ny+nvt*ty;ev.hit&&ev.hit('rail',-vn);ev.rails=(ev.rails||0)+1}}}
-    for(let k=0;k<6;k++){const p=P_PK[k];if(Math.hypot(b.x-p[0],b.y-p[1])<p[2]){b.in=true;b.pk=k;b.vx=b.vy=0;ev.potted.push(b.id);ev.pk[b.id]=k;ev.hit&&ev.hit('pocket',1);break}}
-    if(!b.in&&(b.x<-3.5||b.x>PW_+3.5||b.y<-3.5||b.y>PL_+3.5)){let bk=0,bd=1e9;P_PK.forEach((p,k)=>{const d=Math.hypot(b.x-p[0],b.y-p[1]);if(d<bd){bd=d;bk=k}});b.in=true;b.pk=bk;b.vx=b.vy=0;ev.potted.push(b.id);ev.pk[b.id]=bk;ev.hit&&ev.hit('pocket',1)}}
+      if(d<R&&d>1e-6){const nx=ex/d,ny=ey/d,vn=b.vx*nx+b.vy*ny;b.x=cx+nx*R;b.y=cy+ny*R;if(vn<0){const tx=-ny,ty=nx,vt=b.vx*tx+b.vy*ty,e=.86-Math.min(.14,-vn*.08);
+        const nvt=vt*.93+(b.wz||0)*R*.42;b.wz=(b.wz||0)*.55;b.vx=-vn*e*nx+nvt*tx;b.vy=-vn*e*ny+nvt*ty;
+        /* the cushion grabs the ball high: kill some roll so it slides off */b.wx=(b.wx||0)*.2;b.wy=(b.wy||0)*.2;ev.hit&&ev.hit('rail',-vn);ev.rails=(ev.rails||0)+1}}}
+    for(let k=0;k<6;k++){const p=P_PK[k];if(Math.hypot(b.x-p[0],b.y-p[1])<p[2]){b.in=true;b.pk=k;b.vx=b.vy=b.wx=b.wy=b.wz=0;ev.potted.push(b.id);ev.pk[b.id]=k;ev.hit&&ev.hit('pocket',1);break}}
+    if(!b.in&&(b.x<-3.5||b.x>PW_+3.5||b.y<-3.5||b.y>PL_+3.5)){let bk=0,bd=1e9;P_PK.forEach((p,k)=>{const d=Math.hypot(b.x-p[0],b.y-p[1]);if(d<bd){bd=d;bk=k}});b.in=true;b.pk=bk;b.vx=b.vy=b.wx=b.wy=b.wz=0;ev.potted.push(b.id);ev.pk[b.id]=bk;ev.hit&&ev.hit('pocket',1)}}
   for(let i=0;i<lb.length;i++){const a=lb[i];if(a.in)continue;for(let j=i+1;j<lb.length;j++){const b=lb[j];if(b.in)continue;const dx=b.x-a.x,dy=b.y-a.y;if(Math.abs(dx)>2*R||Math.abs(dy)>2*R)continue;const d=Math.hypot(dx,dy);
     if(d<2*R&&d>1e-6){const nx=dx/d,ny=dy/d,ov=(2*R-d)/2;a.x-=nx*ov;a.y-=ny*ov;b.x+=nx*ov;b.y+=ny*ov;const vn=(a.vx-b.vx)*nx+(a.vy-b.vy)*ny;
-      if(vn>0){const k=vn*.975,cueA=a.id===0,cueB=b.id===0,sp0=cueA?Math.hypot(a.vx,a.vy):cueB?Math.hypot(b.vx,b.vy):0;a.vx-=k*nx;a.vy-=k*ny;b.vx+=k*nx;b.vy+=k*ny;ev.hit&&ev.hit('ball',vn);
-        if(ev.first==null&&(cueA||cueB)){ev.first=cueA?b.id:a.id;const c=cueA?a:b;/* follow / draw */if(ev.fol){c.vx+=ev.dx*ev.fol*.62*sp0;c.vy+=ev.dy*ev.fol*.62*sp0}}}}}}
-  for(const b of lb){if(b.in||(!b.vx&&!b.vy))continue;const s=Math.hypot(b.vx,b.vy),s2=s-.0019-s*.0007;if(s2<=0){b.vx=b.vy=0}else{b.vx*=s2/s;b.vy*=s2/s;mv=true}}
+      if(vn>0){const k=vn*.975;a.vx-=k*nx;a.vy-=k*ny;b.vx+=k*nx;b.vy+=k*ny;ev.hit&&ev.hit('ball',vn);
+        /* a little collision-induced throw: the object ball picks up a touch of the cue ball's sideways motion */
+        const tx=-ny,ty=nx,rt=(a.vx-b.vx)*tx+(a.vy-b.vy)*ty,th=Math.max(-.035,Math.min(.035,rt*.03))*vn;b.vx+=tx*th;b.vy+=ty*th;
+        if(ev.first==null&&(a.id===0||b.id===0))ev.first=a.id===0?b.id:a.id}}}}
+  for(const b of lb){if(b.in)continue;let wx=b.wx||0,wy=b.wy||0,wz=b.wz||0;
+    /* slip of the contact point on the cloth */const ux=b.vx+R*wy,uy=b.vy-R*wx,us=Math.hypot(ux,uy);
+    if(us>1e-4){if(us<=3.5*P_AS){/* friction finishes the job: snap to rolling */b.vx-=ux/3.5;b.vy-=uy/3.5;wx=b.vy/R;wy=-b.vx/R}
+      else{const hx=ux/us,hy=uy/us;b.vx-=P_AS*hx;b.vy-=P_AS*hy;wx+=P_K*P_AS*hy;wy-=P_K*P_AS*hx}mv=true}
+    else{const s=Math.hypot(b.vx,b.vy);if(s>0){const s2=s-.00062-s*.0003;if(s2<=0){b.vx=b.vy=0;wx=wy=0}else{b.vx*=s2/s;b.vy*=s2/s;wx=b.vy/R;wy=-b.vx/R;mv=true}}}
+    if(wz){wz=Math.abs(wz)<.0015?0:wz*.997-Math.sign(wz)*.0002;if(wz)mv=true}
+    if(ev.vis&&b.m){/* turn the ball's own axes by its spin so numbers and stripes really roll */const m=b.m;for(let c=0;c<9;c+=3){const x=m[c],y=m[c+1],z=m[c+2];m[c]=x+(wy*z-wz*y);m[c+1]=y+(wz*x-wx*z);m[c+2]=z+(wx*y-wy*x)}
+      let l=Math.hypot(m[0],m[1],m[2]);m[0]/=l;m[1]/=l;m[2]/=l;let dt=m[0]*m[3]+m[1]*m[4]+m[2]*m[5];m[3]-=dt*m[0];m[4]-=dt*m[1];m[5]-=dt*m[2];l=Math.hypot(m[3],m[4],m[5]);m[3]/=l;m[4]/=l;m[5]/=l;
+      m[6]=m[1]*m[5]-m[2]*m[4];m[7]=m[2]*m[3]-m[0]*m[5];m[8]=m[0]*m[4]-m[1]*m[3]}
+    b.wx=wx;b.wy=wy;b.wz=wz}
   return mv}
-function poolNewEv(ang,spin){return{first:null,potted:[],pk:{},dx:Math.cos(ang),dy:Math.sin(ang),fol:spin?spin.f:0,side:spin?spin.s:0,sideDone:false,rails:0}}
-function poolShoot(B,ang,pw){const c=B[0],v=.1+pw*1.5;c.vx=Math.cos(ang)*v;c.vy=Math.sin(ang)*v}
+function poolNewEv(){return{first:null,potted:[],pk:{},rails:0}}
+/* the cue strike: speed from power; tip offset gives top/back spin (f) and side spin (s) */
+function poolShoot(B,ang,pw,spin){const c=B[0],v=.1+Math.pow(pw,1.25)*2,dx=Math.cos(ang),dy=Math.sin(ang),R=PR_,f=spin?spin.f:0,s=spin?spin.s:0;c.vx=dx*v;c.vy=dy*v;
+  const w=1.25*v/R;c.wx=dy*w*f;c.wy=-dx*w*f;c.wz=-w*s*.9}
 
+/* ---------- playing levels ---------- */
+const POOL_TIERS=[
+  {nm:'Rookie',ic:'🙂',who:['Kojo','Esi','Yaw'],sd:.012,spin:false,safe:false,cands:3,stake:0,lvl:1,guide:1,why:'Learning the game. Misses a lot.'},
+  {nm:'Regular',ic:'😎',who:['Nana Yaw','Selasi','Adwoa'],sd:.0075,spin:true,safe:false,cands:5,stake:0,lvl:2,guide:1,why:'Plays every week. Uses some spin.'},
+  {nm:'Hustler',ic:'😏',who:['Fiifi','Abena','Kwesi'],sd:.005,spin:true,safe:true,cands:6,stake:20,lvl:3,guide:1,why:'Plays for money. Plays safeties when there\'s nothing on.'},
+  {nm:'Shark',ic:'🦈',who:['Kwame "Cue" Mensah','Akua "Shark" Owusu'],sd:.0032,spin:true,safe:true,cands:8,stake:50,lvl:5,guide:.55,why:'Rarely misses. Short guide line (Pro rules).'},
+  {nm:'Campus Champion',ic:'👑',who:['Nana "The Professor" Boateng'],sd:.002,spin:true,safe:true,cands:10,stake:100,lvl:7,guide:.3,why:'The best on campus. Very short guide line, no deflection lines.'}];
+const POOL_LV=[0,150,400,800,1400,2200,3200,4500,6000,8000,10500,13500];
+function poolLevel(){const xp=S.poolXP||0;let l=0;while(l<POOL_LV.length&&xp>=POOL_LV[l])l++;const lo=POOL_LV[l-1]||0,hi=POOL_LV[l]||lo+3000;return{l,xp,lo,hi,pct:Math.min(100,(xp-lo)/(hi-lo)*100)}}
+function poolHall(fee){const lv=poolLevel(),rec=S.poolRec||{w:0,l:0};openSheet();
+  $('sheetIn').innerHTML=`<div class="eyebrow">🎱 Pool hall</div><h3>Level ${lv.l} pool player</h3>
+    <div class="bar" style="margin:6px 0"><i style="width:${lv.pct}%"></i></div><small>${lv.xp} XP · next level at ${lv.hi} · record ${rec.w}W ${rec.l}L</small>
+    <div class="list" style="margin-top:10px">${POOL_TIERS.map((T,i)=>{const lock=lv.l<T.lvl,beat=(S.poolBeat||0)>i;return `<div class="item${lock?' dim':''}"><span style="font-size:24px">${lock?'🔒':T.ic}</span><div class="grow"><b>${T.nm}${beat?' ✓':''}</b><small>${T.why}${T.stake?` · stake ${cedi(T.stake)}`:''}${lock?` · unlocks at level ${T.lvl}`:''}</small></div>${lock?'':`<button class="btn sm" data-t="${i}">Play</button>`}</div>`}).join('')}</div>
+    ${fee?`<p style="font-size:12px;opacity:.7">Table fee ${cedi(fee)} a game.</p>`:''}<button class="ghost sm" id="phBye">Leave</button>`;
+  $('phBye').onclick=closeSheet;$('sheetIn').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const T=POOL_TIERS[+b.dataset.t],cost=T.stake+(fee||0);
+    if(P().money<cost)return toast(`You need ${cedi(cost)} on MoMo for that game.`);P().money-=cost;hud();closeSheet();poolGame(null,{who:pick(T.who),tier:+b.dataset.t,stake:T.stake,theyBreak:Math.random()<.5})})}
 function poolGame(nOpt,opt){opt=opt||{};const n=nOpt===undefined?mgOpponent():nOpt,who=n?n.name.split(' ')[0]:(opt.who||'Kojo');
   try{closeSheet()}catch(e){}S.paused=true;
   const W=PW_,L=PL_,R=PR_,RAIL=8,KITCHEN=L*.75;
-  const B=[];const add=(id,x,y)=>B.push({id,x,y,vx:0,vy:0,in:false});add(0,W/2,L*.8);
+  const B=[];const add=(id,x,y)=>{const a=Math.random()*6.28,c=Math.cos(a),s2=Math.sin(a);B.push({id,x,y,vx:0,vy:0,wx:0,wy:0,wz:0,in:false,m:[c,s2,0,s2,-c,0,0,0,-1]})};add(0,W/2,L*.8);
   [[1],[9,2],[10,8,3],[11,4,12,5],[6,13,14,7,15]].forEach((row,i)=>row.forEach((id,j)=>add(id,W/2+(j-i/2)*(2*R+.03)+(Math.random()-.5)*.03,L*.25-i*(2*R*.866+.03))));
-  const G={turn:opt.theyBreak?1:0,grp:[null,null],brk:true,moving:false,ang:-Math.PI/2,pw:0,spin:{f:0,s:0},bih:true,over:false,dead:false,msg:'',call:null,clock:0,aiSd:.0035+Math.random()*.005,ev:null};
+  const G={turn:opt.theyBreak?1:0,grp:[null,null],brk:true,moving:false,ang:-Math.PI/2,pw:0,spin:{f:0,s:0},bih:true,over:false,dead:false,msg:'',call:null,clock:0,aiSd:0,ev:null};const TI=opt.tier!=null?opt.tier:1,T=POOL_TIERS[TI];G.aiSd=T.sd*(.85+Math.random()*.3);G.tier=TI;
   window._pool=G;G.B=B;G._shoot=(a,p)=>shoot(a,p,G.spin);
   const cue=()=>B[0],live=()=>B.filter(b=>!b.in),grpOf=id=>id<8?'s':id>8?'t':'8',GN={s:'Solids',t:'Stripes'};
   const left=pl=>G.grp[pl]?B.filter(b=>!b.in&&b.id&&b.id!==8&&grpOf(b.id)===G.grp[pl]).length:7;
@@ -50,9 +84,9 @@ function poolGame(nOpt,opt){opt=opt||{};const n=nOpt===undefined?mgOpponent():nO
   /* ---------- DOM ---------- */
   const ov=document.createElement('div');ov.id='poolX';document.body.appendChild(ov);
   const ini=s=>esc(String(s||'?').trim()[0]||'?').toUpperCase();
-  ov.innerHTML=`<div class="px-top"><div class="px-pl" id="pxP0"><div class="px-av">${ini(P().name||'You')}</div><div class="px-info"><b>You</b><div class="px-balls" id="pxB0"></div><div class="px-tm"><i id="pxT0"></i></div></div></div>
+  ov.innerHTML=`<div class="px-top"><div class="px-pl" id="pxP0"><div class="px-av">${ini(P().name||'You')}</div><div class="px-info"><b>You</b> <small class="px-lv">Lv ${poolLevel().l}</small><div class="px-balls" id="pxB0"></div><div class="px-tm"><i id="pxT0"></i></div></div></div>
     <div class="px-mid8">${opt.stake?`<span>💰 ${cedi(opt.stake*2)}</span>`:'<span>8-BALL</span>'}</div>
-    <div class="px-pl them" id="pxP1"><div class="px-info"><b>${esc(who)}</b><div class="px-balls" id="pxB1"></div><div class="px-tm"><i id="pxT1"></i></div></div><div class="px-av">${ini(who)}</div></div><button class="px-x" id="pxX">✕</button></div>
+    <div class="px-pl them" id="pxP1"><div class="px-info"><b>${esc(who)}</b> <small class="px-lv">${n?'Friend':T.ic+' '+T.nm}</small><div class="px-balls" id="pxB1"></div><div class="px-tm"><i id="pxT1"></i></div></div><div class="px-av">${ini(who)}</div></div><button class="px-x" id="pxX">✕</button></div>
     <div class="px-main"><div class="px-pow" id="pxPow"><div class="px-pfill" id="pxPf"></div><div class="px-pcue" id="pxPc"></div><span>PULL</span></div>
       <div class="px-tab"><canvas id="pxCv"></canvas><div class="px-msg" id="pxMsg"></div></div>
 </div>
@@ -68,10 +102,19 @@ function poolGame(nOpt,opt){opt=opt||{};const n=nOpt===undefined?mgOpponent():nO
   const rr=(x,y,w,h,r)=>{ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()};
   const rayHit=(ang)=>{const c=cue(),dx=Math.cos(ang),dy=Math.sin(ang);let tb=null,tm=1e9;live().forEach(b=>{if(b===c)return;const fx=b.x-c.x,fy=b.y-c.y,t=fx*dx+fy*dy;if(t<=0)return;const d2=fx*fx+fy*fy-t*t,r2=4*R*R;if(d2>r2)return;const th=t-Math.sqrt(r2-d2);if(th<tm){tm=th;tb=b}});
     if(!tb){const tx=dx>0?(W-R-c.x)/dx:dx<0?(R-c.x)/dx:1e9,ty=dy>0?(L-R-c.y)/dy:dy<0?(R-c.y)/dy:1e9;tm=Math.min(tx,ty)}return{tb,tm,gx:c.x+dx*tm,gy:c.y+dy*tm,dx,dy}};
-  const ballDraw=(b,x,y,r)=>{const col=POOL_COL[b.id>8?b.id-8:b.id];ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(x+r*.25,y+r*.35,r,r*.92,0,0,7);ctx.fill();
-    ctx.save();ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.clip();ctx.fillStyle=b.id>8?'#f7f4ea':col;ctx.fillRect(x-r,y-r,2*r,2*r);if(b.id>8){ctx.fillStyle=col;ctx.fillRect(x-r,y-r*.56,2*r,r*1.12)}
-    if(b.id){ctx.fillStyle='#fbfaf5';ctx.beginPath();ctx.arc(x,y,r*.46,0,7);ctx.fill();if(r>=4.5){ctx.fillStyle='#111';ctx.font=`800 ${Math.max(6,Math.round(r*.66))}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.id,x,y+.4)}}
-    const g=ctx.createRadialGradient(x-r*.4,y-r*.45,r*.1,x,y,r*1.05);g.addColorStop(0,'rgba(255,255,255,.55)');g.addColorStop(.35,'rgba(255,255,255,0)');g.addColorStop(1,'rgba(0,0,0,.42)');ctx.fillStyle=g;ctx.fillRect(x-r,y-r,2*r,2*r);ctx.restore()};
+  /* a ball drawn from its real 3D orientation: stripes and numbers roll and tumble as it moves */
+  const capFill=(x,y,r,p,th,col)=>{const ct=Math.cos(th),st=Math.sin(th),ax=Math.abs(p[0])<.9?[1,0,0]:[0,1,0];let u1=[p[1]*ax[2]-p[2]*ax[1],p[2]*ax[0]-p[0]*ax[2],p[0]*ax[1]-p[1]*ax[0]];const l=Math.hypot(...u1);u1=u1.map(v=>v/l);
+    const u2=[p[1]*u1[2]-p[2]*u1[1],p[2]*u1[0]-p[0]*u1[2],p[0]*u1[1]-p[1]*u1[0]],pts=[];let front=0;
+    for(let i=0;i<28;i++){const a=i/28*Math.PI*2,c=Math.cos(a)*st,s=Math.sin(a)*st,qx=p[0]*ct+u1[0]*c+u2[0]*s,qy=p[1]*ct+u1[1]*c+u2[1]*s,qz=p[2]*ct+u1[2]*c+u2[2]*s;
+      if(qz<0){front++;pts.push(qx,qy)}else{const m=Math.hypot(qx,qy)||1;pts.push(qx/m,qy/m)}}
+    if(!front)return;ctx.fillStyle=col;ctx.beginPath();for(let i=0;i<pts.length;i+=2)ctx[i?'lineTo':'moveTo'](x+pts[i]*r,y+pts[i+1]*r);ctx.closePath();ctx.fill()};
+  const ballDraw=(b,x,y,r)=>{const id=b.id,col=POOL_COL[id>8?id-8:id],m=b.m||[1,0,0,0,-1,0,0,0,-1];
+    ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(x+r*.22,y+r*.32,r*.98,r*.9,0,0,7);ctx.fill();
+    ctx.save();ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.clip();ctx.fillStyle=id===0?'#f7f4ea':col;ctx.fillRect(x-r,y-r,2*r,2*r);
+    if(id>8){capFill(x,y,r,[m[0],m[1],m[2]],.96,'#f7f4ea');capFill(x,y,r,[-m[0],-m[1],-m[2]],.96,'#f7f4ea')}
+    if(id){const nv=[m[6],m[7],m[8]];capFill(x,y,r,nv,.5,'#fbfaf5');const d=-nv[2];
+      if(d>.25&&r>=4.5){ctx.save();ctx.translate(x+nv[0]*r,y+nv[1]*r);ctx.rotate(Math.atan2(m[1],m[0]));const sc=Math.sqrt(d);ctx.scale(sc,sc);ctx.globalAlpha=Math.min(1,(d-.25)*3);ctx.fillStyle='#111';ctx.font=`800 ${Math.max(6,Math.round(r*.66))}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(id,0,.4);ctx.restore()}}
+    const g=ctx.createRadialGradient(x-r*.4,y-r*.45,r*.08,x,y,r*1.05);g.addColorStop(0,'rgba(255,255,255,.6)');g.addColorStop(.3,'rgba(255,255,255,0)');g.addColorStop(.75,'rgba(0,0,0,.08)');g.addColorStop(1,'rgba(0,0,0,.45)');ctx.fillStyle=g;ctx.fillRect(x-r,y-r,2*r,2*r);ctx.restore()};
   function draw(){if(G.dead)return;const tw=(W+2*RAIL)*k,th=(L+2*RAIL)*k;ctx.clearRect(0,0,tw,th);
     let g=ctx.createLinearGradient(0,0,tw,0);g.addColorStop(0,'#4a2a14');g.addColorStop(.5,'#6b3e1e');g.addColorStop(1,'#4a2a14');ctx.fillStyle=g;rr(0,0,tw,th,7*k);ctx.fill();
     ctx.fillStyle='#e9d7a8';[[W*.25,-RAIL/2],[W*.5,-RAIL/2],[W*.75,-RAIL/2],[W*.25,L+RAIL/2],[W*.5,L+RAIL/2],[W*.75,L+RAIL/2]].concat([1,2,3,5,6,7].flatMap(i=>[[-RAIL/2,L*i/8],[W+RAIL/2,L*i/8]])).forEach(([x,y])=>{ctx.beginPath();ctx.arc(X(x),Y(y),.75*k,0,7);ctx.fill()});
@@ -82,9 +125,9 @@ function poolGame(nOpt,opt){opt=opt||{};const n=nOpt===undefined?mgOpponent():nO
     P_PK.forEach((p,i)=>{const gg=ctx.createRadialGradient(X(p[0]),Y(p[1]),1,X(p[0]),Y(p[1]),p[2]*k);gg.addColorStop(0,'#000');gg.addColorStop(.8,'#0b0b0b');gg.addColorStop(1,'#2a2a2a');ctx.fillStyle=gg;ctx.beginPath();ctx.arc(X(p[0]),Y(p[1]),p[2]*k,0,7);ctx.fill();
       if(G.turn===0&&onEight(0)&&!G.moving&&!G.over){ctx.strokeStyle=G.call===i?'#ffd34d':'rgba(255,211,77,.35)';ctx.lineWidth=G.call===i?3:1.5;ctx.beginPath();ctx.arc(X(p[0]),Y(p[1]),(p[2]+1.6)*k,0,7);ctx.stroke();if(G.call===i){ctx.fillStyle='#ffd34d';ctx.font=`900 ${11}px system-ui`;ctx.textAlign='center';ctx.fillText('8',X(p[0]),Y(p[1])+4)}}});
     const yours=G.turn===0&&!G.moving&&!G.over,aiming=yours||G.aiAim;
-    if(aiming&&!G.dragCue){const c=cue(),h=rayHit(G.ang);if(yours){ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(X(c.x),Y(c.y));ctx.lineTo(X(h.gx),Y(h.gy));ctx.stroke();
-        ctx.beginPath();ctx.arc(X(h.gx),Y(h.gy),R*k,0,7);ctx.stroke();
-        if(h.tb){const nx=h.tb.x-h.gx,ny=h.tb.y-h.gy,d=Math.hypot(nx,ny)||1,ux=nx/d,uy=ny/d,cs=Math.abs(ux*h.dx+uy*h.dy),ok=okFirst(0,h.tb.id);
+    if(aiming&&!G.dragCue){const c=cue(),h=rayHit(G.ang),GL=T.guide>=1||n?1e9:T.guide*100,far=h.tm>GL;if(far){h.gx=c.x+h.dx*GL;h.gy=c.y+h.dy*GL;h.tb=null}if(yours){ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(X(c.x),Y(c.y));ctx.lineTo(X(h.gx),Y(h.gy));ctx.stroke();
+        if(!far){ctx.beginPath();ctx.arc(X(h.gx),Y(h.gy),R*k,0,7);ctx.stroke()}
+        if(h.tb&&(T.guide>=.5||n)){const nx=h.tb.x-h.gx,ny=h.tb.y-h.gy,d=Math.hypot(nx,ny)||1,ux=nx/d,uy=ny/d,cs=Math.abs(ux*h.dx+uy*h.dy),ok=okFirst(0,h.tb.id);
           if(!ok){ctx.strokeStyle='#ff4d4d';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(X(h.gx-2),Y(h.gy-2));ctx.lineTo(X(h.gx+2),Y(h.gy+2));ctx.moveTo(X(h.gx+2),Y(h.gy-2));ctx.lineTo(X(h.gx-2),Y(h.gy+2));ctx.stroke()}
           else{const ol=6+22*cs;ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(X(h.tb.x),Y(h.tb.y));ctx.lineTo(X(h.tb.x+ux*ol),Y(h.tb.y+uy*ol));ctx.stroke();
             let tx=h.dx-ux*cs*Math.sign(ux*h.dx+uy*h.dy),ty=h.dy-uy*cs*Math.sign(ux*h.dx+uy*h.dy);const tl=Math.hypot(tx,ty);if(tl>.02){tx/=tl;ty/=tl;const cl=4+14*Math.sqrt(1-cs*cs);ctx.strokeStyle='rgba(255,255,255,.45)';ctx.beginPath();ctx.moveTo(X(h.gx),Y(h.gy));ctx.lineTo(X(h.gx+tx*cl),Y(h.gy+ty*cl));ctx.stroke()}}}}
@@ -97,12 +140,12 @@ function poolGame(nOpt,opt){opt=opt||{};const n=nOpt===undefined?mgOpponent():nO
       ctx.fillStyle='#ffd34d';ctx.font='700 10px system-ui';ctx.textAlign='center';ctx.fillText('✋ drag',X(c.x),Y(c.y)-(R+4)*k)}}
   const ballsRow=pl=>{const g=G.grp[pl];if(!g)return '<small>open table</small>';return B.filter(b=>b.id&&b.id!==8&&grpOf(b.id)===g).map(b=>`<i class="pb${b.in?' gone':''}${b.id>8?' st':''}" style="--c:${POOL_COL[b.id>8?b.id-8:b.id]}"></i>`).join('')+`<i class="pb${left(pl)?' gone':''}" style="--c:#111"></i>`};
   const hud2=()=>{if(G.dead)return;[0,1].forEach(pl=>{ov.querySelector('#pxP'+pl).classList.toggle('on',G.turn===pl&&!G.over);ov.querySelector('#pxB'+pl).innerHTML=ballsRow(pl)+(G.grp[pl]?` <small>${GN[G.grp[pl]]}</small>`:'')});
-    const yours=G.turn===0&&!G.moving&&!G.over;ov.querySelector('#pxHint').innerHTML=G.over?'':yours?(G.bih?'<b>Ball in hand</b> · drag the cue ball, then aim':onEight(0)&&G.call==null?'<b>Call your pocket:</b> tap the pocket for the 8':'Drag to aim · fine-tune on the right · pull the cue to shoot'):G.moving?'':`${esc(who)} is thinking…`;
+    const yours=G.turn===0&&!G.moving&&!G.over;ov.querySelector('#pxHint').innerHTML=G.over?'':yours?(G.bih?'<b>Ball in hand</b> · drag the cue ball, then aim':onEight(0)&&G.call==null?'<b>Call your pocket:</b> tap the pocket for the 8':'Drag to aim · fine-tune with the wheel · pull the cue to shoot'):G.moving?'':`${esc(who)} is thinking…`;
     const sd=ov.querySelector('#pxSpinDot');sd.style.left=50+G.spin.s*38+'%';sd.style.top=50-G.spin.f*38+'%'};
   let msgT=0;const say=(t,ms=2200)=>{const m=ov.querySelector('#pxMsg');m.innerHTML=t;m.classList.add('on');clearTimeout(msgT);msgT=setTimeout(()=>m.classList.remove('on'),ms)};
   /* ---------- shooting ---------- */
   const shoot=(ang,pw,spin)=>{if(G.moving||G.over)return;G.moving=true;G.bih=false;G.clock=0;const c=cue();G.leftBefore=[left(0),left(1)];
-    G.ev=poolNewEv(ang,spin);G.ev.hit=(kind,v)=>snd(kind,Math.min(1,v/1.6));snd('cue',pw);poolShoot(B,ang,pw);G.pw=0;setPow(0);hud2();
+    G.ev=poolNewEv();G.ev.vis=true;G.ev.hit=(kind,v)=>snd(kind,Math.min(1,v/1.6));snd('cue',pw);poolShoot(B,ang,pw,spin);G.pw=0;setPow(0);hud2();
     let last=performance.now();const go=now=>{if(G.dead)return;const steps=Math.min(24,Math.max(4,Math.round((now-last)/1000*240)));last=now;let mv=false;for(let i=0;i<steps;i++)mv=poolStep(B,G.ev)||mv;draw();if(mv)requestAnimationFrame(go);else{G.moving=false;endShot()}};requestAnimationFrame(go)};
   const endShot=(timeout)=>{if(G.dead)return;const pl=G.turn,op=1-pl,ev=G.ev||{potted:[],pk:{},first:null},P8=ev.potted,cueIn=P8.includes(0),eight=P8.includes(8),wasBrk=G.brk;
     let foul=null;if(timeout)foul='out of time';else if(cueIn)foul='scratch';else if(ev.first==null)foul='no ball hit';else if(!okFirst(pl,ev.first,wasBrk))foul=ev.first===8?'hit the 8 first':'wrong ball first';
@@ -113,30 +156,33 @@ function poolGame(nOpt,opt){opt=opt||{};const n=nOpt===undefined?mgOpponent():nO
     const mine=P8.filter(id=>id&&id!==8);
     if(!G.grp[pl]&&!wasBrk&&!foul&&mine.length){G.grp[pl]=grpOf(mine[0]);G.grp[op]=G.grp[pl]==='s'?'t':'s';say(`${nm} ${pl?'is':'are'} ${GN[G.grp[pl]]}`)}
     const cont=!foul&&mine.some(id=>!G.grp[pl]||grpOf(id)===G.grp[pl]);
-    if(cueIn){const c=cue();c.in=false;c.vx=c.vy=0;c.x=W/2;c.y=L*.8;while(!free(c.x,c.y,c))c.x+=(Math.random()-.5)*10}
+    if(cueIn){const c=cue();c.in=false;c.vx=c.vy=c.wx=c.wy=c.wz=0;c.x=W/2;c.y=L*.8;while(!free(c.x,c.y,c))c.x+=(Math.random()-.5)*10}
     G.brk=false;G.call=null;G.turn=cont?pl:op;G.bih=!!foul;
     if(foul)say(`Foul: ${foul}! ${G.turn?esc(who)+' has':'You have'} ball in hand`,2600);else if(cont&&!P8.length)0;else if(!cont)say(G.turn?`${esc(who)}'s turn`:'Your turn',1400);
     if(G.turn===0)G.spin={f:0,s:0};hud2();draw();if(G.turn===1&&!G.over)setTimeout(aiTurn,650)};
   const finish=(win,txt)=>{G.over=true;hud2();draw();const e=ov.querySelector('#pxEnd');const won=win===0;
-    e.innerHTML=`<div class="px-endc"><div style="font-size:46px">${won?'🏆':'🎱'}</div><h3>${won?'You win!':esc(who)+' wins'}</h3><p>${txt}</p>${opt.stake?`<p><b>${won?'+'+cedi(opt.stake*2):'-'+cedi(opt.stake)}</b></p>`:''}<button class="btn" id="pxDone" style="width:100%">Continue</button></div>`;e.hidden=false;
+    const lv0=poolLevel().l,gain=n?(won?40:10):(won?60+TI*45:15+TI*5);S.poolXP=(S.poolXP||0)+gain;S.poolRec=S.poolRec||{w:0,l:0};S.poolRec[won?'w':'l']++;if(won&&!n)S.poolBeat=Math.max(S.poolBeat||0,TI+1);const lv=poolLevel();G.lvUp=lv.l>lv0?lv.l:0;
+    txt+=`<div class="px-xp"><small>+${gain} XP · Level ${lv.l}</small><div class="bar"><i style="width:${lv.pct}%"></i></div>${G.lvUp?`<b>⬆️ Level up! You're level ${lv.l}.${POOL_TIERS.find(t=>t.lvl===lv.l)?' New opponent unlocked: '+POOL_TIERS.find(t=>t.lvl===lv.l).nm+'!':''}</b>`:''}</div>`;
+    e.innerHTML=`<div class="px-endc"><div style="font-size:46px">${won?'🏆':'🎱'}</div><h3>${won?'You win!':esc(who)+' wins'}</h3><div style="margin:8px 0">${txt}</div>${opt.stake?`<p><b>${won?'+'+cedi(opt.stake*2):'-'+cedi(opt.stake)}</b></p>`:''}<button class="btn" id="pxDone" style="width:100%">Continue</button></div>`;e.hidden=false;
     ov.querySelector('#pxDone').onclick=()=>close(won,true);snd('pocket',1)};
   const close=(won,played)=>{if(G.dead)return;G.dead=true;ov.remove();window.removeEventListener('resize',layout);S.paused=false;
     if(opt.stake&&won){P().money+=opt.stake*2;toast(`💰 You won the money game: +${cedi(opt.stake*2)}`)}mgEnd(n,won,false,'pool',who)};
   /* ---------- the opponent: think in simulation ---------- */
-  const clone=()=>B.map(b=>({id:b.id,x:b.x,y:b.y,vx:0,vy:0,in:b.in}));
+  const clone=()=>B.map(b=>({id:b.id,x:b.x,y:b.y,vx:0,vy:0,wx:0,wy:0,wz:0,in:b.in}));
   const segClear=(x1,y1,x2,y2,skip,bs)=>bs.every(b=>{if(b.in||skip.includes(b.id))return true;const dx=x2-x1,dy=y2-y1,l2=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((b.x-x1)*dx+(b.y-y1)*dy)/l2));return Math.hypot(b.x-(x1+t*dx),b.y-(y1+t*dy))>2*R-.15});
   const shotsFrom=(bs,pl,cx,cy)=>{const out=[];bs.filter(b=>!b.in&&b.id&&okFirst(pl,b.id,false)).forEach(t=>P_PK.forEach((p,pi)=>{const ax=p[0]+(p[0]<0?2.4:p[0]>W?-2.4:0),ay=p[1]+(p[1]<0?2.4:p[1]>L?-2.4:0),tx=ax-t.x,ty=ay-t.y,dt=Math.hypot(tx,ty),ux=tx/dt,uy=ty/dt,gx=t.x-ux*2*R,gy=t.y-uy*2*R,vx=gx-cx,vy=gy-cy,dc=Math.hypot(vx,vy);
     if(dc<.5)return;const cs=(vx*ux+vy*uy)/dc;if(cs<.2)return;if(!segClear(cx,cy,gx,gy,[0,t.id],bs)||!segClear(t.x,t.y,ax,ay,[t.id],bs))return;out.push({t:t.id,pi,ang:Math.atan2(vy,vx),dc,dt,cs,ez:cs*2-(dc+dt)/220})}));return out.sort((a,b)=>b.ez-a.ez)};
-  const simulate=(ang,pw,spin)=>{const bs=clone(),ev=poolNewEv(ang,spin);poolShoot(bs,ang,pw);for(let i=0;i<6000;i++)if(!poolStep(bs,ev))break;return{bs,ev}};
+  const simulate=(ang,pw,spin)=>{const bs=clone(),ev=poolNewEv();poolShoot(bs,ang,pw,spin);for(let i=0;i<6000;i++)if(!poolStep(bs,ev))break;return{bs,ev}};
   const aiPlan=()=>{const c=cue(),pl=1,brk=G.brk;
     if(brk)return{ang:Math.atan2(L*.25-c.y,W/2-c.x)+gauss()*.006,pw:1,spin:{f:0,s:0},call:null,ex:true};
-    const eightNow=onEight(1);const cands=shotsFrom(B,1,c.x,c.y).slice(0,6);let best=null;
+    const eightNow=onEight(1);const cands=shotsFrom(B,1,c.x,c.y).slice(0,T.cands);let best=null;
     const judge=(s,pw,spin)=>{const {bs,ev}=simulate(s.ang,pw,spin);const cueIn=ev.potted.includes(0),first=ev.first,foul=cueIn||first==null||!okFirst(1,first,false);
       let sc=0;if(ev.potted.includes(8)){if(!eightNow||foul||ev.pk[8]!==s.pi)return -100;return 100}
       if(foul)sc-=30;const mineIn=ev.potted.filter(id=>id&&id!==8&&(!G.grp[1]||grpOf(id)===G.grp[1]));if(!foul&&mineIn.length){sc+=20+mineIn.length*3;const cb=bs[0];const nx=shotsFrom(bs,1,cb.x,cb.y);sc+=nx.length?Math.min(8,nx[0].ez*5+nx.length):-4}
       else{const cb=bs[0];if(!cueIn){const theirs=shotsFrom(bs,0,cb.x,cb.y);sc-=theirs.length*1.5}}return sc};
-    cands.forEach(s=>{const base=Math.max(.22,Math.min(.85,.18+(s.dc+s.dt*1.6)/320));[[base,{f:0,s:0}],[base*1.25,{f:.5,s:0}],[base*1.15,{f:-.5,s:0}]].forEach(([pw,sp])=>{pw=Math.min(.95,pw);const sc=judge(s,pw,sp);if(!best||sc>best.sc)best={ang:s.ang,pw,spin:sp,sc,call:s.pi}})});
-    if(!best||best.sc<5){/* no makeable pot: play a safety: hit your own ball softly, leave them nothing */
+    cands.forEach(s=>{const base=Math.max(.22,Math.min(.85,.18+(s.dc+s.dt*1.6)/320));(T.spin?[[base,{f:0,s:0}],[base*1.2,{f:.6,s:0}],[base*1.15,{f:-.6,s:0}],[base,{f:0,s:.5}],[base,{f:0,s:-.5}]]:[[base,{f:0,s:0}],[base*1.3,{f:0,s:0}]]).forEach(([pw,sp])=>{pw=Math.min(.95,pw);const sc=judge(s,pw,sp);if(!best||sc>best.sc)best={ang:s.ang,pw,spin:sp,sc,call:s.pi}})});
+    if((!best||best.sc<5)&&!T.safe){const t=B.filter(b=>!b.in&&b.id&&okFirst(1,b.id,false)).sort((a,b)=>Math.hypot(a.x-c.x,a.y-c.y)-Math.hypot(b.x-c.x,b.y-c.y))[0];if(t&&(!best||best.sc<-5))best={ang:Math.atan2(t.y-c.y,t.x-c.x),pw:.35+Math.random()*.4,spin:{f:0,s:0},sc:0,call:null}}
+    else if(!best||best.sc<5){/* no makeable pot: play a safety: hit your own ball softly, leave them nothing */
       B.filter(b=>!b.in&&b.id&&okFirst(1,b.id,false)).forEach(t=>{[0,-.03,.03].forEach(off=>{const a=Math.atan2(t.y-c.y,t.x-c.x)+off;[.25,.4].forEach(pw=>{const sc=judge({ang:a,pi:-1},pw,{f:0,s:0});if(!best||sc>best.sc)best={ang:a,pw,spin:{f:0,s:0},sc,call:null}})})})}
     return best||{ang:Math.random()*6.28,pw:.5,spin:{f:0,s:0}}};
   const aiTurn=()=>{if(G.dead||G.over)return;hud2();
@@ -193,10 +239,8 @@ const POOL_AT={mall:[-.3,2.75],club:[.6,2.95]};
 {const _eb=enterBuilding;enterBuilding=function(id){const r=_eb.apply(this,arguments);try{if(IS&&IS.kind==='bld'&&POOL_AT[IS.bid]){const [x,z]=POOL_AT[IS.bid];poolTable3D(IS.scene,x,z,IS.obst);IS.spots.pool={x:x-1.15,z,ry:Math.PI/2}}}catch(e){console.warn(e)}return r}}
 {const _pa=placeActions;placeActions=function(b,inside){const a=_pa.apply(this,arguments);try{if(b&&inside&&POOL_AT[b.id]){const h=hour(),open=b.id==='mall'?h>=9&&h<21:true;
   if(open){const bd=buddy(),fee=b.id==='mall'?10:0,pay=()=>!fee||spend(fee);
-    const reg=pick(['Kojo','Nana Yaw','Fiifi','Selasi','Abena','Kwame']);
-    a.unshift([`🎱 Play pool with a regular${fee?' · '+cedi(fee):''}`,()=>{if(pay())poolGame(null,{who:reg,theyBreak:Math.random()<.5})},null,'b']);
-    a.unshift([`💰 Money game: GH₵20 stake vs a regular${fee?' + '+cedi(fee)+' table':''}`,()=>{if(P().money<20+fee)return toast('You need GH₵'+(20+fee)+' on MoMo for that.');P().money-=20+fee;hud();poolGame(null,{who:reg,stake:20,theyBreak:Math.random()<.5})},null,'b'])
-    if(bd)a.unshift([`🎱 Play pool with ${bd.name.split(' ')[0]}${fee?' · '+cedi(fee):''}`,()=>{if(pay())poolGame(bd)},null,'b']);
+    a.unshift([`🎱 Pool hall: challenge players (you're level ${poolLevel().l})${fee?' · '+cedi(fee)+' a game':''}`,()=>poolHall(fee),null,'b']);
+    if(bd)a.unshift([`🎱 Play pool with ${bd.name.split(' ')[0]}${fee?' · '+cedi(fee):''}`,()=>{if(pay())poolGame(bd,{tier:1})},null,'b']);
     else{const mets=(IS&&IS.people||[]).map(q=>q.n).filter(x=>x&&x.met&&x.friend>=15);const f=mets[0];
-      if(f)a.unshift([`🎱 Play pool with ${f.name.split(' ')[0]}${fee?' · '+cedi(fee):''}`,()=>{if(pay())poolGame(f)},null,'b'])}
+      if(f)a.unshift([`🎱 Play pool with ${f.name.split(' ')[0]}${fee?' · '+cedi(fee):''}`,()=>{if(pay())poolGame(f,{tier:1})},null,'b'])}
 }}}catch(e){}return a}}

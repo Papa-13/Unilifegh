@@ -54,3 +54,5 @@
 .px-bigball{width:150px;height:150px;border-radius:50%;margin:0 auto 10px;position:relative;background:radial-gradient(circle at 35% 30%,#fff,#d9d4c6 70%,#a9a395);cursor:crosshair}
 .px-bigball i{width:16px;height:16px;margin:-8px 0 0 -8px}
 .px-end{position:absolute;inset:0;background:rgba(5,8,15,.6);display:grid;place-items:center}.px-endc{background:#141b2b;border-radius:20px;padding:22px;width:min(320px,86vw);text-align:center}.px-endc h3{margin:6px 0}
+.px-lv{font-size:10px;opacity:.7;font-weight:700}.px-xp{margin-top:10px;font-size:13px}.px-xp .bar{margin:4px 0 6px}
+.item.dim{opacity:.55}
