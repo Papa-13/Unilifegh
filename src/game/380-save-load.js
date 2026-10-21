@@ -15,13 +15,13 @@ let SAVING=false;async function saveGame(){const sv=makeSave();if(!sv)return;try
 async function findSave(){let a=null,b=null;try{a=JSON.parse(localStorage.getItem('freshers-save')||'null')}catch(e){}
   if(MP.db&&MP.uid)try{const d=await MP.db.doc('data/users/'+MP.uid+'/save').get();if(d.exists)b=d.data()}catch(e){}
   const ok=x=>x&&x.v===1&&x.p&&x.pre&&x.look&&ROOMS[x.pre.room];return [a,b].filter(ok).sort((x,y)=>(y.ts||0)-(x.ts||0))[0]||null}
-async function loadGame(sv){if(sv&&sv.campus&&sv.cn&&String(sv.campus)[0]==='u')MP.cnames[sv.campus]=mpClean(sv.cn,24);myLook=Object.assign({},sv.look);PRE=Object.assign({},sv.pre);MP.campus=null;MP.rn=sv.rn||1;
+async function loadGame(sv){if(sv&&sv.campus&&sv.cn&&String(sv.campus)[0]==='u')MP.cnames[sv.campus]=mpClean(sv.cn,24);myLook=Object.assign({},sv.look);try{genzFix(myLook)}catch(e){}PRE=Object.assign({},sv.pre);MP.campus=null;MP.rn=sv.rn||1;
   if(sv.campus&&MP.lobby)await joinCampus(sv.campus);
   NOBOTS=!!sv.campus;newGame();const p=P();
-  (sv.npcs||[]).forEach(o=>{if(!o)return;const n=S.npcs.find(x=>x.id===o.id);if(!n)return;const relook=o.look&&JSON.stringify(o.look)!==JSON.stringify(n.look);
+  (sv.npcs||[]).forEach(o=>{if(!o)return;const n=S.npcs.find(x=>x.id===o.id);if(!n)return;try{if(o.look)genzFix(o.look)}catch(e){}const relook=o.look&&JSON.stringify(o.look)!==JSON.stringify(n.look);
     for(const k in o){if(k==='look'||k==='id')continue;n[k]=deser(o[k])}if(relook){n.look=o.look;scene.remove(n.mesh);disposeTree(n.mesh);const h=makeHuman(n.look,{label:n.name});scene.add(h.g);Object.assign(n,{mesh:h.g,legs:h.legs,knees:h.knees,arms:h.arms,elbows:h.elbows,head:h.head,lids:h.lids,torso:h.torso})}
     n.plan=null;n.lastPlan=-1;n.amb=null;n.with=0;n.hidden=false;n.mirror=false;n.needPath=true});
-  const sp=deser(sv.p);delete sp.look;Object.assign(p,sp);p.target=null;p.path=null;p.pose=null;p.inCar=false;p.onBus=null;
+  const sp=deser(sv.p);delete sp.look;Object.assign(p,sp);try{p.wardrobe=(p.wardrobe||[]).filter(w=>OUTFIT[p.look.gender][w.outfit])}catch(e){}p.target=null;p.path=null;p.pose=null;p.inCar=false;p.onBus=null;
   Object.assign(S,deser(sv.S||{}));ensureAcad();S.mates=S.npcs.filter(n=>n.mate);S.paused=false;S.busy=null;S.lastHour=-1;
   if(MP.campus){const sd=Math.floor(S.min/1440),tod=campusMin()%1440;campusAlign(sd+(tod<S.min%1440?1:0))}else S.campOff=null;
   if(sv.mp){if(sv.mp.rel!==undefined&&!mpStore.get('rel',null))relSet(sv.mp.rel);if(Array.isArray(sv.mp.relSeen))sv.mp.relSeen.forEach(x=>relSeen().add(x));Object.assign(MP.friends,sv.mp.friends||{});Object.assign(MP.lastRead,sv.mp.lastRead||{});Object.assign(MP.blocked,sv.mp.blocked||{})}
