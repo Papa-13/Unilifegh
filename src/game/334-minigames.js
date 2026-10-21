@@ -3,9 +3,9 @@
    🟤 Oware (Abapa rules): six pits each, sow anticlockwise, capture 2s and 3s on their side.
    Both are played against a friend (roommate, guest, or whoever you're with). */
 function mgOpponent(){if(IS&&IS.people){const q=IS.people.find(q=>q.n&&!q.lying&&!q.gone);if(q)return q.n}return buddy()||null}
-function mgEnd(n,won,draw,what){const p=P();if(S.le)S.le.last=S.min+60;p.needs.fun=clamp(p.needs.fun+(won?30:draw?20:14));p.needs.social=clamp(p.needs.social+(n?15:0));if(n)n.friend=clamp(n.friend+(won?3:5));if(won)S.wins=(S.wins||0)+1;
+function mgEnd(n,won,draw,what,nm){const p=P();if(S.le)S.le.last=S.min+60;p.needs.fun=clamp(p.needs.fun+(won?30:draw?20:14));p.needs.social=clamp(p.needs.social+(n?15:0));if(n)n.friend=clamp(n.friend+(won?3:5));if(won)S.wins=(S.wins||0)+1;
   advance(what==='oware'?35:30);try{ev('game',{kind:what,win:won});window.track&&window.track('minigame_played',{kind:what,win:won})}catch(e){}
-  const who=n?n.name.split(' ')[0]:'the computer';toast(won?`🏆 You beat ${who}! ${n?pick(['"Rematch tomorrow!" 😤','"You were lucky 😂"','"I\'ll get you next time."']):''}`:draw?`🤝 Draw with ${who}.`:`😩 ${who} wins. ${n?pick(['"Easy money 😂"','"Better luck next time!"','"Go and practise 😏"']):''}`);hud()}
+  const who=n?n.name.split(' ')[0]:(nm||'the computer');toast(won?`🏆 You beat ${who}! ${n?pick(['"Rematch tomorrow!" 😤','"You were lucky 😂"','"I\'ll get you next time."']):''}`:draw?`🤝 Draw with ${who}.`:`😩 ${who} wins. ${n?pick(['"Easy money 😂"','"Better luck next time!"','"Go and practise 😏"']):''}`);hud()}
 
 /* ---------- ⚽ penalty shootout ---------- */
 function penaltyGame(nOpt){const n=nOpt||mgOpponent(),who=n?n.name.split(' ')[0]:'CPU';S.paused=true;openSheet();
