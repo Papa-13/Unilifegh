@@ -48,7 +48,7 @@ function placeActions(b,inside){
         if(tk.vip&&curSlot()===2&&S.metStar!==S.sem)a.push(['✨ VIP meet & greet backstage',()=>meetStar(),null,'b'])}}}
   if(b.id==='square'&&fnight())a.push(["Join Freshers' Night! 🎉",()=>freshersNight()]);
   if(b.id==='square'&&p.race&&!p.race.done&&day()-S.semStart===7&&h>=17&&h<19&&!p.race.manifesto)a.push(['Read your manifesto 🎤',()=>manifesto()]);
-  if(b.id===p.col&&inside){const L=TT[w]&&TT[w].find(([c,st])=>h>=st-.5&&h<=st+.75);if(L)a.push([`Attend ${courseName(L[0])} (${lecturerOf(L[0])})`,()=>lecture(L)]);else a.push(['No lecture now',null,nextLecture()]);
+  if(b.id===p.col&&inside){const L=TT[w]&&TT[w].find(([c,st])=>h>=st-.5&&h<=st+1.6);const RJ=L&&S.lecR&&S.lecR.k===day()+'-'+L[0]&&!S.lecR.done&&!S.lecR.sacked;const SK=L&&S.lecR&&S.lecR.k===day()+'-'+L[0]&&S.lecR.sacked;if(SK)a.push([`🚪 You were sent out of ${courseName(L[0])} today`,null]);else if(L&&!(S.busy&&/lecture$/.test(S.busy.label)))a.push([RJ?`🪑 Go back to your seat (${courseName(L[0])})`:`Attend ${courseName(L[0])} (${lecturerOf(L[0])})${h>L[1]+.25?' · late':''}`,()=>lecture(L),null,RJ?'b':undefined]);else a.push(['No lecture now',null,nextLecture()]);
     const ex=examNow();if(ex&&inside){const [ed,est,ec]=ex,done=p.exams&&p.exams[ec];a.unshift([done?`✅ ${courseName(ec)} exam done`:`📝 Write the ${courseName(ec)} exam (2h)`,done?null:()=>examQuiz(ec,est),null,'b'])}
     else if(ex)a.push([`📝 ${courseName(ex[2])} exam is on now · go inside`,null]);
     if(inside&&!ex)[0,1].forEach(li=>{const nm=li?BADLEC:GOODLEC,ln=lectureNow(),teaching=ln&&lecturerOf(ln[0])===nm,open=w<5&&h>=10&&h<16&&!teaching;

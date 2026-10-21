@@ -192,16 +192,19 @@ function dartsGame(){const F=arcFrame('Darts','🎯');const G={darts:[],score:0,
    table first and still goes in takes out an extra cup. On their turn you watch their throws from
    their side of the table. First to clear all 6 cups wins. */
 function pongGame(nOpt){const n=nOpt===undefined?mgOpponent():nOpt,who=n?n.name.split(' ')[0]:pick(['Kojo','Esi','Yaw','Ama']);
-  const F=arcFrame('Cup Pong','🥤');const CR=.05,CB=.034,CH=.12,BR=.02,TZ=1.85,TW=.42,CAM={y:.62,z:-.55},REST={x:0,y:.3,z:.05};let f=500,cy=100;
-  F.onFit=()=>{f=F.h*1.5;cy=F.h*.12};const pj=(x,y,z)=>{const d=z-CAM.z;return{x:F.w/2+x*f/d,y:cy-(y-CAM.y)*f/d,s:f/d}};
+  const F=arcFrame('Cup Pong','🥤');const CR=.05,CB=.034,CH=.12,BR=.02,TZ=1.85,TW=.42,CAM={y:1.0,z:-.42},TILT=.43,REST={x:0,y:.4,z:.15};let f=500,cy=100;const ct=Math.cos(TILT),st=Math.sin(TILT);
+  F.onFit=()=>{f=Math.min(F.h*1.32,F.w*2.6);cy=F.h*.4};
+  /* a camera tilted down over your end of the table, so you see your own cups too */
+  const pj=(x,y,z)=>{const dy=y-CAM.y,dz=z-CAM.z,zc=dz*ct-dy*st,yc=dy*ct+dz*st;return{x:F.w/2+x*f/zc,y:cy-yc*f/zc,s:f/zc}};
   const rack=()=>[[0],[-.5,.5],[-1,0,1]].flatMap((row,r)=>row.map(c=>({x:c*CR*2.12,z:1.5+r*CR*1.84,in:true,fade:1})));
+  const nearPos=i=>{const r=i===0?0:i<3?1:2,c=[0,-.5,.5,-1,0,1][i];return{x:c*CR*2.12,z:.78-r*CR*1.84}};
   const G={racks:[rack(),rack()],turn:0,left:2,made:0,ball:null,hand:null,drops:[],over:false,flip:0};F.G=G;window._arcF=F;
   /* racks[0] = their cups (you aim at these), racks[1] = your cups (they aim at these) */
   const tgt=()=>G.racks[G.turn],cnt=a=>a.filter(c=>c.in).length;
   const stats=()=>F.stats(`<span>You <b>${6-cnt(G.racks[0])}</b>/6</span><span>${esc(who)} <b>${6-cnt(G.racks[1])}</b>/6</span>`);stats();
   F.hint('Drag the ball and flick it towards the cups');
   const newHand=()=>{G.hand={x:REST.x,y:REST.y-.15,z:REST.z,in:0,drag:false}};
-  const toWorld=(sx,sy)=>{const r=F.cv.getBoundingClientRect(),d=REST.z-CAM.z;return{x:(sx-r.left-F.w/2)*d/f,y:CAM.y-(sy-r.top-cy)*d/f}};
+  const toWorld=(sx,sy)=>{const r=F.cv.getBoundingClientRect(),o=pj(REST.x,REST.y,REST.z),k=o.s;return{x:REST.x+(sx-r.left-o.x)/k,y:REST.y-(sy-r.top-o.y)/k/ct}};
   const throwBall=(x,y,vx,vy,vz,who2)=>{G.ball={x,y,z:REST.z,vx,vy,vz,t:0,bounced:false,rot:0,res:null,by:who2};G.hand=null;arcSnd(330,.05,.06,'triangle')};
   /* aim help: if the ball would land close to a cup, pull it towards that cup's centre */
   const assist=(x,y,vx,vy,vz,k)=>{const disc=vy*vy-19.6*(CH-y);if(disc<=0)return[vx,vz];const t=(vy+Math.sqrt(disc))/9.8,lx=x+vx*t,lz=REST.z+vz*t;let best=null;
@@ -209,7 +212,7 @@ function pongGame(nOpt){const n=nOpt===undefined?mgOpponent():nOpt,who=n?n.name.
   arcFlick(F.cv,e=>{if(G.turn!==0||!G.hand||G.hand.in<1||G.ball||G.over)return false;const w=toWorld(e.clientX,e.clientY),h=G.hand;h.drag=true;h.follow=Math.hypot(w.x-h.x,w.y-h.y)<.12;h.ox=w.x-h.x;h.oy=w.y-h.y},
     e=>{const h=G.hand;if(!h||!h.drag||!h.follow)return;const w=toWorld(e.clientX,e.clientY);h.x=Math.max(-.2,Math.min(.2,w.x-h.ox));h.y=Math.max(.2,Math.min(.42,w.y-h.oy))},
     fl=>{const h=G.hand;if(!h||!h.drag)return;h.drag=false;const up=-fl.vy/F.h;if(up<.8||fl.dy>-15){F.hint('Flick faster, upwards ↑');return}
-      const v=Math.max(2.9,Math.min(4.8,3.63+(up-2.4)*.26)),a=40*Math.PI/180;let vz=v*Math.cos(a),vy=v*Math.sin(a),vx=(fl.vx/(-fl.vy))*vz*.35-h.x*.4;
+      const v=Math.max(2.6,Math.min(4.5,3.4+(up-2.4)*.24)),a=40*Math.PI/180;let vz=v*Math.cos(a),vy=v*Math.sin(a),vx=(fl.vx/(-fl.vy))*vz*.35-h.x*.4;
       [vx,vz]=assist(h.x,h.y,vx,vy,vz,.085);throwBall(h.x,h.y,vx,vy,vz,0);F.hint('')});
   const resolve=(made,bounce)=>{const b=G.ball;if(!b||b.res)return;b.res=made?'in':'out';
     if(made){G.made++;let extra=null;if(bounce){extra=tgt().find(c=>c.in);if(extra){extra.in=false;F.say(G.turn?`😩 Bounce shot! ${esc(who)} takes 2 cups`:'🔥 BOUNCE SHOT! 2 cups',1300)}}if(!bounce||!extra)F.say(G.turn?`💦 ${esc(who)} sinks one`:'💦 SPLASH!',900);stats()}
@@ -218,7 +221,7 @@ function pongGame(nOpt){const n=nOpt===undefined?mgOpponent():nOpt,who=n?n.name.
       if(G.left<=0){if(G.made>=2){G.left=2;G.made=0;F.say(G.turn?`${esc(who)} gets the balls back`:'🙌 Balls back!',1200);return G.turn?setTimeout(aiThrow,1300):newHand()}
         G.left=2;G.made=0;G.turn=1-G.turn;G.flip=1;F.say(G.turn?`👀 ${esc(who)}'s turn`:'Your turn',1100);if(G.turn)setTimeout(aiThrow,1300);else newHand()}
       else G.turn?setTimeout(aiThrow,900):newHand()},made?650:350)};
-  const aiThrow=()=>{if(F.dead||G.over)return;const live=tgt().filter(c=>c.in);if(!live.length)return;const c=pick(live),x=(Math.random()-.5)*.1,y=.3,a=40*Math.PI/180,dz=c.z-REST.z+arcGauss()*.06,dx=c.x-x+arcGauss()*.045,dy=CH-y;
+  const aiThrow=()=>{if(F.dead||G.over)return;const live=tgt().filter(c=>c.in);if(!live.length)return;const c=pick(live),x=(Math.random()-.5)*.1,y=.3,a=40*Math.PI/180,dz=c.z-REST.z+arcGauss()*.07,dx=c.x-x+arcGauss()*.05,dy=CH-y;
     const ca=Math.cos(a),ta=Math.tan(a),v=Math.sqrt(9.8*dz*dz/(2*ca*ca*(dz*ta-dy))),vz=v*ca,t=dz/vz;G.hand={x,y,z:REST.z,in:1,drag:false};setTimeout(()=>{if(F.dead||G.over)return;throwBall(x,y,dx/t,v*Math.sin(a),vz,1)},450)};
   const step=dt=>{const b=G.ball;G.drops.forEach(d=>{d.vy-=9.8*dt;d.x+=d.vx*dt;d.y+=d.vy*dt;d.z+=d.vz*dt;d.t+=dt});G.drops=G.drops.filter(d=>d.t<.6);G.racks.forEach(r=>r.forEach(c=>{if(!c.in&&c.fade>0)c.fade=Math.max(0,c.fade-dt*2.5)}));G.flip=Math.max(0,G.flip-dt*2.2);
     if(G.hand){const h=G.hand;h.in=Math.min(1,h.in+dt*4);if(!h.drag){h.x+=(REST.x-h.x)*Math.min(1,dt*10);h.y+=(REST.y+Math.sin(performance.now()/400)*.006-h.y)*Math.min(1,dt*12)}}
@@ -248,8 +251,10 @@ function pongGame(nOpt){const n=nOpt===undefined?mgOpponent():nOpt,who=n?n.name.
       c.strokeStyle='rgba(255,255,255,.85)';c.lineWidth=3;c.stroke();const m1=pj(0,0,TZ),m2=pj(0,0,0.02);c.lineWidth=1.5;c.strokeStyle='rgba(255,255,255,.5)';c.beginPath();c.moveTo(m1.x,m1.y);c.lineTo(m2.x,m2.y);c.stroke();
       const h1=pj(-TW,0,TZ/2),h2=pj(TW,0,TZ/2);c.beginPath();c.moveTo(h1.x,h1.y);c.lineTo(h2.x,h2.y);c.stroke()});
     const c=F.ctx,b=G.ball,cols=G.turn?['#1a3f8f','#3a78e0']:['#a3141c','#e8343c'];
-    const cups=tgt().filter(q=>q.fade>0).sort((p,q)=>q.z-p.z);let drawn=!b||b.res==='in';cups.forEach(q=>{if(!drawn&&b.z>q.z){ballAt(b.x,b.y,b.z,b.rot);drawn=true}cup(q,cols)});if(!drawn)ballAt(b.x,b.y,b.z,b.rot);
+    const cups=tgt().filter(q=>q.fade>0).sort((p,q)=>q.z-p.z);let drawn=!b||b.res==="in"||b.z<.9;cups.forEach(q=>{if(!drawn&&b.z>q.z){ballAt(b.x,b.y,b.z,b.rot);drawn=true}cup(q,cols)});if(!drawn)ballAt(b.x,b.y,b.z,b.rot);
     G.drops.forEach(d=>{const p=pj(d.x,d.y,d.z);c.fillStyle=`rgba(120,190,255,${1-d.t/.6})`;c.beginPath();c.arc(p.x,p.y,Math.max(1.2,.008*p.s),0,7);c.fill()});
+    const mine=G.racks[1-G.turn],mc=G.turn?['#a3141c','#e8343c']:['#1a3f8f','#3a78e0'];mine.map((q,i)=>Object.assign({},q,nearPos(i))).sort((p,q)=>q.z-p.z).forEach(q=>cup(q,mc));
+    if(b&&b.z<.9&&b.res!=='in')ballAt(b.x,b.y,b.z,b.rot);
     if(G.hand){const h=G.hand;ballAt(h.x,h.y-(1-h.in)*.15,h.z,0,h.in)}
     /* the other rack, small, top left */const other=G.racks[1-G.turn],bx=58,by=34;c.fillStyle='rgba(0,0,0,.35)';c.beginPath();c.roundRect?c.roundRect(bx-48,by-24,96,52,10):c.rect(bx-48,by-24,96,52);c.fill();
     c.fillStyle='rgba(255,255,255,.7)';c.font='800 8.5px system-ui';c.textAlign='center';c.fillText(G.turn?'THEIR CUPS':'YOUR CUPS',bx,by-12);

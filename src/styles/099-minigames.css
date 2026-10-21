@@ -69,3 +69,4 @@
 .gcard{display:flex;gap:6px;justify-content:center;margin:8px 0}.gcard span{display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,.08);border-radius:8px;padding:4px 8px;font-size:15px}.gcard small{opacity:.6;font-size:10px}.gcard .u{color:#7dff8a}.gcard .o{color:#ff8a7d}
 .ax-stats .hot{background:rgba(255,90,60,.3)}
 .arcX .px-msg{top:28%}
+.chip.on{background:linear-gradient(135deg,#e8b24a,#c98a22);color:#2a1a06;border-color:transparent;font-weight:700}

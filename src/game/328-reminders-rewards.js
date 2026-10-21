@@ -24,7 +24,7 @@ function lecReminders(){const p=P();if(!S||!p||p.grad)return;const d=day(),h=Mat
   if(h===21&&!r['n'+d]){const T=(TT[(d+1)%7]||[]).filter(()=>d+1-S.semStart<EXAMS[0][0]);r['n'+d]=1;if(T.length)msg('📅 Timetable',`Tomorrow: ${T.map(([c,st])=>`${courseName(c)} at ${String(st).padStart(2,'0')}:00`).join(', ')}. Set your alarm 😴`)}
   (TT[wd()]||[]).forEach(([c,st])=>{if(off(c))return;const k=d+'|'+c,here=IS&&IS.kind==='bld'&&IS.bid===p.col,done=S['att'+d+'-'+c];
     if(h===st-1&&!r['h'+k]){r['h'+k]=1;if(!done&&!here)lecNote(`📚 ${courseName(c)} starts at ${String(st).padStart(2,'0')}:00 at ${BID[p.col].name}. Leave in good time, the shuttle can be slow.`,true)}
-    if(h===st&&!r['s'+k]){r['s'+k]=1;if(!done&&!here)lecNote(`⏰ ${courseName(c)} has started! ${lecturerOf(c)} is taking attendance. You can still go, but you'll be marked late.`,true)}
+    if(h===st&&!r['s'+k]){r['s'+k]=1;if(!done&&!here)lecNote(`⏰ ${courseName(c)} has started! ${lecturerOf(c)} is taking attendance. Go now: more than 15 minutes late and you could be sent out.`,true)}
     if(h===st+2&&!r['m'+k]){r['m'+k]=1;if(!S['att'+d+'-'+c]){const f=S.npcs.find(n=>n.prog===p.prog&&n.contact)||null;msg(f?f.name:'Class rep',pick([`You missed ${courseName(c)} today 👀 ${lecturerOf(c)} took attendance. Attendance counts o.`,`Where were you? ${courseName(c)} was serious today. I'll send you my notes, but don't make it a habit 😅`]))}}})}
 /* a small banner with a "Go to class" button that doesn't stop the game */
 function lecNote(text,go){let el=$('lecNote');if(!el){el=document.createElement('div');el.id='lecNote';el.setAttribute('role','status');document.body.appendChild(el)}
