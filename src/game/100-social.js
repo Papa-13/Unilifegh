@@ -23,7 +23,7 @@ function talkMenu(n){
     if(!n.contact&&n.met&&n.friend>=15&&n.numNo!==day())opts.push(['number','📱 Ask for their number']);
     const here=!IS&&locOf(p.x,p.y);
     if(n.friend>=25&&here&&here.id==='lib')opts.push(['study','Study together (2h)']);
-    if(n.met&&n.friend>=20&&!(here&&here.id==='lib'))opts.push(['oware','🟤 "Let\'s play Oware"']);
+    if(n.met&&n.friend>=20&&IS&&IS.kind==='room')opts.push(['oware','🟤 "Let\'s play Oware"']);
     if(!IS&&n.met){if(n.with>S.min){opts.push(['walk','🚶 Take a walk together'],['sitw','🪑 Sit somewhere together'],['bye','👋 "See you later"'])}else if(n.friend>=15)opts.push(['come','🚶 "Do you mind taking a walk with me?"'])}
     if(!IS&&n.friend>=30&&!n.mate&&hour()>=8&&hour()<22)opts.push(['visit','🏠 Visit their room']);
     if(n.friend>=50&&!p.debts.some(x=>x.n===n&&!x.done&&x.kind==='owe'))opts.push(['borrow','Ask to borrow money']);
