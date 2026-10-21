@@ -1,3 +1,4 @@
+const _uq1=new THREE.Quaternion(),_uq2=new THREE.Quaternion();
 /* ================= poses & animation ================= */
 /* a bite of food, step by step: scoop from the plate, lift to the mouth, bite, lower, chew */
 const ss=(a,b,x)=>{const k=clamp((x-a)/(b-a),0,1);return k*k*(3-2*k)};
@@ -49,6 +50,8 @@ function posePerson(c,moving,dt){poseX(c);
     case 'climb':{const q=Math.sin(t*6);A=[-2.3+q*.35,-2.3-q*.35];E=[-.6,-.6];L=[-.9-q*.5,-.9+q*.5];K=[1.1,1.1];break}
     case 'dj':A=[-.75,-.6+Math.sin(t*6)*.15];E=[-1.05,-1.2];hx=Math.sin(t*8)*.15+.15;y=Math.abs(Math.sin(t*4))*.02;break;
   }
+  /* holding an umbrella: that arm comes up and stays up */
+  if(c.umbUp&&!c.lying&&!/^sit|type|swim|dive/.test(pose)){A[1]=-.5;Az[1]=-.22;E[1]=-1.65}
   let hy=null;const now=performance.now()/1000;
   if(c.gest&&now>c.gest.end){c.gest=null}
   if(!c.gest&&!moving&&dt&&(pose==='talk'||pose==='sitTalk')&&Math.random()<dt*.22)setGest(c,pick(['nod','nod','laugh','shrug','point','explain','think']),R(1.4,2.4));
@@ -113,6 +116,7 @@ function posePerson(c,moving,dt){poseX(c);
   if(c.torso){c.torso.scale.y=1+Math.sin(tt*1.7+cid)*.01;const tw=moving&&pose==='walk'?Math.sin(c.phase)*.11:moving&&pose==='run'?Math.sin(c.phase)*.18:0;c.torso.rotation.y+=(tw-c.torso.rotation.y)*(dt?Math.min(1,dt*12):1)}
   faceExpr(c,pose,tt,dt);if(g.userData.ring){const rg=g.userData.ring;rg.visible=!(pose==='swim'||pose==='dive'||c.lying);rg.rotation.x=-Math.PI/2-g.rotation.x;rg.rotation.y=-g.rotation.z;rg.position.y=.03-(g.position.y-(c.spotY||0))}
   setProp(c,c.gest&&c.gest.k==='phonecall'?'phone':pose,t);
+  {const u=g.userData.umb;if(u&&u.visible&&u.parent!==g){u.parent.getWorldQuaternion(_uq1).invert();g.getWorldQuaternion(_uq2);u.quaternion.copy(_uq1.multiply(_uq2))}}
   if(g.userData.real)realApply(c);
 }
 const EXPR_OF={hungry:'sad',yawn:'surprised',sniff:'frown',laugh:'laugh',facepalm:'frown',sad:'sad',cross:'frown',no:'frown',celebrate:'laugh',cheer:'laugh',dance:'smile',hug:'smile',dap:'smile',handshake:'smile',wave:'smile',clap:'smile',think:'think',shrug:'meh',kiss:'smile'};

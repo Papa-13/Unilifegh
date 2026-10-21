@@ -28,12 +28,16 @@ const RAIN=(()=>{const N=900,pos=new Float32Array(N*6),sp=new Float32Array(N);co
 
 /* ---- umbrellas for everyone walking outside in the rain ---- */
 const UMB_COL=[0x8e2a3a,0x2f6bb5,0xf4c430,0x2fa84f,0x111111,0xc8322b,0x6a3f8a];
-function umbrellaFor(m){if(m.userData.umb)return m.userData.umb;const g=new THREE.Group(),col=UMB_COL[Math.floor(Math.random()*UMB_COL.length)];
-  const can=new THREE.Mesh(new THREE.ConeGeometry(.62,.26,10,1,true),lam(col));can.material.side=THREE.DoubleSide;can.position.y=1.98;g.add(can);
-  const pole=new THREE.Mesh(cyl(.014,.014,.95,5),lam(0x222222));pole.position.y=1.48;g.add(pole);g.position.set(.12,0,.1);g.visible=false;m.add(g);m.userData.umb=g;return g}
+/* the umbrella is held in the hand: the pole sits in the fist and the canopy stays upright over the head */
+function umbrellaFor(m,c){if(m.userData.umb)return m.userData.umb;const g=new THREE.Group(),col=UMB_COL[Math.floor(Math.random()*UMB_COL.length)];
+  const can=new THREE.Mesh(new THREE.ConeGeometry(.62,.26,12,1,true),lam(col));can.material.side=THREE.DoubleSide;can.position.y=.78;g.add(can);
+  const tip=new THREE.Mesh(cyl(.012,.02,.1,5),lam(0x222222));tip.position.y=.94;g.add(tip);
+  const pole=new THREE.Mesh(cyl(.013,.013,.85,5),lam(0x222222));pole.position.y=.38;g.add(pole);const hook=new THREE.Mesh(new THREE.TorusGeometry(.04,.012,5,10,Math.PI),lam(0x3a2a1a));hook.position.set(.04,-.05,0);hook.rotation.z=Math.PI;g.add(hook);
+  const hand=c&&c.elbows&&c.elbows[1];if(hand){g.position.set(0,-.36,.05);hand.add(g)}else{g.position.set(.2,1.05,.15);m.add(g)}
+  g.visible=false;m.userData.umb=g;return g}
 /* only people who own an umbrella carry one; you open yours yourself (☂️ button) */
 const npcUmb=n=>{let h=3;for(const c of String(n.id)+'umb')h=(h*31+c.charCodeAt(0))%997;return h%100<55};
-function umbrellasTick(on){const show=(c,ok)=>{const m=c&&c.mesh;if(!m)return;if(!on&&!m.userData.umb)return;const u=umbrellaFor(m);u.visible=on&&ok};
+function umbrellasTick(on){const show=(c,ok)=>{const m=c&&c.mesh;if(!m)return;if(!on&&!m.userData.umb){c.umbUp=false;return}const u=umbrellaFor(m,c);u.visible=on&&ok;c.umbUp=u.visible};
   const sit=c=>/^sit|type|swim|dive|lie|sleep/.test(c.pose||'')||c.lying;
   try{const p=P();show(p,!!p.umbOpen&&!p.inCar&&!p.onBus&&!sit(p))}catch(e){}
   if(S&&S.npcs)S.npcs.forEach(n=>show(n,npcUmb(n)&&!n.hidden&&!sit(n)));
