@@ -67,3 +67,5 @@
 .ax-stage{flex:1;position:relative;min-height:0;margin:0 0 calc(6px + env(safe-area-inset-bottom))}.ax-stage canvas{display:block;touch-action:none}
 .ax-hint{position:absolute;left:0;right:0;bottom:10px;text-align:center;font-size:13px;opacity:.85;pointer-events:none;padding:0 16px}
 .gcard{display:flex;gap:6px;justify-content:center;margin:8px 0}.gcard span{display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,.08);border-radius:8px;padding:4px 8px;font-size:15px}.gcard small{opacity:.6;font-size:10px}.gcard .u{color:#7dff8a}.gcard .o{color:#ff8a7d}
+.ax-stats .hot{background:rgba(255,90,60,.3)}
+.arcX .px-msg{top:28%}

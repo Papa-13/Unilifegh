@@ -26,41 +26,80 @@ function arcFrame(title,ic){try{closeSheet()}catch(e){}S.paused=true;
 function arcDone(key,label,score,lower,extra){const rec=arcRecord(key,score,lower),p=P();p.needs.fun=clamp(p.needs.fun+22);advance(15);try{ev('game',{kind:key,score});window.track&&window.track('arcade_played',{game:key,score})}catch(e){}hud();
   return `<div style="font-size:44px">${rec?'🏆':'🎮'}</div><h3>${label}</h3>${extra||''}<p>${rec?'<b>New personal best!</b>':`Your best: <b>${arcBest(key)}</b>`}</p>`}
 
-/* =============== 🏀 HOOPS: swipe up to shoot, 60 seconds =============== */
-function hoopsGame(){const F=arcFrame('Hoops','🏀');const G={score:0,t:60,streak:0,made:0,ball:null,hx:0,hv:0,run:false,shots:0};F.G=G;window._arcF=F;
-  const RIM={h:3.05,r:.23,z:4.6},BR=.12,CAM={y:1.95,z:-1.7};let f=500,cy=250;
-  F.onFit=()=>{f=F.h*1.0;cy=F.h*.47};
-  const pj=(x,y,z)=>{const d=z-CAM.z;return{x:F.w/2+x*f/d,y:cy-(y-CAM.y)*f/d,s:f/d}};
-  const newBall=()=>{G.ball={x:0,y:1.45,z:.25,vx:0,vy:0,vz:0,fly:false,t:0,scored:false,rimmed:false,spin:0}};newBall();
-  const stats=()=>F.stats(`<span>🏀 <b>${G.score}</b></span><span>⏱ <b>${Math.ceil(G.t)}</b></span><span>Best ${arcBest('hoops')??'-'}</span>`);stats();
-  F.hint('Swipe up on the ball to shoot. Faster swipe = further.');F.say('<b>60 seconds!</b> Swipe up to shoot',1800);
-  /* swipe */let sw=null;F.cv.addEventListener('pointerdown',e=>{if(G.ball.fly||F.over)return;sw={x:e.clientX,y:e.clientY,t:performance.now()}});
-  F.cv.addEventListener('pointerup',e=>{if(!sw||G.ball.fly||F.over)return;const dx=e.clientX-sw.x,dy=e.clientY-sw.y;sw=null;if(-dy<25)return;G.run=true;
-    const p=Math.min(1.25,-dy/(F.h*.5)),v=5.2+p*4,a=52*Math.PI/180,vz=v*Math.cos(a),b=G.ball;b.vz=vz;b.vy=v*Math.sin(a);b.vx=dx/(-dy)*vz*.9;b.fly=true;b.spin=-8;G.shots++;F.hint('')});
-  const step=dt=>{const b=G.ball;if(!b.fly)return;const py=b.y,pz=b.z;b.vy-=9.8*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;b.z+=b.vz*dt;b.t+=dt;
-    /* backboard */const bz=RIM.z+RIM.r+.15;if(pz+BR<=bz&&b.z+BR>bz&&Math.abs(b.x-G.hx)<.9&&b.y>RIM.h-.2&&b.y<RIM.h+1.05){b.z=bz-BR;b.vz=-Math.abs(b.vz)*.5;b.vx*=.8;arcThud(.5)}
-    /* rim: a ring; bounce off the nearest point */const rx=b.x-G.hx,rz=b.z-RIM.z,d=Math.hypot(rx,rz)||1e-6,nx=G.hx+rx/d*RIM.r,nz=RIM.z+rz/d*RIM.r,ex=b.x-nx,ey=b.y-RIM.h,ez=b.z-nz,dd=Math.hypot(ex,ey,ez);
-    if(dd<BR+.02){const ux=ex/dd,uy=ey/dd,uz=ez/dd,vn=b.vx*ux+b.vy*uy+b.vz*uz;if(vn<0){b.vx-=1.4*vn*ux;b.vy-=1.4*vn*uy;b.vz-=1.4*vn*uz;b.x=nx+ux*(BR+.02);b.y=RIM.h+uy*(BR+.02);b.z=nz+uz*(BR+.02);b.rimmed=true;arcThud(.3)}}
-    /* through the hoop */if(!b.scored&&py>RIM.h&&b.y<=RIM.h&&Math.hypot(b.x-G.hx,b.z-RIM.z)<RIM.r-.03){b.scored=true;G.streak++;const pts=G.streak>=4?3:2;G.score+=pts;G.made++;b.vx*=.3;b.vz*=.3;arcSnd(880,.12,.15);setTimeout(()=>arcSnd(1320,.15,.12),90);
-      F.say(G.streak>=4?`🔥 ON FIRE +${pts}`:b.rimmed?'+2':'SWISH! +2',900);if(G.made===5)F.say('The hoop starts moving! 👀',1400)}
-    if(b.y<BR&&b.vy<0){b.y=BR;b.vy=-b.vy*.5;b.vx*=.7;b.vz*=.7;arcThud(.2)}
-    if(b.t>2.6||b.z>8||Math.abs(b.x)>5){if(!b.scored)G.streak=0;newBall()}};
-  F.step=step;F.loop((dt,now)=>{if(G.run&&!F.over){G.t-=dt;if(G.t<=0){G.t=0;F.over=true;setTimeout(()=>F.end(arcDone('hoops','Time!',G.score,false,`<p style="font-size:30px;margin:4px 0"><b>${G.score}</b> points</p><small>${G.made}/${G.shots} baskets</small>`),hoopsGame),500)}}
-    if(G.made>=5){const sp=Math.min(1.6,.5+(G.made-5)*.08);G.hx=Math.sin(now*sp)*Math.min(1,.35+(G.made-5)*.05)}
-    for(let i=0;i<4;i++)step(dt/4);stats();draw()});
-  const draw=()=>{F.layer('bg',c=>{const W=F.w,H=F.h;let g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,'#1b2440');g.addColorStop(.55,'#2b3a63');g.addColorStop(.56,'#a8733f');g.addColorStop(1,'#6e4524');c.fillStyle=g;c.fillRect(0,0,W,H);
-    c.strokeStyle='rgba(255,255,255,.08)';for(let i=0;i<14;i++){const a=pj(-3+i*.5,0,0),b2=pj(-3+i*.5,0,9);c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b2.x,b2.y);c.stroke()}
-    const lp=pj(0,0,RIM.z-1.2),lr=1.8*lp.s;c.strokeStyle='rgba(255,255,255,.5)';c.lineWidth=2;c.beginPath();c.ellipse(lp.x,lp.y,lr,lr*.12,0,0,Math.PI*2);c.stroke();});const c=F.ctx;
-    /* backboard + pole */const bz=RIM.z+RIM.r+.15,p1=pj(G.hx-.9,RIM.h+1.05,bz),p2=pj(G.hx+.9,RIM.h-.2,bz),pole=pj(G.hx,0,bz+.6),pt=pj(G.hx,RIM.h+.5,bz+.6);
-    c.fillStyle='#555';c.fillRect(pole.x-5,pt.y,10,pole.y-pt.y);c.fillStyle='rgba(255,255,255,.92)';c.fillRect(p1.x,p1.y,p2.x-p1.x,p2.y-p1.y);c.strokeStyle='#d33';c.lineWidth=3;c.strokeRect(p1.x+2,p1.y+2,p2.x-p1.x-4,p2.y-p1.y-4);
-    const q1=pj(G.hx-.3,RIM.h+.45,bz),q2=pj(G.hx+.3,RIM.h,bz);c.strokeRect(q1.x,q1.y,q2.x-q1.x,q2.y-q1.y);
-    const b=G.ball,rc=pj(G.hx,RIM.h,RIM.z),rw=RIM.r*rc.s,behind=b.z>RIM.z;
-    const ball=()=>{const p=pj(b.x,b.y,b.z),r=BR*p.s,sh=pj(b.x,0,b.z);c.fillStyle='rgba(0,0,0,.25)';c.beginPath();c.ellipse(sh.x,sh.y,r,r*.3,0,0,7);c.fill();
-      c.save();c.translate(p.x,p.y);c.rotate(b.t*b.spin);const gg=c.createRadialGradient(-r*.35,-r*.35,r*.1,0,0,r);gg.addColorStop(0,'#ffab5c');gg.addColorStop(1,'#c4561a');c.fillStyle=gg;c.beginPath();c.arc(0,0,r,0,7);c.fill();
-      c.strokeStyle='#3a1a08';c.lineWidth=Math.max(1,r*.07);c.beginPath();c.moveTo(-r,0);c.lineTo(r,0);c.moveTo(0,-r);c.lineTo(0,r);c.stroke();c.beginPath();c.arc(-r*1.35,0,r*.95,-.8,.8);c.stroke();c.beginPath();c.arc(r*1.35,0,r*.95,Math.PI-.8,Math.PI+.8);c.stroke();c.restore()};
-    const net=()=>{c.strokeStyle='rgba(255,255,255,.8)';c.lineWidth=1;const n2=pj(G.hx,RIM.h-.42,RIM.z),nw=RIM.r*.6*n2.s;for(let i=0;i<10;i++){const a=i/10*Math.PI*2;c.beginPath();c.moveTo(rc.x+Math.cos(a)*rw,rc.y+Math.sin(a)*rw*.3);c.lineTo(n2.x+Math.cos(a+.3)*nw,n2.y+Math.sin(a+.3)*nw*.3);c.stroke()}
-      c.beginPath();c.ellipse(n2.x,n2.y,nw,nw*.3,0,0,7);c.stroke()};
-    if(behind)ball();c.strokeStyle='#ff6a1a';c.lineWidth=Math.max(2,rw*.12);c.beginPath();c.ellipse(rc.x,rc.y,rw,rw*.3,0,Math.PI,2*Math.PI);c.stroke();net();c.beginPath();c.ellipse(rc.x,rc.y,rw,rw*.3,0,0,Math.PI);c.stroke();if(!behind)ball()};
+/* a flick tracker: drag the ball, let go, and the speed of the last ~100 ms of your swipe is the throw */
+function arcFlick(el,onDown,onMove,onUp){let pts=null;
+  el.addEventListener('pointerdown',e=>{if(onDown(e)===false)return;pts=[[performance.now(),e.clientX,e.clientY]];el.setPointerCapture&&el.setPointerCapture(e.pointerId)});
+  el.addEventListener('pointermove',e=>{if(!pts)return;pts.push([performance.now(),e.clientX,e.clientY]);if(pts.length>40)pts.shift();onMove&&onMove(e)});
+  const up=e=>{if(!pts)return;const now=performance.now();pts.push([now,e.clientX,e.clientY]);const rec=pts.filter(p=>now-p[0]<110),a=rec[0],b=rec[rec.length-1],dt=Math.max(.016,(b[0]-a[0])/1000);
+    const st=pts[0];onUp({vx:(b[1]-a[1])/dt,vy:(b[2]-a[2])/dt,dx:b[1]-st[1],dy:b[2]-st[2]});pts=null};
+  el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up)}
+const arcGauss=()=>(Math.random()+Math.random()+Math.random()+Math.random()-2)*1.22;
+
+/* =============== 🏀 HOOPS (GamePigeon style): drag the ball and flick it up. 60 seconds =============== */
+function hoopsGame(){const F=arcFrame('Hoops','🏀');const G={score:0,t:60,streak:0,made:0,shots:0,hx:0,run:false,hand:null,balls:[],pops:[],swish:0};F.G=G;window._arcF=F;
+  const RIM={h:3.05,r:.23,z:4.6},BR=.12,CAM={y:1.95,z:-1.7},REST={x:0,y:1.22,z:.2},BZ=()=>RIM.z+RIM.r+.16;let f=500,cy=250;
+  F.onFit=()=>{f=F.h*1.0;cy=F.h*.47};const pj=(x,y,z)=>{const d=z-CAM.z;return{x:F.w/2+x*f/d,y:cy-(y-CAM.y)*f/d,s:f/d}};
+  /* the net: 12 strings x 4 knots that swing on springs when the ball goes through */
+  const NET=[];for(let r=0;r<4;r++)for(let i=0;i<12;i++){const a=i/12*Math.PI*2+(r%2)*Math.PI/12,rad=RIM.r*(1-r*.13),y=-(r+1)*.11;NET.push({a,rad,y,dx:0,dy:0,dz:0,vx:0,vy:0,vz:0})}
+  const newHand=()=>{G.hand={x:REST.x,y:REST.y-.6,z:REST.z,in:0,drag:false,spin:0}};newHand();
+  const stats=()=>F.stats(`<span>🏀 <b>${G.score}</b></span><span class="${G.t<10?'hot':''}">⏱ <b>${Math.ceil(G.t)}</b></span><span>Best ${arcBest('hoops')??'-'}</span>`);stats();
+  F.hint('Drag the ball and flick it up towards the hoop');F.say('<b>60 seconds</b> · flick to shoot',1600);
+  const toWorld=(sx,sy)=>{const r=F.cv.getBoundingClientRect(),d=REST.z-CAM.z;return{x:(sx-r.left-F.w/2)*d/f,y:CAM.y-(sy-r.top-cy)*d/f}};
+  arcFlick(F.cv,e=>{if(!G.hand||G.hand.in<1||F.over)return false;const w=toWorld(e.clientX,e.clientY),h=G.hand;h.drag=true;h.follow=Math.hypot(w.x-h.x,w.y-h.y)<.55;h.ox=w.x-h.x;h.oy=w.y-h.y},
+    e=>{const h=G.hand;if(!h||!h.drag||!h.follow)return;const w=toWorld(e.clientX,e.clientY);h.x=Math.max(-.7,Math.min(.7,w.x-h.ox));h.y=Math.max(.9,Math.min(1.6,w.y-h.oy))},
+    fl=>{const h=G.hand;if(!h||!h.drag)return;h.drag=false;const up=-fl.vy/F.h;if(up<.9||fl.dy>-15){F.hint('Flick faster, upwards ↑');return}
+      G.run=true;const v=Math.max(6.6,Math.min(9.4,8.1+(up-3)*.38)),a=52*Math.PI/180,vz=v*Math.cos(a),vy=v*Math.sin(a);
+      let vx=(fl.vx/(-fl.vy))*vz*.75-h.x*.25;
+      /* GamePigeon-style aim help: a close shot gets pulled towards the middle of the rim */
+      const disc=vy*vy-19.6*(RIM.h-h.y);if(disc>0){const t=(vy+Math.sqrt(disc))/9.8,lx=h.x+vx*t,lz=h.z+vz*t,ex=lx-G.hx,ez=lz-RIM.z,e2=Math.hypot(ex,ez);
+        if(e2<.4){const k2=e2<.13?.95:.6,tx=lx-ex*k2,tz=lz-ez*k2;vx=(tx-h.x)/t;const nvz=(tz-h.z)/t;vx=vx;G.shotVz=nvz;}else G.shotVz=vz}else G.shotVz=vz;
+      G.balls.push({x:h.x,y:h.y,z:h.z,vx,vy,vz:G.shotVz,t:0,rot:0,spin:-14,scored:false,rimmed:false,board:false,sq:0,hit:0});G.shots++;G.hand=null;arcSnd(220,.07,.08,'triangle');
+      setTimeout(()=>{if(!F.dead)newHand()},380);F.hint('')});
+  const kickNet=b=>{NET.forEach(n=>{const nx=G.hx+Math.cos(n.a)*n.rad,nz=RIM.z+Math.sin(n.a)*n.rad,ny=RIM.h+n.y,dx=nx-b.x,dy=ny-b.y,dz=nz-b.z,d=Math.hypot(dx,dy,dz);if(d<BR+.09){const k=(BR+.09-d)*7;n.vx+=dx/d*k+b.vx*.15;n.vy+=b.vy*.12;n.vz+=dz/d*k+b.vz*.1}})};
+  const step=dt=>{for(const b of G.balls){const py=b.y,pz=b.z;b.vy-=9.8*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;b.z+=b.vz*dt;b.t+=dt;b.rot+=b.spin*dt;b.sq=Math.max(0,b.sq-dt*6);
+      const bz=BZ();if(pz+BR<=bz&&b.z+BR>bz&&Math.abs(b.x-G.hx)<.9&&b.y>RIM.h-.25&&b.y<RIM.h+1.05){b.z=bz-BR;b.vz=-Math.abs(b.vz)*.45;b.vx*=.85;b.board=true;b.spin*=-.5;arcThud(.45)}
+      const rx=b.x-G.hx,rz=b.z-RIM.z,d=Math.hypot(rx,rz)||1e-6,nx=G.hx+rx/d*RIM.r,nz=RIM.z+rz/d*RIM.r,ex=b.x-nx,ey=b.y-RIM.h,ez=b.z-nz,dd=Math.hypot(ex,ey,ez);
+      if(dd<BR+.018){const ux=ex/dd,uy=ey/dd,uz=ez/dd,vn=b.vx*ux+b.vy*uy+b.vz*uz;if(vn<0){const e=1.42;b.vx-=e*vn*ux;b.vy-=e*vn*uy;b.vz-=e*vn*uz;b.vx*=.92;b.vz*=.92;b.x=nx+ux*(BR+.018);b.y=RIM.h+uy*(BR+.018);b.z=nz+uz*(BR+.018);b.rimmed=true;b.spin*=-.6;if(Math.abs(vn)>.4)arcSnd(160+Math.random()*40,.12,.12,'square')}}
+      if(b.y<RIM.h+.25&&b.y>RIM.h-.55&&Math.hypot(b.x-G.hx,b.z-RIM.z)<RIM.r+.1)kickNet(b);
+      if(!b.scored&&py>RIM.h&&b.y<=RIM.h&&Math.hypot(b.x-G.hx,b.z-RIM.z)<RIM.r-.02){b.scored=true;G.streak++;const fire=G.streak>=4,pts=fire?3:2;G.score+=pts;G.made++;b.vx*=.25;b.vz*=.25;b.vy*=.6;
+        const sw=!b.rimmed&&!b.board;arcSnd(sw?1250:900,.16,.13);setTimeout(()=>arcSnd(sw?1650:1200,.2,.1),80);G.pops.push({x:G.hx,y:RIM.h+.35,z:RIM.z,t:0,txt:(sw?'SWISH ':'')+'+'+pts,fire});if(navigator.vibrate)try{navigator.vibrate(18)}catch(e){}
+        if(G.streak===4)F.say('🔥 ON FIRE! 3 points a basket',1300);if(G.made===5)F.say('👀 The hoop starts moving',1300)}
+      if(b.y<BR&&b.vy<0){b.y=BR;b.vy=-b.vy*.55;b.vx*=.8;b.vz*=.8;b.sq=1;if(Math.abs(b.vy)>.6)arcThud(Math.min(.5,b.vy*.15))}
+      if(!b.done&&(b.scored?b.y<RIM.h-.6:(b.t>1.1&&b.vy<0&&b.y<RIM.h-.4)||b.t>2.4)){b.done=true;if(!b.scored)G.streak=0}}
+    G.balls=G.balls.filter(b=>b.t<3.4&&b.z<9);
+    NET.forEach(n=>{n.vx+=(-n.dx*90-n.vx*7)*dt;n.vy+=(-n.dy*90-n.vy*7)*dt;n.vz+=(-n.dz*90-n.vz*7)*dt;n.dx+=n.vx*dt;n.dy+=n.vy*dt;n.dz+=n.vz*dt});
+    G.pops.forEach(p=>p.t+=dt);G.pops=G.pops.filter(p=>p.t<1);
+    if(G.hand){const h=G.hand;h.in=Math.min(1,h.in+dt*4);if(!h.drag){h.x+=(REST.x-h.x)*Math.min(1,dt*10);const ty=REST.y+Math.sin(performance.now()/380)*.012;h.y+=(ty-h.y)*Math.min(1,dt*(h.in<1?14:10))}}};
+  F.step=step;F.loop((dt,now)=>{if(G.run&&!F.over){G.t-=dt;if(G.t<=0){G.t=0;F.over=true;setTimeout(()=>F.end(arcDone('hoops','Time!',G.score,false,`<p style="font-size:30px;margin:4px 0"><b>${G.score}</b> points</p><small>${G.made}/${G.shots} baskets</small>`),hoopsGame),900)}}
+    if(G.made>=5){const sp=Math.min(1.5,.55+(G.made-5)*.07),am=Math.min(.95,.35+(G.made-5)*.05);G.hx+=((Math.sin(now*sp)*am)-G.hx)*Math.min(1,dt*8)}
+    for(let i=0;i<5;i++)step(dt/5);stats();draw(now)});
+  const ballAt=(c,x,y,z,rot,sq,fire,alpha)=>{const p=pj(x,y,z),r=BR*p.s,sh=pj(x,0,z);c.globalAlpha=alpha==null?1:alpha;
+    c.fillStyle=`rgba(0,0,0,${Math.max(.08,.35-y*.07)})`;c.beginPath();c.ellipse(sh.x,sh.y,r*(1+y*.08),r*.28,0,0,7);c.fill();
+    if(fire){const fg=c.createRadialGradient(p.x,p.y,r*.6,p.x,p.y,r*1.9);fg.addColorStop(0,'rgba(255,170,40,.75)');fg.addColorStop(1,'rgba(255,60,0,0)');c.fillStyle=fg;c.beginPath();c.arc(p.x,p.y,r*1.9,0,7);c.fill()}
+    c.save();c.translate(p.x,p.y);c.scale(1+sq*.12,1-sq*.12);c.rotate(rot);const gg=c.createRadialGradient(-r*.35,-r*.4,r*.1,0,0,r);gg.addColorStop(0,'#ffb46a');gg.addColorStop(.7,'#e06a24');gg.addColorStop(1,'#a8461a');c.fillStyle=gg;c.beginPath();c.arc(0,0,r,0,7);c.fill();
+    c.strokeStyle='rgba(40,16,4,.85)';c.lineWidth=Math.max(1,r*.06);c.beginPath();c.moveTo(-r,0);c.lineTo(r,0);c.moveTo(0,-r);c.lineTo(0,r);c.stroke();c.beginPath();c.arc(-r*1.4,0,r*1.02,-.75,.75);c.stroke();c.beginPath();c.arc(r*1.4,0,r*1.02,Math.PI-.75,Math.PI+.75);c.stroke();
+    c.restore();c.fillStyle='rgba(255,255,255,.22)';c.beginPath();c.ellipse(p.x-r*.35,p.y-r*.45,r*.32,r*.2,-.5,0,7);c.fill();c.globalAlpha=1};
+  const draw=now=>{F.layer('bg',c=>{const W=F.w,H=F.h,fl=cy-(0-CAM.y)*f/(30-CAM.z);let g=c.createLinearGradient(0,0,0,fl);g.addColorStop(0,'#0d1426');g.addColorStop(1,'#1f2c4d');c.fillStyle=g;c.fillRect(0,0,W,fl+1);
+      for(let i=0;i<320;i++){const r1=Math.abs(Math.sin(i*12.9898)*43758.5453)%1,r2=Math.abs(Math.sin(i*78.233)*12345.678)%1,x=r1*W,y=fl*.38+r2*fl*.58;c.fillStyle=`hsla(${(i*37)%360},40%,${30+(i%5)*6}%,.5)`;c.fillRect(x,y,3,4)}
+      const sp=c.createRadialGradient(W/2,0,10,W/2,0,H*.7);sp.addColorStop(0,'rgba(255,240,200,.28)');sp.addColorStop(1,'rgba(255,240,200,0)');c.fillStyle=sp;c.fillRect(0,0,W,H);
+      g=c.createLinearGradient(0,fl,0,H);g.addColorStop(0,'#8a5a2e');g.addColorStop(1,'#c88b4e');c.fillStyle=g;c.fillRect(0,fl,W,H-fl);
+      c.strokeStyle='rgba(60,30,10,.18)';c.lineWidth=1;for(let i=-12;i<=12;i++){const a=pj(i*.35,0,-.5),b2=pj(i*.35,0,30);c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b2.x,b2.y);c.stroke()}
+      const k1=pj(-1.0,0,RIM.z-.2),k2=pj(1.0,0,RIM.z-.2),k3=pj(1.0,0,RIM.z-3.2),k4=pj(-1.0,0,RIM.z-3.2);c.fillStyle='rgba(200,40,40,.35)';c.beginPath();c.moveTo(k1.x,k1.y);c.lineTo(k2.x,k2.y);c.lineTo(k3.x,k3.y);c.lineTo(k4.x,k4.y);c.fill();
+      c.strokeStyle='rgba(255,255,255,.75)';c.lineWidth=2;c.stroke();const ft=pj(0,0,RIM.z-3.2);c.beginPath();c.ellipse(ft.x,ft.y,1.0*ft.s,1.0*ft.s*.18,0,Math.PI,0);c.stroke()});
+    const c=F.ctx,bz=BZ(),rc=pj(G.hx,RIM.h,RIM.z),rw=RIM.r*rc.s;
+    const pole=pj(G.hx,0,bz+.75),pt=pj(G.hx,RIM.h+.55,bz+.75);c.fillStyle='#2b2f38';c.fillRect(pole.x-.08*pole.s,pt.y,.16*pole.s,pole.y-pt.y);const arm=pj(G.hx,RIM.h+.45,bz);c.fillRect(pole.x-.04*pole.s,pt.y,.08*pole.s,arm.y-pt.y+8);
+    const p1=pj(G.hx-.9,RIM.h+1.05,bz),p2=pj(G.hx+.9,RIM.h-.25,bz);c.fillStyle='rgba(225,240,255,.35)';c.fillRect(p1.x,p1.y,p2.x-p1.x,p2.y-p1.y);c.strokeStyle='#f4f4f4';c.lineWidth=Math.max(2,.04*p1.s);c.strokeRect(p1.x,p1.y,p2.x-p1.x,p2.y-p1.y);
+    const q1=pj(G.hx-.3,RIM.h+.45,bz),q2=pj(G.hx+.3,RIM.h,bz);c.strokeStyle='#f4f4f4';c.strokeRect(q1.x,q1.y,q2.x-q1.x,q2.y-q1.y);
+    const nodeP=n=>pj(G.hx+Math.cos(n.a)*n.rad+n.dx,RIM.h+n.y+n.dy,RIM.z+Math.sin(n.a)*n.rad+n.dz),rimP=a=>pj(G.hx+Math.cos(a)*RIM.r,RIM.h,RIM.z+Math.sin(a)*RIM.r);
+    const netPart=back=>{c.strokeStyle='rgba(255,255,255,.85)';c.lineWidth=Math.max(1,rw*.035);for(let r=0;r<4;r++)for(let i=0;i<12;i++){const n=NET[r*12+i];if((Math.sin(n.a)>0)!==back)continue;const a=nodeP(n);
+      const up1=r?nodeP(NET[(r-1)*12+i]):rimP(n.a-Math.PI/12),up2=r?nodeP(NET[(r-1)*12+(i+(r%2?1:11))%12]):rimP(n.a+Math.PI/12);c.beginPath();c.moveTo(up1.x,up1.y);c.lineTo(a.x,a.y);c.lineTo(up2.x,up2.y);c.stroke()}};
+    const rimHalf=back=>{c.strokeStyle='#ff5a14';c.lineWidth=Math.max(3,rw*.13);c.beginPath();c.ellipse(rc.x,rc.y,rw,rw*.28,0,back?Math.PI:0,back?2*Math.PI:Math.PI);c.stroke()};
+    rimHalf(true);netPart(true);
+    const near=G.balls.filter(b=>b.z<RIM.z-RIM.r-BR*1.2),far=G.balls.filter(b=>!near.includes(b)),fire=G.streak>=3;
+    far.forEach(b=>ballAt(c,b.x,b.y,b.z,b.rot,b.sq,fire));netPart(false);rimHalf(false);near.forEach(b=>ballAt(c,b.x,b.y,b.z,b.rot,b.sq,fire));
+    G.pops.forEach(p=>{const q=pj(p.x,p.y+p.t*.5,p.z);c.globalAlpha=1-p.t;c.fillStyle=p.fire?'#ffb02e':'#fff';c.font=`900 ${Math.round(22+p.t*6)}px system-ui`;c.textAlign='center';c.fillText(p.txt,q.x,q.y);c.globalAlpha=1});
+    if(G.hand){const h=G.hand,yy=h.y-(1-h.in)*.6;ballAt(c,h.x,yy,h.z,0,0,fire,h.in)}
+    const tw=F.w*(G.t/60);c.fillStyle='rgba(255,255,255,.1)';c.fillRect(0,0,F.w,4);c.fillStyle=G.t<10?'#ff5a3c':'#ffd34d';c.fillRect(0,0,tw,4)};
   return F}
 
 /* =============== ⛳ MINI GOLF: 6 holes, drag back from the ball to putt =============== */
@@ -148,44 +187,76 @@ function dartsGame(){const F=arcFrame('Darts','🎯');const G={darts:[],score:0,
   const dart=(x,y,s)=>{const c=F.ctx;c.save();c.translate(x,y);c.scale(s,s);c.strokeStyle='#bbb';c.lineWidth=2;c.beginPath();c.moveTo(0,0);c.lineTo(9,14);c.stroke();c.fillStyle='#333';c.fillRect(8,13,4,12);c.fillStyle='#e0483a';c.beginPath();c.moveTo(11,24);c.lineTo(4,34);c.lineTo(18,34);c.fill();c.restore()};
   return F}
 
-/* =============== 🥤 CUP PONG vs an opponent: swipe to throw, 2 throws a turn, first to sink all 6 =============== */
+/* =============== 🥤 CUP PONG (GamePigeon style) ===============
+   Flick the ball. 2 balls a turn, sink both and you get the balls back. A ball that bounces on the
+   table first and still goes in takes out an extra cup. On their turn you watch their throws from
+   their side of the table. First to clear all 6 cups wins. */
 function pongGame(nOpt){const n=nOpt===undefined?mgOpponent():nOpt,who=n?n.name.split(' ')[0]:pick(['Kojo','Esi','Yaw','Ama']);
-  const F=arcFrame('Cup Pong','🥤');const CR=.062,CH=.13,BR=.022,TZ=1.8,CAM={y:.72,z:-.32};let f=500,cy=100;
-  F.onFit=()=>{f=F.h*.95;cy=F.h*.16};const pj=(x,y,z)=>{const d=z-CAM.z;return{x:F.w/2+x*f/d,y:cy-(y-CAM.y)*f/d,s:f/d}};
-  const rack=z0=>{const o=[];[[0],[-.5,.5],[-1,0,1]].forEach((row,r)=>row.forEach(c=>o.push({x:c*CR*2.1,z:z0-r*CR*1.85,in:true})));return o};
-  const G={mine:rack(.0),theirs:rack(TZ-.12).map(c=>({...c,z:TZ-.12-(TZ-.12-c.z)*-1})),turn:0,left:2,b:null,over:false};
-  F.G=G;window._arcF=F;G.theirs=[[0],[-.5,.5],[-1,0,1]].flatMap((row,r)=>row.map(c=>({x:c*CR*2.1,z:TZ-.36+r*CR*1.85,in:true})));
-  const cnt=a=>a.filter(c=>c.in).length;
-  const stats=()=>F.stats(`<span>You <b>${cnt(G.theirs)}</b> left</span><span>${esc(who)} <b>${cnt(G.mine)}</b> left</span>`);stats();
-  F.hint('Swipe up to throw. 2 throws a turn. Sink all 6 of their cups to win.');
-  const newBall=()=>{G.b={x:0,y:.32,z:.05,vx:0,vy:0,vz:0,fly:false,t:0}};newBall();
-  let sw=null;F.cv.addEventListener('pointerdown',e=>{if(G.turn!==0||G.b.fly||G.over)return;sw={x:e.clientX,y:e.clientY}});
-  F.cv.addEventListener('pointerup',e=>{if(!sw||G.b.fly)return;const dx=e.clientX-sw.x,dy=e.clientY-sw.y;sw=null;if(-dy<25)return;const p=Math.min(1.3,-dy/(F.h*.5)),v=3.0+p*2.6,a=Math.PI/4,vz=v*Math.cos(a);
-    G.b.vz=vz;G.b.vy=v*Math.sin(a);G.b.vx=dx/(-dy)*vz*.55;G.b.fly=true;F.hint('')});
-  const step=dt=>{const b=G.b;if(!b.fly)return;const py=b.y;b.vy-=9.8*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;b.z+=b.vz*dt;b.t+=dt;
-    for(const c of G.theirs){if(!c.in)continue;const d=Math.hypot(b.x-c.x,b.z-c.z);if(py>CH&&b.y<=CH){if(d<CR-BR*.6){c.in=false;b.fly=false;arcSnd(520,.1,.15);setTimeout(()=>arcSnd(780,.16,.13),100);F.say('💦 IN THE CUP!',900);stats();return afterThrow(true)}
-      if(d<CR+BR){const nx=(b.x-c.x)/d,nz=(b.z-c.z)/d;b.vx=nx*1.2+b.vx*.3;b.vz=nz*1.2+b.vz*.3;b.vy=Math.abs(b.vy)*.45;b.y=CH+.001;arcThud(.25);F.say('Rim! 😩',600)}}}
-    if(b.y<BR&&b.vy<0&&Math.abs(b.x)<.45&&b.z<TZ+.05&&b.z>-.1){b.y=BR;b.vy=-b.vy*.62;b.vx*=.85;b.vz*=.85;arcThud(.2)}
-    if(b.y<-.6||b.t>3){b.fly=false;afterThrow(false)}};
-  const afterThrow=made=>{G.left--;if(!cnt(G.theirs))return finish(true);setTimeout(()=>{if(F.dead)return;newBall();if(G.left<=0){G.turn=1;G.left=2;aiTurn()}},made?700:400)};
-  const aiTurn=()=>{F.say(`${esc(who)}'s turn`,900);let k=0;const one=()=>{if(F.dead||G.over)return;const live=G.mine.filter(c=>c.in);if(!live.length)return finish(false);const made=Math.random()<.36+Math.random()*.12;
-      setTimeout(()=>{if(F.dead||G.over)return;if(made){pick(live).in=false;arcSnd(330,.12,.12);F.say(`💦 ${esc(who)} sinks one!`,900)}else F.say(`${esc(who)} misses`,800);stats();k++;
-        if(!cnt(G.mine))return setTimeout(()=>finish(false),700);if(k<2)setTimeout(one,1000);else setTimeout(()=>{G.turn=0;F.say('Your turn',800)},1000)},700)};setTimeout(one,900)};
-  const finish=won=>{if(G.over)return;G.over=true;F.over=true;const p=P();p.needs.fun=clamp(p.needs.fun+20);if(n){n.friend=clamp(n.friend+(won?3:4))}if(won)S.wins=(S.wins||0)+1;
-    const rec=won&&arcRecord('pong',cnt(G.mine),false);advance(20);try{ev('game',{kind:'pong',win:won})}catch(e){}hud();
-    setTimeout(()=>F.end(`<div style="font-size:44px">${won?'🏆':'🥤'}</div><h3>${won?'You win!':esc(who)+' wins'}</h3><p>${won?`You won with ${cnt(G.mine)} of your cups still standing.`:`You sank ${6-cnt(G.theirs)} of 6.`}</p>${rec?'<p><b>New personal best!</b></p>':''}`,()=>pongGame(nOpt)),600)};
-  F.step=step;F.loop(dt=>{for(let i=0;i<4;i++)step(dt/4);draw()});
-  const cup=(c,col)=>{const x=F.ctx,t=pj(c.x,CH,c.z),bo=pj(c.x,0,c.z),r=CR*t.s,rb=CR*.7*bo.s;x.fillStyle=col;x.beginPath();x.moveTo(t.x-r,t.y);x.lineTo(bo.x-rb,bo.y);x.lineTo(bo.x+rb,bo.y);x.lineTo(t.x+r,t.y);x.fill();
-    x.fillStyle='rgba(255,255,255,.18)';x.fillRect(t.x-r*.55,t.y,r*.18,bo.y-t.y);x.fillStyle='#f4f4f4';x.beginPath();x.ellipse(t.x,t.y,r,r*.32,0,0,7);x.fill();x.fillStyle='#3a8ad6';x.beginPath();x.ellipse(t.x,t.y+r*.04,r*.86,r*.26,0,0,7);x.fill()};
-  const draw=()=>{F.layer('t',c=>{let g=c.createLinearGradient(0,0,0,F.h);g.addColorStop(0,'#251a35');g.addColorStop(1,'#0f0b16');c.fillStyle=g;c.fillRect(0,0,F.w,F.h);
-    const a=pj(-.45,0,TZ+.05),b=pj(.45,0,TZ+.05),d2=pj(.45,0,-.05),e=pj(-.45,0,-.05);c.fillStyle='#1d5c9e';c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.lineTo(d2.x,d2.y);c.lineTo(e.x,e.y);c.fill();
-    c.strokeStyle='rgba(255,255,255,.6)';c.lineWidth=2;c.stroke();const m1=pj(0,0,TZ+.05),m2=pj(0,0,-.05);c.beginPath();c.moveTo(m1.x,m1.y);c.lineTo(m2.x,m2.y);c.stroke();});const c=F.ctx;
-    const ball=()=>{const B=G.b,p=pj(B.x,B.y,B.z),r=Math.max(2,BR*p.s),sh=pj(B.x,0,B.z);c.fillStyle='rgba(0,0,0,.3)';c.beginPath();c.ellipse(sh.x,sh.y,r,r*.35,0,0,7);c.fill();const gg=c.createRadialGradient(p.x-r*.3,p.y-r*.3,1,p.x,p.y,r);gg.addColorStop(0,'#fff');gg.addColorStop(1,'#f0c890');c.fillStyle=gg;c.beginPath();c.arc(p.x,p.y,r,0,7);c.fill()};
-    const cups=G.theirs.filter(q=>q.in).sort((p,q)=>q.z-p.z);let drawn=false;cups.forEach(q=>{if(!drawn&&G.b.z>q.z+CR){ball();drawn=true}cup(q,'#d8352a')});if(!drawn)ball();
-    /* your rack, shown small at the bottom */const bx=78,by=40;c.fillStyle='rgba(255,255,255,.08)';c.beginPath();c.roundRect?c.roundRect(bx-70,by-26,140,50,12):c.rect(bx-70,by-26,140,50);c.fill();c.fillStyle='rgba(255,255,255,.6)';c.font='700 9px system-ui';c.textAlign='center';c.fillText('YOUR CUPS',bx,by-14);
-    G.mine.forEach((q,i)=>{const row=i===0?0:i<3?1:2,col=[0,-.5,.5,-1,0,1][i];c.fillStyle=q.in?'#2456c8':'rgba(255,255,255,.12)';c.beginPath();c.arc(bx+col*22,by+4+(row-1)*-0+row*6-6+row*4,8,0,7);c.fill()});
-    if(G.turn===1&&!G.over){c.fillStyle='rgba(255,255,255,.75)';c.font='700 13px system-ui';c.fillText(`${who} is throwing…`,F.w/2,F.h*.62)}};
-  return F}
+  const F=arcFrame('Cup Pong','🥤');const CR=.05,CB=.034,CH=.12,BR=.02,TZ=1.85,TW=.42,CAM={y:.62,z:-.55},REST={x:0,y:.3,z:.05};let f=500,cy=100;
+  F.onFit=()=>{f=F.h*1.5;cy=F.h*.12};const pj=(x,y,z)=>{const d=z-CAM.z;return{x:F.w/2+x*f/d,y:cy-(y-CAM.y)*f/d,s:f/d}};
+  const rack=()=>[[0],[-.5,.5],[-1,0,1]].flatMap((row,r)=>row.map(c=>({x:c*CR*2.12,z:1.5+r*CR*1.84,in:true,fade:1})));
+  const G={racks:[rack(),rack()],turn:0,left:2,made:0,ball:null,hand:null,drops:[],over:false,flip:0};F.G=G;window._arcF=F;
+  /* racks[0] = their cups (you aim at these), racks[1] = your cups (they aim at these) */
+  const tgt=()=>G.racks[G.turn],cnt=a=>a.filter(c=>c.in).length;
+  const stats=()=>F.stats(`<span>You <b>${6-cnt(G.racks[0])}</b>/6</span><span>${esc(who)} <b>${6-cnt(G.racks[1])}</b>/6</span>`);stats();
+  F.hint('Drag the ball and flick it towards the cups');
+  const newHand=()=>{G.hand={x:REST.x,y:REST.y-.15,z:REST.z,in:0,drag:false}};
+  const toWorld=(sx,sy)=>{const r=F.cv.getBoundingClientRect(),d=REST.z-CAM.z;return{x:(sx-r.left-F.w/2)*d/f,y:CAM.y-(sy-r.top-cy)*d/f}};
+  const throwBall=(x,y,vx,vy,vz,who2)=>{G.ball={x,y,z:REST.z,vx,vy,vz,t:0,bounced:false,rot:0,res:null,by:who2};G.hand=null;arcSnd(330,.05,.06,'triangle')};
+  /* aim help: if the ball would land close to a cup, pull it towards that cup's centre */
+  const assist=(x,y,vx,vy,vz,k)=>{const disc=vy*vy-19.6*(CH-y);if(disc<=0)return[vx,vz];const t=(vy+Math.sqrt(disc))/9.8,lx=x+vx*t,lz=REST.z+vz*t;let best=null;
+    tgt().forEach(c=>{if(!c.in)return;const d=Math.hypot(lx-c.x,lz-c.z);if(!best||d<best.d)best={d,c}});if(!best||best.d>k)return[vx,vz];const pull=best.d<.03?.9:.55,tx=lx+(best.c.x-lx)*pull,tz=lz+(best.c.z-lz)*pull;return[(tx-x)/t,(tz-REST.z)/t]};
+  arcFlick(F.cv,e=>{if(G.turn!==0||!G.hand||G.hand.in<1||G.ball||G.over)return false;const w=toWorld(e.clientX,e.clientY),h=G.hand;h.drag=true;h.follow=Math.hypot(w.x-h.x,w.y-h.y)<.12;h.ox=w.x-h.x;h.oy=w.y-h.y},
+    e=>{const h=G.hand;if(!h||!h.drag||!h.follow)return;const w=toWorld(e.clientX,e.clientY);h.x=Math.max(-.2,Math.min(.2,w.x-h.ox));h.y=Math.max(.2,Math.min(.42,w.y-h.oy))},
+    fl=>{const h=G.hand;if(!h||!h.drag)return;h.drag=false;const up=-fl.vy/F.h;if(up<.8||fl.dy>-15){F.hint('Flick faster, upwards ↑');return}
+      const v=Math.max(2.9,Math.min(4.8,3.63+(up-2.4)*.26)),a=40*Math.PI/180;let vz=v*Math.cos(a),vy=v*Math.sin(a),vx=(fl.vx/(-fl.vy))*vz*.35-h.x*.4;
+      [vx,vz]=assist(h.x,h.y,vx,vy,vz,.085);throwBall(h.x,h.y,vx,vy,vz,0);F.hint('')});
+  const resolve=(made,bounce)=>{const b=G.ball;if(!b||b.res)return;b.res=made?'in':'out';
+    if(made){G.made++;let extra=null;if(bounce){extra=tgt().find(c=>c.in);if(extra){extra.in=false;F.say(G.turn?`😩 Bounce shot! ${esc(who)} takes 2 cups`:'🔥 BOUNCE SHOT! 2 cups',1300)}}if(!bounce||!extra)F.say(G.turn?`💦 ${esc(who)} sinks one`:'💦 SPLASH!',900);stats()}
+    setTimeout(()=>{if(F.dead)return;G.ball=null;G.left--;
+      if(!cnt(tgt()))return finish(G.turn===0);
+      if(G.left<=0){if(G.made>=2){G.left=2;G.made=0;F.say(G.turn?`${esc(who)} gets the balls back`:'🙌 Balls back!',1200);return G.turn?setTimeout(aiThrow,1300):newHand()}
+        G.left=2;G.made=0;G.turn=1-G.turn;G.flip=1;F.say(G.turn?`👀 ${esc(who)}'s turn`:'Your turn',1100);if(G.turn)setTimeout(aiThrow,1300);else newHand()}
+      else G.turn?setTimeout(aiThrow,900):newHand()},made?650:350)};
+  const aiThrow=()=>{if(F.dead||G.over)return;const live=tgt().filter(c=>c.in);if(!live.length)return;const c=pick(live),x=(Math.random()-.5)*.1,y=.3,a=40*Math.PI/180,dz=c.z-REST.z+arcGauss()*.06,dx=c.x-x+arcGauss()*.045,dy=CH-y;
+    const ca=Math.cos(a),ta=Math.tan(a),v=Math.sqrt(9.8*dz*dz/(2*ca*ca*(dz*ta-dy))),vz=v*ca,t=dz/vz;G.hand={x,y,z:REST.z,in:1,drag:false};setTimeout(()=>{if(F.dead||G.over)return;throwBall(x,y,dx/t,v*Math.sin(a),vz,1)},450)};
+  const step=dt=>{const b=G.ball;G.drops.forEach(d=>{d.vy-=9.8*dt;d.x+=d.vx*dt;d.y+=d.vy*dt;d.z+=d.vz*dt;d.t+=dt});G.drops=G.drops.filter(d=>d.t<.6);G.racks.forEach(r=>r.forEach(c=>{if(!c.in&&c.fade>0)c.fade=Math.max(0,c.fade-dt*2.5)}));G.flip=Math.max(0,G.flip-dt*2.2);
+    if(G.hand){const h=G.hand;h.in=Math.min(1,h.in+dt*4);if(!h.drag){h.x+=(REST.x-h.x)*Math.min(1,dt*10);h.y+=(REST.y+Math.sin(performance.now()/400)*.006-h.y)*Math.min(1,dt*12)}}
+    if(!b||b.res)return;const py=b.y;b.vy-=9.8*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;b.z+=b.vz*dt;b.t+=dt;b.rot+=dt*9;
+    for(const c of tgt()){if(!c.in)continue;const hd=Math.hypot(b.x-c.x,b.z-c.z);
+      if(py>CH&&b.y<=CH&&hd<CR-BR*.5){c.in=false;for(let i=0;i<12;i++)G.drops.push({x:c.x,y:CH,z:c.z,vx:(Math.random()-.5)*.8,vy:.6+Math.random()*.9,vz:(Math.random()-.5)*.8,t:0});arcSnd(500,.08,.14);setTimeout(()=>arcSnd(760,.14,.12),70);return resolve(true,b.bounced)}
+      /* the rim of the cup: a ring the ball can clip and bounce off */const rx=b.x-c.x,rz=b.z-c.z,d=Math.hypot(rx,rz)||1e-6,nx=c.x+rx/d*CR,nz=c.z+rz/d*CR,ex=b.x-nx,ey=b.y-CH,ez=b.z-nz,dd=Math.hypot(ex,ey,ez);
+      if(dd<BR+.004){const ux=ex/dd,uy=ey/dd,uz=ez/dd,vn=b.vx*ux+b.vy*uy+b.vz*uz;if(vn<0){b.vx-=1.5*vn*ux;b.vy-=1.5*vn*uy;b.vz-=1.5*vn*uz;b.x=nx+ux*(BR+.004);b.y=CH+uy*(BR+.004);b.z=nz+uz*(BR+.004);arcSnd(1200,.05,.06,'square')}}
+      /* the cup's side wall */if(b.y<CH&&b.y>0&&hd<CR+BR&&hd>CR-BR){const ux=rx/d,uz=rz/d,vn=b.vx*ux+b.vz*uz;if(vn<0){b.vx-=1.6*vn*ux;b.vz-=1.6*vn*uz}}}
+    if(b.y<BR&&b.vy<0&&Math.abs(b.x)<TW&&b.z<TZ&&b.z>0){b.y=BR;b.vy=-b.vy*.62;b.vx*=.92;b.vz*=.92;if(!b.bounced&&b.t>.15)b.bounced=true;arcThud(Math.min(.4,-b.vy*.2+.1))}
+    if(b.y<-.4||b.t>2.6||b.z>TZ+.6)resolve(false)};
+  const finish=won=>{if(G.over)return;G.over=true;F.over=true;const p=P();p.needs.fun=clamp(p.needs.fun+20);if(n)n.friend=clamp(n.friend+(won?3:4));if(won)S.wins=(S.wins||0)+1;
+    const left=cnt(G.racks[1]),rec=won&&arcRecord('pong',left,false);advance(20);try{ev('game',{kind:'pong',win:won})}catch(e){}hud();
+    setTimeout(()=>F.end(`<div style="font-size:44px">${won?'🏆':'🥤'}</div><h3>${won?'You win!':esc(who)+' wins'}</h3><p>${won?`You won with ${left} of your cups still standing.`:`You sank ${6-cnt(G.racks[0])} of 6.`}</p>${rec?'<p><b>New personal best!</b></p>':''}`,()=>pongGame(nOpt)),700)};
+  F.step=step;F.loop(dt=>{for(let i=0;i<5;i++)step(dt/5);draw()});
+  const cup=(c,col)=>{if(c.fade<=0)return;const x=F.ctx,sink=(1-c.fade)*CH,t=pj(c.x,CH-sink,c.z),bo=pj(c.x,0,c.z),r=CR*t.s,rb=CB*bo.s;x.globalAlpha=c.fade;
+    const g=x.createLinearGradient(t.x-r,0,t.x+r,0);g.addColorStop(0,col[0]);g.addColorStop(.35,col[1]);g.addColorStop(1,col[0]);x.fillStyle=g;x.beginPath();x.moveTo(t.x-r,t.y);x.lineTo(bo.x-rb,bo.y);x.quadraticCurveTo(bo.x,bo.y+rb*.3,bo.x+rb,bo.y);x.lineTo(t.x+r,t.y);x.fill();
+    x.strokeStyle='rgba(255,255,255,.25)';x.lineWidth=1;x.beginPath();x.moveTo(t.x-r*.92,t.y+(bo.y-t.y)*.18);x.lineTo(t.x+r*.92,t.y+(bo.y-t.y)*.18);x.stroke();
+    x.fillStyle='#f6f6f6';x.beginPath();x.ellipse(t.x,t.y,r,r*.3,0,0,7);x.fill();x.fillStyle='#7a3b12';x.beginPath();x.ellipse(t.x,t.y+r*.05,r*.85,r*.24,0,0,7);x.fill();x.fillStyle='rgba(255,220,140,.35)';x.beginPath();x.ellipse(t.x-r*.2,t.y,r*.35,r*.08,0,0,7);x.fill();x.globalAlpha=1};
+  const ballAt=(x,y,z,rot,al)=>{const c=F.ctx,p=pj(x,y,z),r=Math.max(1.5,BR*p.s),sh=pj(x,0,z);c.globalAlpha=al==null?1:al;if(z>0&&Math.abs(x)<TW){c.fillStyle=`rgba(0,0,0,${Math.max(.05,.3-y*.4)})`;c.beginPath();c.ellipse(sh.x,sh.y,r*(1+y),r*.3*(1+y),0,0,7);c.fill()}
+    const g=c.createRadialGradient(p.x-r*.35,p.y-r*.35,r*.1,p.x,p.y,r);g.addColorStop(0,'#ffffff');g.addColorStop(.7,'#f3efe4');g.addColorStop(1,'#c9c1ad');c.fillStyle=g;c.beginPath();c.arc(p.x,p.y,r,0,7);c.fill();
+    c.strokeStyle='rgba(230,120,40,.5)';c.lineWidth=Math.max(1,r*.12);c.beginPath();c.arc(p.x,p.y,r*.55,rot,rot+1.2);c.stroke();c.globalAlpha=1};
+  const draw=()=>{F.layer('t',c=>{const W=F.w,H=F.h;let g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,'#2a1d3d');g.addColorStop(1,'#120c1c');c.fillStyle=g;c.fillRect(0,0,W,H);
+      for(let i=0;i<40;i++){c.fillStyle=`hsla(${[300,190,45][i%3]},90%,60%,.035)`;c.beginPath();c.arc((i*131)%W,(i*71)%(H*.4),20+(i%4)*14,0,7);c.fill()}
+      const a=pj(-TW,0,TZ),b=pj(TW,0,TZ),d2=pj(TW,0,0.02),e=pj(-TW,0,0.02),a2=pj(-TW,-.04,TZ),b2=pj(TW,-.04,TZ);c.fillStyle='#5a3417';c.beginPath();c.moveTo(a2.x,a2.y);c.lineTo(b2.x,b2.y);c.lineTo(b.x,b.y);c.lineTo(a.x,a.y);c.fill();
+      g=c.createLinearGradient(0,a.y,0,F.h);g.addColorStop(0,'#1f5fa8');g.addColorStop(1,'#2f7fd0');c.fillStyle=g;c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.lineTo(d2.x,d2.y);c.lineTo(e.x,e.y);c.fill();
+      c.strokeStyle='rgba(255,255,255,.85)';c.lineWidth=3;c.stroke();const m1=pj(0,0,TZ),m2=pj(0,0,0.02);c.lineWidth=1.5;c.strokeStyle='rgba(255,255,255,.5)';c.beginPath();c.moveTo(m1.x,m1.y);c.lineTo(m2.x,m2.y);c.stroke();
+      const h1=pj(-TW,0,TZ/2),h2=pj(TW,0,TZ/2);c.beginPath();c.moveTo(h1.x,h1.y);c.lineTo(h2.x,h2.y);c.stroke()});
+    const c=F.ctx,b=G.ball,cols=G.turn?['#1a3f8f','#3a78e0']:['#a3141c','#e8343c'];
+    const cups=tgt().filter(q=>q.fade>0).sort((p,q)=>q.z-p.z);let drawn=!b||b.res==='in';cups.forEach(q=>{if(!drawn&&b.z>q.z){ballAt(b.x,b.y,b.z,b.rot);drawn=true}cup(q,cols)});if(!drawn)ballAt(b.x,b.y,b.z,b.rot);
+    G.drops.forEach(d=>{const p=pj(d.x,d.y,d.z);c.fillStyle=`rgba(120,190,255,${1-d.t/.6})`;c.beginPath();c.arc(p.x,p.y,Math.max(1.2,.008*p.s),0,7);c.fill()});
+    if(G.hand){const h=G.hand;ballAt(h.x,h.y-(1-h.in)*.15,h.z,0,h.in)}
+    /* the other rack, small, top left */const other=G.racks[1-G.turn],bx=58,by=34;c.fillStyle='rgba(0,0,0,.35)';c.beginPath();c.roundRect?c.roundRect(bx-48,by-24,96,52,10):c.rect(bx-48,by-24,96,52);c.fill();
+    c.fillStyle='rgba(255,255,255,.7)';c.font='800 8.5px system-ui';c.textAlign='center';c.fillText(G.turn?'THEIR CUPS':'YOUR CUPS',bx,by-12);
+    other.forEach((q,i)=>{const r=i===0?0:i<3?1:2,col=[0,-.5,.5,-1,0,1][i];c.fillStyle=q.in?(G.turn?'#e8343c':'#3a78e0'):'rgba(255,255,255,.12)';c.beginPath();c.arc(bx+col*15,by+r*11,6,0,7);c.fill()});
+    if(G.turn===1){c.fillStyle='rgba(255,255,255,.85)';c.font='800 13px system-ui';c.fillText(`👀 ${who}'s view`,F.w/2,F.h*.12)}
+    if(G.flip>0){c.fillStyle=`rgba(10,8,16,${G.flip})`;c.fillRect(0,0,F.w,F.h)}};
+  newHand();return F}
 
 /* ---------- the arcade menu ---------- */
 const ARC_GAMES=[
