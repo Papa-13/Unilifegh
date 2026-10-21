@@ -82,7 +82,7 @@ function poolGame(nOpt,opt){opt=opt||{};const n=nOpt===undefined?mgOpponent():nO
     const src=AC.createBufferSource();src.buffer=buf;const f=AC.createBiquadFilter();f.type='bandpass';f.frequency.value=kind==='ball'?2600:kind==='cue'?1500:kind==='pocket'?220:700;f.Q.value=kind==='ball'?3:1;
     const g=AC.createGain();g.gain.value=Math.min(1,(kind==='pocket'?.9:.25+v*1.6));src.connect(f);f.connect(g);g.connect(AC.destination);src.start()}catch(e){}};
   /* ---------- DOM ---------- */
-  const ov=document.createElement('div');ov.id='poolX';document.body.appendChild(ov);
+  const ov=document.createElement('div');ov.id='poolX';document.body.appendChild(ov);FSGAME.on++;
   const ini=s=>esc(String(s||'?').trim()[0]||'?').toUpperCase();
   ov.innerHTML=`<div class="px-top"><div class="px-pl" id="pxP0"><div class="px-av">${ini(P().name||'You')}</div><div class="px-info"><b>You</b> <small class="px-lv">Lv ${poolLevel().l}</small><div class="px-balls" id="pxB0"></div><div class="px-tm"><i id="pxT0"></i></div></div></div>
     <div class="px-mid8">${opt.stake?`<span>💰 ${cedi(opt.stake*2)}</span>`:'<span>8-BALL</span>'}</div>
@@ -115,14 +115,18 @@ function poolGame(nOpt,opt){opt=opt||{};const n=nOpt===undefined?mgOpponent():nO
     if(id){const nv=[m[6],m[7],m[8]];capFill(x,y,r,nv,.5,'#fbfaf5');const d=-nv[2];
       if(d>.25&&r>=4.5){ctx.save();ctx.translate(x+nv[0]*r,y+nv[1]*r);ctx.rotate(Math.atan2(m[1],m[0]));const sc=Math.sqrt(d);ctx.scale(sc,sc);ctx.globalAlpha=Math.min(1,(d-.25)*3);ctx.fillStyle='#111';ctx.font=`800 ${Math.max(6,Math.round(r*.66))}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(id,0,.4);ctx.restore()}}
     const g=ctx.createRadialGradient(x-r*.4,y-r*.45,r*.08,x,y,r*1.05);g.addColorStop(0,'rgba(255,255,255,.6)');g.addColorStop(.3,'rgba(255,255,255,0)');g.addColorStop(.75,'rgba(0,0,0,.08)');g.addColorStop(1,'rgba(0,0,0,.45)');ctx.fillStyle=g;ctx.fillRect(x-r,y-r,2*r,2*r);ctx.restore()};
-  function draw(){if(G.dead)return;const tw=(W+2*RAIL)*k,th=(L+2*RAIL)*k;ctx.clearRect(0,0,tw,th);
+  let TBL=null;const tableLayer=()=>{const tw=(W+2*RAIL)*k,th=(L+2*RAIL)*k;if(TBL&&TBL.k===k)return TBL;const cvT=document.createElement('canvas');cvT.width=tw*dpr;cvT.height=th*dpr;cvT.k=k;const ctx0=ctx;
+    {const ctx=cvT.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);const rr=(x,y,w,h,r)=>{ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()};
     let g=ctx.createLinearGradient(0,0,tw,0);g.addColorStop(0,'#4a2a14');g.addColorStop(.5,'#6b3e1e');g.addColorStop(1,'#4a2a14');ctx.fillStyle=g;rr(0,0,tw,th,7*k);ctx.fill();
     ctx.fillStyle='#e9d7a8';[[W*.25,-RAIL/2],[W*.5,-RAIL/2],[W*.75,-RAIL/2],[W*.25,L+RAIL/2],[W*.5,L+RAIL/2],[W*.75,L+RAIL/2]].concat([1,2,3,5,6,7].flatMap(i=>[[-RAIL/2,L*i/8],[W+RAIL/2,L*i/8]])).forEach(([x,y])=>{ctx.beginPath();ctx.arc(X(x),Y(y),.75*k,0,7);ctx.fill()});
     /* cushions */ctx.fillStyle='#164a86';ctx.fillRect(X(-2.2),Y(-2.2),(W+4.4)*k,(L+4.4)*k);
     g=ctx.createRadialGradient(X(W/2),Y(L/2),10,X(W/2),Y(L/2),L*k*.62);g.addColorStop(0,'#2f7fd0');g.addColorStop(1,'#1a5aa3');ctx.fillStyle=g;ctx.fillRect(X(0),Y(0),W*k,L*k);
     ctx.strokeStyle='rgba(255,255,255,.12)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(X(0),Y(KITCHEN));ctx.lineTo(X(W),Y(KITCHEN));ctx.stroke();ctx.fillStyle='rgba(255,255,255,.25)';ctx.beginPath();ctx.arc(X(W/2),Y(L*.25),.8*k,0,7);ctx.fill();
     /* pocket jaws (cushion noses) */ctx.strokeStyle='#103a6b';ctx.lineWidth=2.2*k;ctx.lineCap='round';P_SEG.slice(6).forEach(s=>{ctx.beginPath();ctx.moveTo(X(s[0]),Y(s[1]));ctx.lineTo(X(s[2]),Y(s[3]));ctx.stroke()});
-    P_PK.forEach((p,i)=>{const gg=ctx.createRadialGradient(X(p[0]),Y(p[1]),1,X(p[0]),Y(p[1]),p[2]*k);gg.addColorStop(0,'#000');gg.addColorStop(.8,'#0b0b0b');gg.addColorStop(1,'#2a2a2a');ctx.fillStyle=gg;ctx.beginPath();ctx.arc(X(p[0]),Y(p[1]),p[2]*k,0,7);ctx.fill();
+      P_PK.forEach(p=>{const gg=ctx.createRadialGradient(X(p[0]),Y(p[1]),1,X(p[0]),Y(p[1]),p[2]*k);gg.addColorStop(0,'#000');gg.addColorStop(.8,'#0b0b0b');gg.addColorStop(1,'#2a2a2a');ctx.fillStyle=gg;ctx.beginPath();ctx.arc(X(p[0]),Y(p[1]),p[2]*k,0,7);ctx.fill()})}
+    return TBL=cvT};
+  function draw(){if(G.dead)return;G.dirty=false;const tw=(W+2*RAIL)*k,th=(L+2*RAIL)*k;ctx.clearRect(0,0,tw,th);ctx.drawImage(tableLayer(),0,0,tw,th);
+    P_PK.forEach((p,i)=>{
       if(G.turn===0&&onEight(0)&&!G.moving&&!G.over){ctx.strokeStyle=G.call===i?'#ffd34d':'rgba(255,211,77,.35)';ctx.lineWidth=G.call===i?3:1.5;ctx.beginPath();ctx.arc(X(p[0]),Y(p[1]),(p[2]+1.6)*k,0,7);ctx.stroke();if(G.call===i){ctx.fillStyle='#ffd34d';ctx.font=`900 ${11}px system-ui`;ctx.textAlign='center';ctx.fillText('8',X(p[0]),Y(p[1])+4)}}});
     const yours=G.turn===0&&!G.moving&&!G.over,aiming=yours||G.aiAim;
     if(aiming&&!G.dragCue){const c=cue(),h=rayHit(G.ang),GL=T.guide>=1||n?1e9:T.guide*100,far=h.tm>GL;if(far){h.gx=c.x+h.dx*GL;h.gy=c.y+h.dy*GL;h.tb=null}if(yours){ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(X(c.x),Y(c.y));ctx.lineTo(X(h.gx),Y(h.gy));ctx.stroke();
@@ -165,7 +169,7 @@ function poolGame(nOpt,opt){opt=opt||{};const n=nOpt===undefined?mgOpponent():nO
     txt+=`<div class="px-xp"><small>+${gain} XP · Level ${lv.l}</small><div class="bar"><i style="width:${lv.pct}%"></i></div>${G.lvUp?`<b>⬆️ Level up! You're level ${lv.l}.${POOL_TIERS.find(t=>t.lvl===lv.l)?' New opponent unlocked: '+POOL_TIERS.find(t=>t.lvl===lv.l).nm+'!':''}</b>`:''}</div>`;
     e.innerHTML=`<div class="px-endc"><div style="font-size:46px">${won?'🏆':'🎱'}</div><h3>${won?'You win!':esc(who)+' wins'}</h3><div style="margin:8px 0">${txt}</div>${opt.stake?`<p><b>${won?'+'+cedi(opt.stake*2):'-'+cedi(opt.stake)}</b></p>`:''}<button class="btn" id="pxDone" style="width:100%">Continue</button></div>`;e.hidden=false;
     ov.querySelector('#pxDone').onclick=()=>close(won,true);snd('pocket',1)};
-  const close=(won,played)=>{if(G.dead)return;G.dead=true;ov.remove();window.removeEventListener('resize',layout);S.paused=false;
+  const close=(won,played)=>{if(G.dead)return;G.dead=true;FSGAME.on=Math.max(0,FSGAME.on-1);ov.remove();window.removeEventListener('resize',layout);S.paused=false;
     if(opt.stake&&won){P().money+=opt.stake*2;toast(`💰 You won the money game: +${cedi(opt.stake*2)}`)}mgEnd(n,won,false,'pool',who)};
   /* ---------- the opponent: think in simulation ---------- */
   const clone=()=>B.map(b=>({id:b.id,x:b.x,y:b.y,vx:0,vy:0,wx:0,wy:0,wz:0,in:b.in}));
@@ -201,16 +205,16 @@ function poolGame(nOpt,opt){opt=opt||{};const n=nOpt===undefined?mgOpponent():nO
     if(G.bih&&Math.hypot(t.x-c.x,t.y-c.y)<R*3.2){G.dragCue=true;dn={cue:1};return}
     dn={x:e.clientX,y:e.clientY,a:Math.atan2(t.y-c.y,t.x-c.x),moved:false,t}});
   cv.addEventListener('pointermove',e=>{if(!dn||!yours())return;const t=toT(e),c=cue();
-    if(dn.cue){const y=G.brk?Math.max(KITCHEN+R,t.y):t.y;if(free(t.x,y,c)){c.x=t.x;c.y=y}draw();return}
-    if(!dn.moved&&Math.hypot(e.clientX-dn.x,e.clientY-dn.y)<5)return;dn.moved=true;const a=Math.atan2(t.y-c.y,t.x-c.x);let d=a-dn.a;if(d>Math.PI)d-=2*Math.PI;if(d<-Math.PI)d+=2*Math.PI;G.ang+=d;dn.a=a;draw()});
+    if(dn.cue){const y=G.brk?Math.max(KITCHEN+R,t.y):t.y;if(free(t.x,y,c)){c.x=t.x;c.y=y}G.dirty=true;return}
+    if(!dn.moved&&Math.hypot(e.clientX-dn.x,e.clientY-dn.y)<5)return;dn.moved=true;const a=Math.atan2(t.y-c.y,t.x-c.x);let d=a-dn.a;if(d>Math.PI)d-=2*Math.PI;if(d<-Math.PI)d+=2*Math.PI;G.ang+=d;dn.a=a;G.dirty=true});
   cv.addEventListener('pointerup',()=>{if(dn&&!dn.cue&&!dn.moved&&yours()){const c=cue();G.ang=Math.atan2(dn.t.y-c.y,dn.t.x-c.x)}if(dn&&dn.cue)G.dragCue=false;dn=null;draw()});
   /* fine-tune wheel */
   const fine=ov.querySelector('#pxFine');let fy=null;fine.addEventListener('pointerdown',e=>{if(!yours())return;fy=e.clientX;fine.setPointerCapture&&fine.setPointerCapture(e.pointerId)});
-  fine.addEventListener('pointermove',e=>{if(fy==null)return;const d=e.clientX-fy;fy=e.clientX;G.ang+=d*.0011;fine.style.backgroundPositionX=(parseFloat(fine.style.backgroundPositionX)||0)+d+'px';draw()});fine.addEventListener('pointerup',()=>fy=null);
+  fine.addEventListener('pointermove',e=>{if(fy==null)return;const d=e.clientX-fy;fy=e.clientX;G.ang+=d*.0011;fine.style.backgroundPositionX=(parseFloat(fine.style.backgroundPositionX)||0)+d+'px';G.dirty=true});fine.addEventListener('pointerup',()=>fy=null);
   /* power: pull the cue down and release */
   const pow=ov.querySelector('#pxPow');let py=null;const setPow=v=>{G.pw=v;ov.querySelector('#pxPf').style.height=v*100+'%';ov.querySelector('#pxPc').style.transform=`translateY(${v*(pow.clientHeight-40)}px)`};
   pow.addEventListener('pointerdown',e=>{if(!yours()||G.bih&&G.dragCue)return;if(onEight(0)&&G.call==null){say('Call your pocket first: tap a pocket');return}py=e.clientY;pow.setPointerCapture&&pow.setPointerCapture(e.pointerId)});
-  pow.addEventListener('pointermove',e=>{if(py==null)return;setPow(Math.max(0,Math.min(1,(e.clientY-py)/(pow.clientHeight*.85))));draw()});
+  pow.addEventListener('pointermove',e=>{if(py==null)return;setPow(Math.max(0,Math.min(1,(e.clientY-py)/(pow.clientHeight*.85))));G.dirty=true});
   const rel=()=>{if(py==null)return;py=null;if(G.pw<.03){setPow(0);draw();return}const pw=G.pw,err=gauss()*.0012*pw*pw;shoot(G.ang+err,pw,G.spin)};pow.addEventListener('pointerup',rel);pow.addEventListener('pointercancel',rel);
   /* spin */
   const pop=ov.querySelector('#pxSpinPop'),big=ov.querySelector('#pxBig');const showSpin=()=>{const d=ov.querySelector('#pxBigDot');d.style.left=50+G.spin.s*40+'%';d.style.top=50-G.spin.f*40+'%'};
@@ -220,7 +224,7 @@ function poolGame(nOpt,opt){opt=opt||{};const n=nOpt===undefined?mgOpponent():nO
   /* quit: tap twice */
   let qt=0;ov.querySelector('#pxX').onclick=()=>{if(G.over)return close(false,true);if(Date.now()-qt<2500){toast(`You walked away from the table. ${esc(who)} takes the game.`);close(false,false)}else{qt=Date.now();say('Tap ✕ again to forfeit',2400)}};
   /* shot clock: 40 seconds */
-  let lt=performance.now();const tick=now=>{if(G.dead)return;const dt=(now-lt)/1000;lt=now;if(G.turn===0&&!G.moving&&!G.over){G.clock+=dt;if(G.clock>=40){G.clock=0;G.ev=null;G.leftBefore=[left(0),left(1)];endShot(true)}}
+  let lt=performance.now();const tick=now=>{if(G.dead)return;if(G.dirty&&!G.moving)draw();const dt=(now-lt)/1000;lt=now;if(G.turn===0&&!G.moving&&!G.over){G.clock+=dt;if(G.clock>=40){G.clock=0;G.ev=null;G.leftBefore=[left(0),left(1)];endShot(true)}}
     [0,1].forEach(pl=>{const el=ov.querySelector('#pxT'+pl);if(el)el.style.width=(G.turn===pl&&!G.over&&!G.moving?Math.max(0,100-(pl?0:G.clock/40*100)):0)+'%'});requestAnimationFrame(tick)};requestAnimationFrame(tick);
   window.addEventListener('resize',layout);requestAnimationFrame(layout);hud2();
   say(G.turn?`${esc(who)} breaks`:'<b>Your break!</b> Place the cue ball, aim, pull the cue',2600);if(G.turn===1)setTimeout(aiTurn,1200);

@@ -13,11 +13,12 @@ function arcFrame(title,ic){try{closeSheet()}catch(e){}S.paused=true;
     <div class="ax-stage" id="axStage"><canvas></canvas><div class="px-msg" id="axMsg"></div><div class="ax-hint" id="axHint"></div></div><div class="px-end" id="axEnd" hidden></div>`;
   document.body.appendChild(ov);const cv=ov.querySelector('canvas'),ctx=cv.getContext('2d');
   const F={ov,cv,ctx,w:300,h:500,dead:false};
-  F.fit=()=>{const st=ov.querySelector('#axStage');const w=st.clientWidth,h=st.clientHeight,dpr=Math.min(2,window.devicePixelRatio||1);cv.width=w*dpr;cv.height=h*dpr;cv.style.width=w+'px';cv.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0);F.w=w;F.h=h;F.onFit&&F.onFit()};
-  F.stats=html=>{ov.querySelector('#axStats').innerHTML=html};F.hint=t=>{ov.querySelector('#axHint').innerHTML=t||''};
+  F._c={};F.layer=(key,fn)=>{let L=F._c[key];if(!L){const dpr=Math.min(2,window.devicePixelRatio||1);L=document.createElement('canvas');L.width=Math.max(1,F.w*dpr);L.height=Math.max(1,F.h*dpr);const c=L.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);fn(c);F._c[key]=L}F.ctx.drawImage(L,0,0,F.w,F.h)};
+  F.fit=()=>{F._c={};const st=ov.querySelector('#axStage');const w=st.clientWidth,h=st.clientHeight,dpr=Math.min(2,window.devicePixelRatio||1);cv.width=w*dpr;cv.height=h*dpr;cv.style.width=w+'px';cv.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0);F.w=w;F.h=h;F.onFit&&F.onFit()};
+  let lastS='',lastH=null;F.stats=html=>{if(html!==lastS){lastS=html;ov.querySelector('#axStats').innerHTML=html}};F.hint=t=>{t=t||'';if(t!==lastH){lastH=t;ov.querySelector('#axHint').innerHTML=t}};
   let mt=0;F.say=(t,ms=1500)=>{const m=ov.querySelector('#axMsg');m.innerHTML=t;m.classList.add('on');clearTimeout(mt);mt=setTimeout(()=>m.classList.remove('on'),ms)};
   F.loop=fn=>{let last=performance.now();const go=now=>{if(F.dead)return;const dt=Math.min(.04,(now-last)/1000);last=now;fn(dt,now/1000);requestAnimationFrame(go)};requestAnimationFrame(go)};
-  F.close=()=>{if(F.dead)return;F.dead=true;ov.remove();window.removeEventListener('resize',F.fit);S.paused=false;F.onClose&&F.onClose()};
+  FSGAME.on++;F.close=()=>{if(F.dead)return;F.dead=true;FSGAME.on=Math.max(0,FSGAME.on-1);ov.remove();window.removeEventListener('resize',F.fit);S.paused=false;F.onClose&&F.onClose()};
   F.end=(html,again)=>{const e=ov.querySelector('#axEnd');e.innerHTML=`<div class="px-endc">${html}<div class="row" style="gap:8px;margin-top:12px">${again?`<button class="ghost" id="axAgain" style="flex:1">Play again · ${cedi(ARC_FEE)}</button>`:''}<button class="btn" id="axDone" style="flex:1">Done</button></div></div>`;e.hidden=false;
     ov.querySelector('#axDone').onclick=F.close;if(again)ov.querySelector('#axAgain').onclick=()=>{if(!spend(ARC_FEE))return;F.close();setTimeout(again,60)}};
   let qt=0;ov.querySelector('#axX').onclick=()=>{if(!ov.querySelector('#axEnd').hidden||F.over)return F.close();if(Date.now()-qt<2500)return F.close();qt=Date.now();F.say('Tap ✕ again to quit',2200)};
@@ -47,9 +48,9 @@ function hoopsGame(){const F=arcFrame('Hoops','🏀');const G={score:0,t:60,stre
   F.step=step;F.loop((dt,now)=>{if(G.run&&!F.over){G.t-=dt;if(G.t<=0){G.t=0;F.over=true;setTimeout(()=>F.end(arcDone('hoops','Time!',G.score,false,`<p style="font-size:30px;margin:4px 0"><b>${G.score}</b> points</p><small>${G.made}/${G.shots} baskets</small>`),hoopsGame),500)}}
     if(G.made>=5){const sp=Math.min(1.6,.5+(G.made-5)*.08);G.hx=Math.sin(now*sp)*Math.min(1,.35+(G.made-5)*.05)}
     for(let i=0;i<4;i++)step(dt/4);stats();draw()});
-  const draw=()=>{const c=F.ctx,W=F.w,H=F.h;let g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,'#1b2440');g.addColorStop(.55,'#2b3a63');g.addColorStop(.56,'#a8733f');g.addColorStop(1,'#6e4524');c.fillStyle=g;c.fillRect(0,0,W,H);
+  const draw=()=>{F.layer('bg',c=>{const W=F.w,H=F.h;let g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,'#1b2440');g.addColorStop(.55,'#2b3a63');g.addColorStop(.56,'#a8733f');g.addColorStop(1,'#6e4524');c.fillStyle=g;c.fillRect(0,0,W,H);
     c.strokeStyle='rgba(255,255,255,.08)';for(let i=0;i<14;i++){const a=pj(-3+i*.5,0,0),b2=pj(-3+i*.5,0,9);c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b2.x,b2.y);c.stroke()}
-    const lp=pj(0,0,RIM.z-1.2),lr=1.8*lp.s;c.strokeStyle='rgba(255,255,255,.5)';c.lineWidth=2;c.beginPath();c.ellipse(lp.x,lp.y,lr,lr*.12,0,0,Math.PI*2);c.stroke();
+    const lp=pj(0,0,RIM.z-1.2),lr=1.8*lp.s;c.strokeStyle='rgba(255,255,255,.5)';c.lineWidth=2;c.beginPath();c.ellipse(lp.x,lp.y,lr,lr*.12,0,0,Math.PI*2);c.stroke();});const c=F.ctx;
     /* backboard + pole */const bz=RIM.z+RIM.r+.15,p1=pj(G.hx-.9,RIM.h+1.05,bz),p2=pj(G.hx+.9,RIM.h-.2,bz),pole=pj(G.hx,0,bz+.6),pt=pj(G.hx,RIM.h+.5,bz+.6);
     c.fillStyle='#555';c.fillRect(pole.x-5,pt.y,10,pole.y-pt.y);c.fillStyle='rgba(255,255,255,.92)';c.fillRect(p1.x,p1.y,p2.x-p1.x,p2.y-p1.y);c.strokeStyle='#d33';c.lineWidth=3;c.strokeRect(p1.x+2,p1.y+2,p2.x-p1.x-4,p2.y-p1.y-4);
     const q1=pj(G.hx-.3,RIM.h+.45,bz),q2=pj(G.hx+.3,RIM.h,bz);c.strokeRect(q1.x,q1.y,q2.x-q1.x,q2.y-q1.y);
@@ -100,19 +101,22 @@ function golfGame(){const F=arcFrame('Mini Golf','⛳');const G={hole:0,strokes:
       F.end(arcDone('golf','Round complete',tot,true,`<p style="font-size:26px;margin:4px 0"><b>${tot}</b> strokes · ${d===0?'even par':d>0?'+'+d:d}</p><div class="gcard">${G.card.map((c,i)=>`<span><small>${i+1}</small><b class="${c<GOLF[i].par?'u':c>GOLF[i].par?'o':''}">${c}</b></span>`).join('')}</div>`),golfGame);return}
     G.hole++;start()};
   F.step=step;F.loop((dt,t)=>{for(let i=0;i<4;i++)step(dt/4,t);draw(t)});
-  const draw=t=>{const c=F.ctx,h=H();c.fillStyle='#173d22';c.fillRect(0,0,F.w,F.h);c.fillStyle='rgba(255,255,255,.03)';for(let i=0;i<F.w;i+=18)c.fillRect(i,0,9,F.h);
+  const draw=t=>{const h=H();F.layer('h'+G.hole,c=>{c.fillStyle='#173d22';c.fillRect(0,0,F.w,F.h);c.fillStyle='rgba(255,255,255,.03)';for(let i=0;i<F.w;i+=18)c.fillRect(i,0,9,F.h);
     c.save();c.beginPath();h.poly.forEach((p,i)=>c[i?'lineTo':'moveTo'](X(p[0]),Y(p[1])));c.closePath();c.fillStyle='#3fae4a';c.fill();c.clip();for(let y=0;y<180;y+=12){c.fillStyle='rgba(255,255,255,.05)';c.fillRect(0,Y(y),F.w,6*k)}
     (h.sand||[]).forEach(r=>{c.fillStyle='#e6d39a';c.beginPath();c.ellipse(X(r[0]+r[2]/2),Y(r[1]+r[3]/2),r[2]/2*k,r[3]/2*k,0,0,7);c.fill()});
-    (h.water||[]).forEach(r=>{c.fillStyle='#2a83c9';c.fillRect(X(r[0]),Y(r[1]),r[2]*k,r[3]*k);c.strokeStyle='rgba(255,255,255,.35)';for(let i=0;i<4;i++){c.beginPath();const yy=Y(r[1]+3+i*4);for(let x=0;x<=r[2];x+=2)c.lineTo(X(r[0]+x),yy+Math.sin(x*.5+t*3+i)*1.5);c.stroke()}});c.restore();
+    (h.water||[]).forEach(r=>{c.fillStyle='#2a83c9';c.fillRect(X(r[0]),Y(r[1]),r[2]*k,r[3]*k)});c.restore();
     c.strokeStyle='#8b5a2b';c.lineWidth=2.4*k;c.lineCap='round';c.beginPath();h.poly.forEach((p,i)=>c[i?'lineTo':'moveTo'](X(p[0]),Y(p[1])));c.closePath();c.stroke();(h.walls||[]).forEach(w=>{c.beginPath();c.moveTo(X(w[0]),Y(w[1]));c.lineTo(X(w[2]),Y(w[3]));c.stroke()});
     (h.bump||[]).forEach(([x,y,r])=>{c.fillStyle='#d8352a';c.beginPath();c.arc(X(x),Y(y),r*k,0,7);c.fill();c.fillStyle='#fff';c.beginPath();c.arc(X(x),Y(y),r*k*.55,0,7);c.fill();c.fillStyle='#d8352a';c.beginPath();c.arc(X(x),Y(y),r*k*.25,0,7);c.fill()});
-    if(h.mill){const m=h.mill,a=t*m.spd;c.strokeStyle='#5b3a1e';c.lineWidth=2.2*k;[0,Math.PI].forEach(o=>{c.beginPath();c.moveTo(X(m.x),Y(m.y));c.lineTo(X(m.x+Math.cos(a+o)*m.len),Y(m.y+Math.sin(a+o)*m.len));c.stroke()});c.fillStyle='#e8b24a';c.beginPath();c.arc(X(m.x),Y(m.y),2*k,0,7);c.fill()}
     c.fillStyle='#0b0b0b';c.beginPath();c.arc(X(h.cup[0]),Y(h.cup[1]),CR*k,0,7);c.fill();c.strokeStyle='#ddd';c.lineWidth=1.5;c.beginPath();c.moveTo(X(h.cup[0]),Y(h.cup[1]));c.lineTo(X(h.cup[0]),Y(h.cup[1]-16));c.stroke();
+    c.fillStyle='rgba(255,255,255,.85)';c.font='800 12px system-ui';c.textAlign='left';c.fillText(`Par ${h.par}`,8,F.h-10)});
+    const c=F.ctx;
+    (h.water||[]).forEach(r=>{c.strokeStyle='rgba(255,255,255,.35)';c.lineWidth=1;for(let i=0;i<4;i++){c.beginPath();const yy=Y(r[1]+3+i*4);for(let x=0;x<=r[2];x+=3)c.lineTo(X(r[0]+x),yy+Math.sin(x*.5+t*3+i)*1.5);c.stroke()}});
+    if(h.mill){const m=h.mill,a=t*m.spd;c.strokeStyle='#5b3a1e';c.lineWidth=2.2*k;c.lineCap='round';[0,Math.PI].forEach(o=>{c.beginPath();c.moveTo(X(m.x),Y(m.y));c.lineTo(X(m.x+Math.cos(a+o)*m.len),Y(m.y+Math.sin(a+o)*m.len));c.stroke()});c.fillStyle='#e8b24a';c.beginPath();c.arc(X(m.x),Y(m.y),2*k,0,7);c.fill()}
     c.fillStyle='#e0483a';c.beginPath();c.moveTo(X(h.cup[0]),Y(h.cup[1]-16));c.lineTo(X(h.cup[0]+9+Math.sin(t*4)),Y(h.cup[1]-13));c.lineTo(X(h.cup[0]),Y(h.cup[1]-10));c.fill();
     const b=G.b;if(G.aim&&G.aim.cur){const dx=G.aim.x-G.aim.cur.x,dy=G.aim.y-G.aim.cur.y,l=Math.hypot(dx,dy),p=Math.min(1,l/45);if(l>2){const ux=dx/l,uy=dy/l;c.setLineDash([4,5]);c.strokeStyle=`rgba(255,255,255,.9)`;c.lineWidth=2;c.beginPath();c.moveTo(X(b.x),Y(b.y));c.lineTo(X(b.x+ux*(8+p*38)),Y(b.y+uy*(8+p*38)));c.stroke();c.setLineDash([]);
       c.fillStyle=`hsl(${120-p*120},80%,55%)`;c.fillRect(X(b.x)-14,Y(b.y)+5*k,28*p,4)}}
     if(!(G.sink&&G.sink<.8)){const r=BR*k*(G.sink?Math.max(.3,G.sink):1);c.fillStyle='rgba(0,0,0,.3)';c.beginPath();c.arc(X(b.x)+1.5,Y(b.y)+2,r,0,7);c.fill();const gg=c.createRadialGradient(X(b.x)-r*.4,Y(b.y)-r*.4,r*.1,X(b.x),Y(b.y),r);gg.addColorStop(0,'#fff');gg.addColorStop(1,'#cfcfcf');c.fillStyle=gg;c.beginPath();c.arc(X(b.x),Y(b.y),r,0,7);c.fill()}
-    c.fillStyle='rgba(255,255,255,.85)';c.font='800 12px system-ui';c.textAlign='left';c.fillText(`Par ${h.par}`,8,F.h-10)};
+  };
   start();return F}
 
 /* =============== 🎯 DARTS: hold to steady your hand, let go to throw. 9 darts =============== */
@@ -133,11 +137,11 @@ function dartsGame(){const F=arcFrame('Darts','🎯');const G={darts:[],score:0,
       if(G.darts.length%3===0&&G.darts.length<9)setTimeout(()=>{if(!F.dead)F.say(`Round ${G.darts.length/3+1}`,900)},850);
       if(G.darts.length>=9){F.over=true;setTimeout(()=>F.end(arcDone('darts','Nine darts done',G.score,false,`<p style="font-size:30px;margin:4px 0"><b>${G.score}</b> points</p><small>${G.darts.map(d=>d.lab||'0').join(' · ')}</small>`),dartsGame),900)}}}
     draw()});
-  const draw=()=>{const c=F.ctx;c.fillStyle='#16233a';c.fillRect(0,0,F.w,F.h);c.fillStyle='#24344f';c.fillRect(0,0,F.w,F.h*.82);
+  const draw=()=>{F.layer('board',c=>{c.fillStyle='#16233a';c.fillRect(0,0,F.w,F.h);c.fillStyle='#24344f';c.fillRect(0,0,F.w,F.h*.82);
     c.fillStyle='#111';c.beginPath();c.arc(cx,cy,R*1.18,0,7);c.fill();
     for(let i=0;i<20;i++){const a0=(i*18-9-90)*Math.PI/180,a1=a0+18*Math.PI/180,dark=i%2===0;[[170,162,dark?'#d8352a':'#1f8a4c'],[162,107,dark?'#111':'#f2e6c9'],[107,99,dark?'#d8352a':'#1f8a4c'],[99,15.9,dark?'#111':'#f2e6c9']].forEach(([ro,ri,col])=>{c.fillStyle=col;c.beginPath();c.arc(cx,cy,ro/170*R,a0,a1);c.arc(cx,cy,ri/170*R,a1,a0,true);c.closePath();c.fill()})}
     c.fillStyle='#1f8a4c';c.beginPath();c.arc(cx,cy,15.9/170*R,0,7);c.fill();c.fillStyle='#d8352a';c.beginPath();c.arc(cx,cy,6.35/170*R,0,7);c.fill();
-    c.fillStyle='#fff';c.font=`700 ${Math.round(R*.1)}px system-ui`;c.textAlign='center';c.textBaseline='middle';DART_N.forEach((n,i)=>{const a=(i*18-90)*Math.PI/180;c.fillText(n,cx+Math.cos(a)*R*1.09,cy+Math.sin(a)*R*1.09)});
+    c.fillStyle='#fff';c.font=`700 ${Math.round(R*.1)}px system-ui`;c.textAlign='center';c.textBaseline='middle';DART_N.forEach((n,i)=>{const a=(i*18-90)*Math.PI/180;c.fillText(n,cx+Math.cos(a)*R*1.09,cy+Math.sin(a)*R*1.09)});});const c=F.ctx;
     G.darts.forEach((d,i)=>{if(i<Math.floor((G.darts.length-1)/3)*3)return;dart(d.x,d.y,1)});
     if(G.fly){const s=1+ (1-G.fly.t/.22)*1.5;dart(G.fly.x,G.fly.y+(1-G.fly.t/.22)*R*.6,s)}
     if(G.hold||!G.fly&&!F.over){const a=G.aim;c.strokeStyle=G.hold?'#ffd34d':'rgba(255,255,255,.5)';c.lineWidth=2;c.beginPath();c.arc(a.x,a.y,9,0,7);c.moveTo(a.x-15,a.y);c.lineTo(a.x-4,a.y);c.moveTo(a.x+4,a.y);c.lineTo(a.x+15,a.y);c.moveTo(a.x,a.y-15);c.lineTo(a.x,a.y-4);c.moveTo(a.x,a.y+4);c.lineTo(a.x,a.y+15);c.stroke()}};
@@ -173,9 +177,9 @@ function pongGame(nOpt){const n=nOpt===undefined?mgOpponent():nOpt,who=n?n.name.
   F.step=step;F.loop(dt=>{for(let i=0;i<4;i++)step(dt/4);draw()});
   const cup=(c,col)=>{const x=F.ctx,t=pj(c.x,CH,c.z),bo=pj(c.x,0,c.z),r=CR*t.s,rb=CR*.7*bo.s;x.fillStyle=col;x.beginPath();x.moveTo(t.x-r,t.y);x.lineTo(bo.x-rb,bo.y);x.lineTo(bo.x+rb,bo.y);x.lineTo(t.x+r,t.y);x.fill();
     x.fillStyle='rgba(255,255,255,.18)';x.fillRect(t.x-r*.55,t.y,r*.18,bo.y-t.y);x.fillStyle='#f4f4f4';x.beginPath();x.ellipse(t.x,t.y,r,r*.32,0,0,7);x.fill();x.fillStyle='#3a8ad6';x.beginPath();x.ellipse(t.x,t.y+r*.04,r*.86,r*.26,0,0,7);x.fill()};
-  const draw=()=>{const c=F.ctx;let g=c.createLinearGradient(0,0,0,F.h);g.addColorStop(0,'#251a35');g.addColorStop(1,'#0f0b16');c.fillStyle=g;c.fillRect(0,0,F.w,F.h);
+  const draw=()=>{F.layer('t',c=>{let g=c.createLinearGradient(0,0,0,F.h);g.addColorStop(0,'#251a35');g.addColorStop(1,'#0f0b16');c.fillStyle=g;c.fillRect(0,0,F.w,F.h);
     const a=pj(-.45,0,TZ+.05),b=pj(.45,0,TZ+.05),d2=pj(.45,0,-.05),e=pj(-.45,0,-.05);c.fillStyle='#1d5c9e';c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.lineTo(d2.x,d2.y);c.lineTo(e.x,e.y);c.fill();
-    c.strokeStyle='rgba(255,255,255,.6)';c.lineWidth=2;c.stroke();const m1=pj(0,0,TZ+.05),m2=pj(0,0,-.05);c.beginPath();c.moveTo(m1.x,m1.y);c.lineTo(m2.x,m2.y);c.stroke();
+    c.strokeStyle='rgba(255,255,255,.6)';c.lineWidth=2;c.stroke();const m1=pj(0,0,TZ+.05),m2=pj(0,0,-.05);c.beginPath();c.moveTo(m1.x,m1.y);c.lineTo(m2.x,m2.y);c.stroke();});const c=F.ctx;
     const ball=()=>{const B=G.b,p=pj(B.x,B.y,B.z),r=Math.max(2,BR*p.s),sh=pj(B.x,0,B.z);c.fillStyle='rgba(0,0,0,.3)';c.beginPath();c.ellipse(sh.x,sh.y,r,r*.35,0,0,7);c.fill();const gg=c.createRadialGradient(p.x-r*.3,p.y-r*.3,1,p.x,p.y,r);gg.addColorStop(0,'#fff');gg.addColorStop(1,'#f0c890');c.fillStyle=gg;c.beginPath();c.arc(p.x,p.y,r,0,7);c.fill()};
     const cups=G.theirs.filter(q=>q.in).sort((p,q)=>q.z-p.z);let drawn=false;cups.forEach(q=>{if(!drawn&&G.b.z>q.z+CR){ball();drawn=true}cup(q,'#d8352a')});if(!drawn)ball();
     /* your rack, shown small at the bottom */const bx=78,by=40;c.fillStyle='rgba(255,255,255,.08)';c.beginPath();c.roundRect?c.roundRect(bx-70,by-26,140,50,12):c.rect(bx-70,by-26,140,50);c.fill();c.fillStyle='rgba(255,255,255,.6)';c.font='700 9px system-ui';c.textAlign='center';c.fillText('YOUR CUPS',bx,by-14);

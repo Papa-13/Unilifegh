@@ -127,6 +127,8 @@ function update(dt){
   needWatch(dt);
   hudT+=dt;if(hudT>.25){hudT=0;hud();acts();drawMini();stageCheck()}
 }
+/* full-screen mini-games pause the 3D world so they get the whole GPU and run smooth */
+const FSGAME={on:0};
 function loop(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;
-  if(S&&!$('game').hidden){if(sharedClock()){S.speed=1;if(S.paused){syncClock();hourly()}}const sp=S.speed??1;if(sp>0){const n=[0,1,2,3][sp];S._cm=SPEEDS[sp]/n;for(let i=0;i<n;i++){if(!S.paused)update(dt);if(!IS)updTraffic(dt)}}else{hudT+=dt;if(hudT>.25){hudT=0;hud()}}render(dt)}
+  if(S&&!$('game').hidden&&!FSGAME.on){if(sharedClock()){S.speed=1;if(S.paused){syncClock();hourly()}}const sp=S.speed??1;if(sp>0){const n=[0,1,2,3][sp];S._cm=SPEEDS[sp]/n;for(let i=0;i<n;i++){if(!S.paused)update(dt);if(!IS)updTraffic(dt)}}else{hudT+=dt;if(hudT>.25){hudT=0;hud()}}render(dt)}
   if(pvOn)renderPreview(dt);requestAnimationFrame(loop)}
