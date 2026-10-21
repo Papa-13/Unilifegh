@@ -31,7 +31,7 @@ const stepBar=i=>`<div class="steps" aria-label="Step ${i+1} of ${STEPS.length}:
 /* the launch animation lives in index.html so it shows while the game downloads.
    It stays at least until its letters have landed, then wipes up. Tap to skip once the logo is in. */
 function splashDone(){const sp=$('splash');if(!sp||sp.dataset.go)return;sp.dataset.go=1;
-  const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches,wait=Math.max(0,(reduce?600:4200)-performance.now());
+  const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches,wait=Math.max(0,(reduce?900:5000)-performance.now());
   const out=()=>{sp.classList.add('out');setTimeout(()=>sp.remove(),750)};
   const t=setTimeout(out,wait);sp.addEventListener('click',()=>{if(performance.now()>500){clearTimeout(t);out()}})}
 
