@@ -23,6 +23,7 @@ const B=[
  {id:'pharm',name:'Campus Pharmacy',x:1140,y:1145,w:230,h:150,ht:2.4,c:0xf3f3f0,roof:0x2f8a4a,door:[1255,1127],zone:'c',deco:1},
  {id:'shawarma',name:'Shawarma & Pizza Spot',x:1410,y:1145,w:260,h:150,ht:2.4,c:0xf0e2c8,roof:0xc2572e,door:[1540,1127],zone:'c',deco:1},
  {id:'market',name:'Campus Market',x:700,y:1450,w:320,h:150,open:1,c:0x8a7458,door:[860,1540],zone:'c'},
+ {id:'arcade',name:'Game Zone Arcade',x:1060,y:1855,w:260,h:150,ht:3.2,c:0x1c2340,roof:0x1b6bff,door:[1190,2023],zone:'c'},
  {id:'club',name:'Club Vibes',x:700,y:1855,w:240,h:150,ht:3.4,c:0x221d2e,roof:0x7a2ea0,door:[820,2023],zone:'c'},
  {id:'senate',name:'Administration',x:2100,y:475,w:300,h:170,ht:3.6,c:0xe6dcc6,roof:0x2f4e6b,door:[2250,457],zone:'f',deco:1},
  {id:'greathall',name:'Great Hall',x:2450,y:475,w:300,h:180,ht:4.2,c:0xe9dfc9,roof:0x8e2a3a,door:[2600,457],zone:'f',deco:1},

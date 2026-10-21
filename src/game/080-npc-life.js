@@ -14,7 +14,7 @@ function planFor(n){
   if(Math.random()<.18)return{b:n.home,hide:true};
   if(h<9)return{b:pick(['canteen','canteen','lib',n.home,'gym'])};
   if(h<17)return{b:pick(['lib','canteen','print','garden','field','office','mall','square','lib','salon','clinic','court','terminal','taxi','market','pool',n.col,n.col,'bank','books'])};
-  if(h<19)return{b:pick(['field','court','volley','gym','canteen','garden','lake','square',n.home,'pool','market'])};
+  if(h<19)return{b:pick(['arcade','field','court','volley','gym','canteen','garden','lake','square',n.home,'pool','market'])};
   if(fnight()&&Math.random()<.6)return{b:'square'};
   return{b:pick(['night','night','night',n.home,'square','lake',h<22?'resto':'night'])};
 }
