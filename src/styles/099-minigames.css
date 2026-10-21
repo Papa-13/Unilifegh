@@ -70,3 +70,5 @@
 .ax-stats .hot{background:rgba(255,90,60,.3)}
 .arcX .px-msg{top:28%}
 .chip.on{background:linear-gradient(135deg,#e8b24a,#c98a22);color:#2a1a06;border-color:transparent;font-weight:700}
+.arcX.cine .px-msg{top:56%}
+.cn-bar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:8px 12px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.6))}

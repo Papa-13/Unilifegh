@@ -42,7 +42,7 @@ function buildArch(b,s,cx,cz,w,d,f){
   const add=(k,geo,x,y,z,ry,sx,sy,sz,rx=0,rz=0)=>{E.set(rx,ry,rz,'YXZ');Q.setFromEuler(E);M.compose(V.set(x,y,z),Q,SC.set(sx,sy,sz));(B[k]=B[k]||[]).push({geo,m:M.clone()})};
   const bx=(k,sx,sy,sz,x,y,z,ry=0)=>add(k,AG.box,x,y,z,ry,sx,sy,sz);
   const H=b.ht,id=b.id,zone=b.zone,home=!!b.home;
-  const style=id==='senate'?'senate':id==='lib'?'library':id==='greathall'?'hall':id==='chapel'?'chapel':id==='mosque'?'mosque':id==='club'||id==='arcade'?'club':id==='mall'?'mall':(id==='unity'||id==='bank')?'bank':HT(id)==='royal'?'tower':
+  const style=id==='senate'?'senate':id==='lib'?'library':id==='greathall'?'hall':id==='chapel'?'chapel':id==='mosque'?'mosque':id==='club'||id==='arcade'||id==='cinema'?'club':id==='mall'?'mall':(id==='unity'||id==='bank')?'bank':HT(id)==='royal'?'tower':
     id==='gym'?'sports':home?'hostel':zone==='c'?'shop':'college';
   const roofT={hostel:HT(id)==='lodge'?'corr':'hip',chapel:'gable',sports:'flat',college:['canteen','office','print','clinic'].includes(id)?'hip':'flat'}[style]||'flat';
   const floors=style==='mosque'?2:Math.max(1,Math.round((H-.2)/1.2)),fh=(H-.2)/floors;

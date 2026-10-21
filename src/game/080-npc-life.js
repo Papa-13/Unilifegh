@@ -16,7 +16,7 @@ function planFor(n){
   if(h<17)return{b:pick(['lib','canteen','print','garden','field','office','mall','square','lib','salon','clinic','court','terminal','taxi','market','pool',n.col,n.col,'bank','books'])};
   if(h<19)return{b:pick(['arcade','field','court','volley','gym','canteen','garden','lake','square',n.home,'pool','market'])};
   if(fnight()&&Math.random()<.6)return{b:'square'};
-  return{b:pick(['night','night','night',n.home,'square','lake',h<22?'resto':'night'])};
+  return{b:pick(['night','night','night',n.home,'square','lake',h<22?'resto':'night','cinema'])};
 }
 const npcMuslim=n=>{if(n.ints.includes('Church'))return false;let h=7;String(n.id).split('').forEach(c=>h=(h*29+c.charCodeAt(0))%991);return h%100<28};
 const fnight=()=>day()===S.semStart+4&&hour()>=19&&hour()<23.5;
