@@ -42,11 +42,13 @@ const TV_SONG=['Kofi Vibes · Sunday Jollof','Ama Gold · Odo Bebree','DJ Kwabs 
 /* find the TV and its screen in the room (works for the auto-placed TV and one you placed yourself) */
 function tvFind(){if(!IS||!IS.tv){TV.g=TV.scr=null;return null}if(TV.scr&&TV.scr.parent&&TV._is===IS)return TV.scr;TV.scr=null;TV._is=IS;
   IS.scene.traverse(o=>{const gp=o.geometry&&o.geometry.parameters;if(!TV.scr&&gp&&Math.abs(gp.width-1.2)<.001&&Math.abs(gp.height-.66)<.001&&Math.abs(gp.depth-.01)<.001)TV.scr=o});
-  if(TV.scr){TV.g=TV.scr.parent;TV.mat0=TV.scr.material;if(!TV.on){TV.scr.material=basic(0x0e1318)}}return TV.scr}
+  if(TV.scr){TV.g=TV.scr.parent;TV.mat0=TV.scr.material;try{const sc=TV.scr.position,pan=TV.g.children.find(o=>{const q=o.geometry&&o.geometry.parameters;return q&&Math.abs(q.width-1.3)<.001&&Math.abs(q.height-.75)<.001});if(pan&&!TV.g.userData.tvBack){TV.g.userData.tvBack=1;const dir=Math.sign(sc.z-pan.position.z)||1;
+    if(!TV.g.children.some(o=>{const q=o.geometry&&o.geometry.parameters;return q&&Math.abs(q.width-.8)<.001&&Math.abs(q.height-.45)<.001}))box(.85,.46,.07,lam(0x34383e),sc.x,sc.y,pan.position.z-dir*.06,TV.g);
+    TV.led=box(.03,.03,.012,basic(0xff3030),sc.x+.55,sc.y-.355,sc.z+dir*.005,TV.g)}}catch(e){}if(!TV.on){TV.scr.material=basic(0x172230)}}return TV.scr}
 function tvPower(on,auto){if(on&&!tvFind())return;TV.on=!!on;TV.auto=!!(on&&auto);clearInterval(TV.timer);TV.timer=null;
   if(TV.on){if(!TV.cv){TV.cv=document.createElement('canvas');TV.cv.width=256;TV.cv.height=144;TV.tex=new THREE.CanvasTexture(TV.cv)}TV.scr.material=new THREE.MeshBasicMaterial({map:TV.tex});TV.t0=performance.now();
     tvDraw();TV.timer=setInterval(()=>{if(!IS||!TV.scr||!TV.scr.parent||TV._is!==IS){tvPower(false);return}tvDraw()},110);if(!auto)toast(`📺 ${TV_CH[tvCh()].ic} ${TV_CH[tvCh()].name}`)}
-  else if(TV.scr)TV.scr.material=basic(0x0e1318);tvRemote()}
+  else if(TV.scr)TV.scr.material=basic(0x172230);try{if(TV.led)TV.led.material=basic(TV.on?0x35e07a:0xff3030)}catch(e){}tvRemote()}
 function tvSet(c){const p=P();p.tvCh=((c%TV_CH.length)+TV_CH.length)%TV_CH.length;TV.t0=performance.now();if(!TV.on)tvPower(true);else{tvDraw();tvRemote()}
   const C=TV_CH[p.tvCh];toast(`📺 ${C.ic} ${C.name}`);try{if(S.busy&&/^Watching TV|movie/.test(S.busy.label)&&C.k==='news'&&Math.random()<.4)toast(`🗞️ ${pick(TV_NEWS)}`)}catch(e){}}
 function tvChannelSheet(){placeSheet('📡 Pick a channel',TV_CH.map((c,i)=>`${c.ic} ${c.name}${i===tvCh()&&TV.on?' · on now':''}`),i=>{closeSheet();tvSet(i)})}
