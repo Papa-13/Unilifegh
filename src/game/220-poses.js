@@ -1,4 +1,4 @@
-const _uq1=new THREE.Quaternion(),_uq2=new THREE.Quaternion();
+const _uq1=new THREE.Quaternion(),_uq2=new THREE.Quaternion(),_lqA=new THREE.Quaternion(),_lqB=new THREE.Quaternion(),_lX=new THREE.Vector3(1,0,0),_lY=new THREE.Vector3(0,1,0);
 /* ================= poses & animation ================= */
 /* a bite of food, step by step: scoop from the plate, lift to the mouth, bite, lower, chew */
 const ss=(a,b,x)=>{const k=clamp((x-a)/(b-a),0,1);return k*k*(3-2*k)};
@@ -98,6 +98,9 @@ function posePerson(c,moving,dt){poseX(c);
       case 'keeper':K=[.55,.55];L=[-.2,-.2];A=[-.55,-.55];Az=[.55,-.55];E=[-.5,-.5];y-=.08;lean=.15;break;
       case 'shake':rz=Math.sin(u*22)*.06;hy=Math.sin(u*18)*.3;A=[-.2,-.2];Az=[.35+Math.sin(u*20)*.15,-.35-Math.sin(u*20)*.15];break;
     }}
+  /* sleeping positions: on the back, curled on either side, on the stomach, or starfish; people turn over now and then */
+  if(c.lying){const nowS=performance.now()/1000;if(!c.sleepStyle||(c._ssT&&nowS>c._ssT&&!c.noTurn)){const opts=['back','side','sideL','front','star','side','sideL'];c.sleepStyle=c.sleepStyle?pick(opts.filter(o=>o!==c.sleepStyle)):opts[Math.floor(((c.id||0)*7.13+(c.cid||0))%opts.length)];c._ssT=nowS+25+Math.random()*35}
+    const ss=c.sleepStyle;if(ss==='side'||ss==='sideL'){L=[-.95,-.7];K=[1.25,1.05];A=[-1.25,-.95];Az=[0,0];E=[-1.45,-1.2]}else if(ss==='front'){L=[0,-.35];K=[0,.75];A=[-2.7,-.15];Az=[.1,-.1];E=[-1.5,-.2]}else if(ss==='star'){L=[0,0];K=[0,0];A=[-.2,-.2];Az=[-1.15,1.15];E=[-.25,-.25]}else{L=[0,0];K=[0,.05];A=[-.05,-.05];Az=[.12,-.12];E=[-.3,-.3]}}
   const pv=c._pv||(c._pv={L:[0,0],K:[0,0],A:[0,0],Az:[0,0],E:[-.12,-.12],y:0,rz:0});
   const k=(!dt||pose==='swim'||pose==='dive')?1:Math.min(1,dt*(moving?18:8)),lp=(a,b)=>{a[0]+=(b[0]-a[0])*k;a[1]+=(b[1]-a[1])*k};
   lp(pv.L,L);lp(pv.K,K);lp(pv.A,A);lp(pv.Az,Az);lp(pv.E,E);pv.y+=(y-pv.y)*k;pv.rz+=(rz-pv.rz)*k;
@@ -105,7 +108,8 @@ function posePerson(c,moving,dt){poseX(c);
   if(c.knees){c.knees[0].rotation.x=pv.K[0];c.knees[1].rotation.x=pv.K[1]}
   c.arms[0].rotation.x=pv.A[0];c.arms[1].rotation.x=pv.A[1];c.arms[0].rotation.z=pv.Az[0];c.arms[1].rotation.z=pv.Az[1];
   if(c.elbows){c.elbows[0].rotation.x=pv.E[0];c.elbows[1].rotation.x=pv.E[1]}
-  if(c.lying){g.rotation.x=-Math.PI/2;g.rotation.y=0;g.rotation.z=0;g.position.y=c.spotY||0}
+  if(c.lying){const ss=c.sleepStyle||'back',ty=ss==='side'?Math.PI/2:ss==='sideL'?-Math.PI/2:ss==='front'?Math.PI:0;c._sry=c._sry==null?ty:c._sry+(ty-c._sry)*(dt?Math.min(1,dt*2.5):1);
+    _lqA.setFromAxisAngle(_lX,-Math.PI/2);_lqB.setFromAxisAngle(_lY,c._sry);g.quaternion.copy(_lqA).multiply(_lqB);g.position.y=(c.spotY||0)+(ss==='side'||ss==='sideL'?.1:ss==='front'?.06:0)+Math.sin(performance.now()/1000*1.6+(c.id||0))*.004}
   else if(pose==='dive'){g.rotation.x=c.diveRot||0;g.rotation.z=0;g.position.y=c.diveY||0}
   else if(pose==='swim'){g.rotation.x=1.55;g.rotation.z=0;g.position.y=.06+Math.sin(t*9)*.012}
   else{g.rotation.x=lean;g.rotation.z=pv.rz;g.position.y=pv.y+(c.spotY||0)}

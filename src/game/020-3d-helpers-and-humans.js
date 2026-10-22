@@ -128,7 +128,9 @@ const OSPEC={
  m_bomber:{sl:2,legs:'pants',pc:'#5e5b3c',cargo:1,loose:1,jacket:'pal',tee:'#1c1c1c',rib:1},m_work:{sl:2,legs:'pants',pc:'#3f5f86',denim:1,wide:1,loose:1,jacket:'#8a6a3e',tee:'#f4f1ea'},
  m_overshirt:{sl:2,legs:'pants',pc:'#3a3a3a',wide:1,loose:1,jacket:'pal',tee:'#f4f1ea'},m_mesh:{sl:1,legs:'shorts',pc:'#1c1c1c',loose:1,solid:1,socks:1},
  f_cardigan:{sl:2,legs:'skin',jacket:'pal',tee:'#f8f1f4',over:'mini',oc:'#2b2b2b',crop:1},f_leather:{sl:2,legs:'pants',pc:'#5b6b3a',cargo:1,wide:1,jacket:'#161616',tee:'#f4f1ea',crop:1},
- f_ftrack:{sl:2,legs:'jog',match:1,solid:1,stripes:1,zip:1,wide:1}};
+ f_ftrack:{sl:2,legs:'jog',match:1,solid:1,stripes:1,zip:1,wide:1},
+ m_pj:{sl:2,legs:'jog',match:1,solid:1,loose:1,collar:1,buttons:1},f_pj:{sl:1,legs:'jog',match:1,solid:1,loose:1,neck:1},
+ m_towel:{sl:0,legs:'shorts',pc:'#f4f2ec',bare:1},f_towel:{sl:0,legs:'skin',solid:1,neck:2,over:'bodycon'}};
 const ospec=(f,O)=>OSPEC[(f?'f_':'m_')+O]||OSPEC[(f?'m_':'f_')+O]||OSPEC.m_tee;
 const hexN=c=>new THREE.Color(c).getHex();
 function torsoMat(L,f){const O=L.outfit,sp=ospec(f,O),k='to'+(f?'f':'m')+O+L.pal+L.skin;if(SM[k])return SM[k];

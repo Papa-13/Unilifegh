@@ -44,7 +44,7 @@ function enterRoom0(owner){fadeIn();
     OB(BX0-.1,BX1+.06,-.06,D/2);OB(BX1-.06,BX1+.06,bz,-.95);OB(BX0,BX1,-.06,.06);
     const lt=new THREE.PointLight(0xfff4e0,.5,6,1.5);lt.position.set(cx,2.4,bz/2);s.add(lt);
     // shower with frosted glass
-    const SD=tier>=3?.85:.95,glass=new THREE.MeshStandardMaterial({color:0xdfeef2,transparent:true,opacity:.82,roughness:.4,side:THREE.DoubleSide});
+    const SD=tier>=3?.85:.95,glass=new THREE.MeshStandardMaterial({color:0xe8f1f3,transparent:true,opacity:.97,roughness:.6,side:THREE.DoubleSide});
     box(SD,.04,SD,white,BX0+SD/2,.02,bz+SD/2,s);const g1=mesh(new THREE.PlaneGeometry(SD,1.25),glass,BX0+SD/2,.95,bz+SD,s);const g2=mesh(new THREE.PlaneGeometry(SD,1.25),glass,BX0+SD,.95,bz+SD/2,s);g2.rotation.y=Math.PI/2;
     mesh(cyl(.08,.05,.04,12),lam(0xbbbbbb),BX0+.3,2.05,bz+.2,s);box(.03,.03,.25,0xaaaaaa,BX0+.3,2.08,bz+.08,s);OB(BX0,BX0+SD+.02,bz,bz+SD+.02);
     const water=new THREE.Group(),wm=new THREE.MeshBasicMaterial({color:0xd6f3ff,transparent:true,opacity:.6});for(let i=0;i<8;i++)mesh(cyl(.006,.006,1.9,4),wm,R(-.12,.12),1.05,R(-.12,.12),water);water.position.set(BX0+SD/2,0,bz+SD/2);water.visible=false;s.add(water);IS.water=water;

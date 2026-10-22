@@ -72,3 +72,6 @@
 .chip.on{background:linear-gradient(135deg,#e8b24a,#c98a22);color:#2a1a06;border-color:transparent;font-weight:700}
 .arcX.cine .px-msg{top:56%}
 .cn-bar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:8px 12px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.6))}
+/* furniture placement bar */
+#placeBar{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;background:rgba(20,16,13,.94);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center;width:min(380px,calc(100vw - 24px));box-shadow:0 12px 30px rgba(0,0,0,.5);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+#placeBar small{opacity:.8;font-size:12.5px}

@@ -156,7 +156,7 @@ function enterBuilding(id,back){fadeIn();S.shuttleWait=null;const BD=IS?(IS.budd
     let tt=0;IS.tick=dt=>{tt+=dt;puffs.forEach(q=>{const f=(tt*.45+q.o)%1;q.m.position.y=1.16+f*.75;q.m.position.x=q.x+Math.sin(f*6+q.o*5)*.05;q.m.material.opacity=.4*(1-f);q.m.scale.setScalar(1+f*1.6)})}}
   if(id==='hbath'){const lodge=HT(P().home)==='lodge',priv=tier>=2;IS.waterOff=['lodge','sunrise'].includes(HT(P().home))&&S.waterOffDay===day();
     const water=new THREE.Group(),wm=new THREE.MeshBasicMaterial({color:0xd6f3ff,transparent:true,opacity:.55});for(let i=0;i<8;i++)mesh(cyl(.006,.006,1.9,4),wm,R(-.13,.13),1.05,R(-.13,.13),water);water.visible=false;s.add(water);IS.water=water;
-    const curtM=new THREE.MeshStandardMaterial({color:priv?0xdfeef2:0x7fb3d5,transparent:true,opacity:priv?.8:.9,roughness:.6,side:THREE.DoubleSide});
+    const curtM=new THREE.MeshStandardMaterial({color:priv?0xe8f1f3:0x7fb3d5,transparent:true,opacity:.98,roughness:.7,side:THREE.DoubleSide});
     if(!priv){box(W,1.5,.04,0xbfe0ea,0,.75,-D/2+.08,s);
       [-2.3,-.7,.9].forEach((x,i)=>{[-.78,.78].forEach(dx=>box(.06,2,1.3,0xe8e8e8,x+dx,1,-D/2+.65,s));mesh(cyl(.07,.05,.05,10),lam(0xaaaaaa),x,2.05,-D/2+.35,s);
         const c=mesh(new THREE.PlaneGeometry(1.45,1.15),curtM,x,1.0,-D/2+1.3,s);box(1.5,.03,.03,0x999999,x,1.6,-D/2+1.3,s);mesh(cyl(.17,.14,.3,12),lam([0x2f6bb5,0xe0483a,0x2f7a4a][i]),x+.45,.15,-D/2+.4,s)});
