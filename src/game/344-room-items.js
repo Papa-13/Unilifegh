@@ -27,7 +27,7 @@ arrangeSheet=function(){const p=P(),own=p.items.filter(id=>roomItemInfo(id));if(
 const tapRay=new THREE.Raycaster();
 window.addEventListener('pointerdown',e=>{if(e.target!==cv||PLACE.on||!S||S.paused||S.busy||!inMyRoomNow()||!e.isPrimary)return;tvFind();const G=Object.assign({},IS.itemG||{});if(TV.g&&!G.tv)G.tv=TV.g;
   const r=cv.getBoundingClientRect();tapRay.setFromCamera({x:((e.clientX-r.left)/r.width)*2-1,y:-((e.clientY-r.top)/r.height)*2+1},IS.cam);let best=null;
-  for(const id in G){if(!P().items.includes(id)||(MOVABLE[id]&&MOVABLE[id].flat))continue;const h=tapRay.intersectObject(G[id],true)[0];if(h&&(!best||h.distance<best.d))best={id,d:h.distance}}
+  for(const id in G){if(!(P().items.includes(id)||id==='desk')||(MOVABLE[id]&&MOVABLE[id].flat))continue;const h=tapRay.intersectObject(G[id],true)[0];if(h&&(!best||h.distance<best.d))best={id,d:h.distance}}
   if(!best)return;const pm=P().mesh;if(pm&&pm.visible){const hp=tapRay.intersectObject(pm,true)[0];if(hp&&hp.distance<best.d)return}
   e.stopImmediatePropagation();e.preventDefault();itemMenu(best.id)},true);
 
