@@ -35,7 +35,8 @@ function phone(tab='home'){
     {k:'gems',n:'Gem Shop',ic:'💎',c:'linear-gradient(135deg,#3a8dde,#7b2fbe)',go:()=>gemShop()},
     {k:'drip',n:'Drip & Flex',ic:'✨',c:'linear-gradient(135deg,#d4a52a,#8e2a3a)',go:()=>{closeSheet();dripStore()}},
     {k:'daily',n:'Daily Gift',ic:'🎁',c:'linear-gradient(135deg,#e0483a,#f5b41f)',go:()=>{closeSheet();dailySheet()}},
-    {k:'backup',n:'Backup',ic:'💾',c:'#3a3f47',go:()=>progressSheet()}];
+    {k:'backup',n:'Backup',ic:'💾',c:'#3a3f47',go:()=>progressSheet()},
+    {k:'help',n:'Help',ic:'💡',c:'#4a4f5a',go:()=>helpSheet()}];
   const DOCK=['msgs','money','ride','food'];
   const icon=a=>{const n=a.b?a.b():0;return `<button class="phApp" data-app="${a.k}"><i style="background:${a.c};color:${a.fg||'#fff'}">${a.ic}</i><span>${esc(a.n)}</span>${n?`<em class="bd">${n>9?'9+':n}</em>`:''}</button>`};
   const bar=()=>`<div class="phBar"><span>${hm(S.min)}</span><span class="nt"></span><span>${(()=>{try{return dataStr()+' 🔋'+Math.round(P().batt)+'%'}catch(e){return '📶 4G 🔋'}})()}</span></div>`;

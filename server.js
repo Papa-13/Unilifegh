@@ -9,13 +9,15 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 const ROOT = path.dirname(fileURLToPath(import.meta.url)), DIST = path.join(ROOT, 'dist');
 if (!process.env.FIREBASE_SERVICE_ACCOUNT && process.env.FIREBASE_SERVICE_ACCOUNT_FILE) {
   try { process.env.FIREBASE_SERVICE_ACCOUNT = fs.readFileSync(process.env.FIREBASE_SERVICE_ACCOUNT_FILE, 'utf8'); } catch (e) { console.error('Unilife GH: cannot read FIREBASE_SERVICE_ACCOUNT_FILE', e.message); }
 }
-const API = { gems: './api/gems.js', momo: './api/momo.js', pay: './api/pay.js', 'paystack-webhook': './api/paystack-webhook.js' }, loaded = {};
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.webp': 'image/webp', '.woff2': 'font/woff2', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.webmanifest': 'application/manifest+json', '.txt': 'text/plain; charset=utf-8' };
+const ZCACHE = new Map(); // compressed copies of files, built once per file per server start
+const API = { gems: './api/gems.js', momo: './api/momo.js', pay: './api/pay.js', feedback: './api/feedback.js', 'paystack-webhook': './api/paystack-webhook.js' }, loaded = {};
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.png': 'image/png', '.webmanifest': 'application/manifest+json', '.ico': 'image/x-icon', '.glb': 'model/gltf-binary', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.webp': 'image/webp', '.woff2': 'font/woff2', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.webmanifest': 'application/manifest+json', '.txt': 'text/plain; charset=utf-8' };
 /* the small part of Vercel's req/res helpers that the api files use */
 function wrap(res) {
   res.status = (c) => { res.statusCode = c; return res; };
@@ -37,10 +39,18 @@ function serveFile(req, res, p) {
     if (err || !st.isFile()) { if (path.extname(p)) { res.statusCode = 404; return res.end('Not found'); } return serveFile(req, res, path.join(DIST, 'index.html')); }
     const ext = path.extname(p).toLowerCase();
     res.setHeader('Content-Type', MIME[ext] || 'application/octet-stream');
-    res.setHeader('Cache-Control', p.includes(`${path.sep}assets${path.sep}`) ? 'public, max-age=31536000, immutable' : 'no-cache');
-    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Cache-Control', p.includes(`${path.sep}assets${path.sep}`) ? 'public, max-age=31536000, immutable' : p.includes(`${path.sep}models${path.sep}`) ? 'public, max-age=604800' : 'no-cache');
+    res.setHeader('X-Content-Type-Options', 'nosniff');res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');res.setHeader('Vary', 'Accept-Encoding');
     if (req.method === 'HEAD') return res.end();
-    fs.createReadStream(p).pipe(res);
+    /* compress text files (JS, CSS, HTML, JSON): the game's code goes from ~2.7 MB to ~0.8 MB on the wire */
+    const ae = String(req.headers['accept-encoding'] || ''), zip = /\.(js|css|html|json|svg|txt|webmanifest)$/.test(ext) && /gzip|br/.test(ae);
+    if (!zip) return fs.createReadStream(p).pipe(res);
+    const enc = /\bbr\b/.test(ae) ? 'br' : 'gzip', key = p + '|' + enc + '|' + st.mtimeMs;
+    const send = (buf) => { res.setHeader('Content-Encoding', enc); res.setHeader('Content-Length', buf.length); res.end(buf); };
+    if (ZCACHE.has(key)) return send(ZCACHE.get(key));
+    fs.readFile(p, (e2, raw) => { if (e2) { res.statusCode = 500; return res.end(); }
+      const buf = enc === 'br' ? zlib.brotliCompressSync(raw, { params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 9 } }) : zlib.gzipSync(raw, { level: 9 });
+      ZCACHE.set(key, buf); send(buf); });
   });
 }
 const server = http.createServer((req, res) => {

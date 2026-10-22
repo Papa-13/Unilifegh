@@ -58,7 +58,7 @@ function signInScreen(auth){return new Promise(res=>{
    <button id="fbG" class="sbtn"><span class="ic">G</span><span>Continue with Google<small>Your student is saved to your account</small></span></button>
    <button id="fbA" class="sbtn alt"><span class="ic">🎒</span><span>Play as a guest<small>Saved on this device only</small></span></button>
    <button id="fbO" class="sbtn dim"><span class="ic">📴</span><span>Play offline<small>No account, nothing synced</small></span></button>
-   <div id="fbErr"></div></div>`;
+   <div id="fbErr"></div><p style="font-size:12px;opacity:.8;margin:6px 0 0">By playing you agree to our <a href="/terms.html" target="_blank" style="color:#ffd34d">Terms</a> and <a href="/privacy.html" target="_blank" style="color:#ffd34d">Privacy Policy</a>.</p></div>`;
   const st=document.createElement('style');st.textContent=`#fbSign{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;overflow:auto;padding:24px 16px calc(24px + min(30vh,260px));
    background:linear-gradient(180deg,#2b1433 0%,#5a2340 46%,#b2453a 74%,#f08a3c 100%);color:#fbf3e2;font:16px/1.5 Figtree,system-ui,sans-serif}
    #fbSign .skyline{position:fixed}#fbSign .sunball{position:fixed}

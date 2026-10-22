@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import { defineConfig } from 'vite';
 import { createHash } from 'node:crypto';
 import { transform } from 'esbuild';
@@ -53,8 +54,28 @@ function yoloGame() {
   };
 }
 
+/* site details (domain, owner, contact email) from site.config.json: filled into the link-preview tags
+   and the Privacy / Terms pages (legal/*.html → dist/privacy.html, dist/terms.html) */
+function siteMeta() {
+  const cfg = JSON.parse(fs.readFileSync(root + '/site.config.json', 'utf8'));
+  const url = String(cfg.url || '').replace(/\/+$/, '');
+  const fill = (t) => t.replace(/%SITE_URL%/g, url).replace(/%OWNER%/g, cfg.owner || 'the developer of Unilife GH')
+    .replace(/%EMAIL_LINK%/g, cfg.email ? `<a href="mailto:${cfg.email}">${cfg.email}</a>` : 'the <b>💬 Send feedback</b> button in the game menu')
+    .replace(/%COUNTRY%/g, cfg.country || 'Ghana').replace(/%UPDATED%/g, cfg.updated || '');
+  return {
+    name: 'site-meta',
+    transformIndexHtml: { order: 'pre', handler: (html) => fill(html) },
+    generateBundle() {
+      for (const f of ['privacy', 'terms']) {
+        const src = root + '/legal/' + f + '.html';
+        if (fs.existsSync(src)) this.emitFile({ type: 'asset', fileName: f + '.html', source: fill(fs.readFileSync(src, 'utf8')) });
+      }
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [yoloGame()],
+  plugins: [siteMeta(), yoloGame()],
   build: { outDir: 'dist', chunkSizeWarningLimit: 1500 },
   server: { port: 5173 },
 });
