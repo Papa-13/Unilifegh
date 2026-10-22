@@ -26,9 +26,9 @@ function cinemaSnacks(f,bd){const p=P(),sel={pop:1,drink:1},PR={pop:[0,20,30],dr
       if(p.money<tot)return toast(`That's ${cedi(tot)}. Not enough on MoMo.`);p.money-=tot;hud();closeSheet();if(treat)toast(`${bd.name.split(' ')[0]} already bought their own ticket 🥰`);
       const st=cineNext(f);if(st>hour()+.05){toast(`You wait in the lobby until ${st}:00 🛋️`);S.min=Math.max(S.min,day()*1440+st*60)}setTimeout(()=>cinemaWatch(f,bd,{pop:sel.pop,drink:sel.drink}),300)}};draw()}
 /* the theatre: a full-screen view with the film on the big screen */
-function cinemaWatch(f,date,snack){const F=arcFrame(f.t,f.ic);F.ov.classList.add('cine');const p=P(),dn=date?date.name.split(' ')[0]:null;
+function cinemaWatch(f,date,snack){const pal=date&&!romOK(date)?date:null;if(pal)date=null;const F=arcFrame(f.t,f.ic);F.ov.classList.add('cine');const p=P(),dn=date?date.name.split(' ')[0]:null;
   const G={t:0,dur:52,beat:-1,pop:snack.pop?(snack.pop===2?14:9):0,held:false,leaned:0,jump:0,shh:0,kiss:false,rom:0,events:[],pops:[]};F.G=G;window._arcF=F;
-  F.stats(`<span>${f.g}</span>${date?`<span>❤️ with ${esc(dn)}</span>`:''}`);
+  F.stats(`<span>${f.g}</span>${date?`<span>❤️ with ${esc(dn)}</span>`:pal?`<span>🤝 with ${esc(pal.name.split(' ')[0])}</span>`:''}`);
   const bar=document.createElement('div');bar.className='cn-bar';F.ov.appendChild(bar);
   const btns=()=>{bar.innerHTML=[G.pop>0?['pop',`🍿 Popcorn (${G.pop})`]:null,date&&!G.held?['hold','🤝 Hold hands']:null,date?['wh','💬 Whisper']:null,date&&G.held&&!G.kiss?['kiss','😘 Lean in']:null,['skip','⏩ Skip to the end']].filter(Boolean).map(([k,l])=>`<button class="ghost sm" data-c="${k}">${l}</button>`).join('');
     bar.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>act(b.dataset.c))};btns();
@@ -40,6 +40,7 @@ function cinemaWatch(f,date,snack){const F=arcFrame(f.t,f.ic);F.ov.classList.add
     if(k==='skip')G.t=G.dur;btns()};
   const end=()=>{F.over=true;bar.remove();const stars=Math.max(2,Math.min(5,Math.round(3+arcGauss()*.9)));p.needs.fun=clamp(p.needs.fun+30);if(date)p.needs.social=clamp(p.needs.social+25);
     const buff={Horror:'shaken',Comedy:'amused',Romance:'loved','Rom-com':'loved',Action:'inspired',Animation:'amused'}[f.g];try{addBuff(date&&buff==='shaken'?'amused':buff)}catch(e){}
+    if(pal){pal.friend=clamp(pal.friend+6);p.needs.social=clamp(p.needs.social+20)}
     if(date){romance(6);date.friend=clamp(date.friend+5);date.dates=(date.dates||0)+1;try{memAdd('date',[date],'Kente Cinemas','us')}catch(e){}}advance(115);hud();try{ev('act',{l:'Watching a movie'});window.track&&window.track('cinema',{film:f.id,date:!!date})}catch(e){}
     F.end(`<div style="font-size:40px">${f.ic}</div><h3>${esc(f.t)}</h3><p>${'⭐'.repeat(stars)}${'☆'.repeat(5-stars)}</p><p class="scene" style="font-size:14px">${date?pick([`Walking out, ${dn} can't stop talking about the ending.`,`${dn}: "Same time next week?" 😊`,`${dn} is still holding your arm as you leave.`]):pick(['Worth every cedi.','You\'ll be thinking about that ending all night.','Not bad at all.'])}</p>${date?`<p>Romance ${G.rom+6>=0?'+':''}${G.rom+6}</p>`:''}`)};
   /* the film itself: procedural scenes per beat, with subtitles */
@@ -75,7 +76,7 @@ function cinemaWatch(f,date,snack){const F=arcFrame(f.t,f.ic);F.ov.classList.add
     G.pops.forEach(q=>{c.globalAlpha=1-q.t;c.font='18px system-ui';c.fillText('🍿',W/2-hr*1.3+q.t*12,by-hr-q.t*30);c.globalAlpha=1});
     const pr=G.t/G.dur;c.fillStyle='rgba(255,255,255,.12)';c.fillRect(0,H-3,W,3);c.fillStyle=f.pal[1];c.fillRect(0,H-3,W*pr,3)};
   return F}
-function cinemaInvite(){const list=S.npcs.filter(n=>n.contact&&(n.romance>=15||n.friend>=35)).sort((a,b)=>(b.romance||0)-(a.romance||0)).slice(0,8);if(!list.length)return toast('No one in your contacts close enough to invite to a movie yet.');
+function cinemaInvite(){const list=S.npcs.filter(n=>n.contact&&((romOK(n)&&n.romance>=15)||n.friend>=35)).sort((a,b)=>(b.romance||0)-(a.romance||0)).slice(0,8);if(!list.length)return toast('No one in your contacts close enough to invite to a movie yet.');
   placeSheet('📲 Who do you want to take to the movies?',list.map(n=>`${n.name}${n.romance>=40?' ❤️':''}`),i=>{const n=list[i],ok=Math.random()<.4+(n.romance||0)/150+(n.friend||0)/250;toast(`📲 You text ${n.name.split(' ')[0]}: "Movie tonight? 🍿"`);
     setTimeout(()=>{if(ok){toast(`${n.name.split(' ')[0]}: "Yesss! I'm coming 🏃" … they arrive 15 minutes later 😍`);advance(15);n.with=Math.max(n.with||0,S.min+180);if(IS)IS.buddy=n;cinemaShowtimes()}else toast(`${n.name.split(' ')[0]}: "Not tonight 😩 Another time?"`)},1600)})}
 /* the building */

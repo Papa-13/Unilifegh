@@ -35,6 +35,7 @@ function relBreak(ck,nm){const r=relGet();if(!r||r.ck!==ck)return;if(!confirm(`B
 /* ---- incoming relationship messages (from mail or live) ---- */
 function relIn(ck,nm,k,tx,id){const seen=relSeen();if(id){if(seen.has(id))return;seen.add(id);mpStore.set('relSeen',[...seen].slice(-300))}
   if(MP.blocked[ck])return;const r=relGet(),me=P&&S&&S.p?P():null;nm=mpClean(nm,16)||'Someone';
+  if(k==='gq'&&tx&&me&&tx===me.look.gender)return;
   if(k==='gq'){const was=r&&r.ck!==ck?r:null;
     relShow(`<div class="eyebrow">💍 Relationship request</div><h3>${esc(nm)} wants you to be ${tx==='m'?'his':tx==='f'?'her':'their'} ${bfgf(me&&me.look.gender)}!</h3><p class="scene">${was?`You're dating <b>${esc(was.nm)}</b> right now. Saying yes means breaking up with ${esc(was.nm)}.`:`Your friendship and how you feel about ${esc(nm)} are up to you.`}</p>`,
       [['❤️ Yes','g',()=>{if(was){relSend(was.ck,'bu','');mpSys(was.ck,`You broke up with ${was.nm} 💔`)}mpMakeFriend(ck,nm);relSet({ck,nm,since:Date.now()});romAdd(ck,20);relSend(ck,'ga','');mpSys(ck,`You and ${nm} are together now ❤️`);toast(`❤️ You and ${nm} are official!`)}],

@@ -21,7 +21,8 @@ function restoOrder(guest){const p=P(),sel={m:0,d:0,s:-1},two=!!guest;openSheet(
     $('sheetIn').querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{sel[b.dataset.k]=+b.dataset.i;draw()});
     $('roGo').onclick=()=>{const t=total();if(p.money<t)return toast(`That's ${cedi(t)}. Not enough on MoMo.`);p.money-=t;closeSheet();hud();const M=RESTO_MENU,m=M.mains[sel.m],dr=M.drinks[sel.d],sw=sel.s>=0?M.sweets[sel.s]:null;
       toast(`Efua: "Coming right up!" 📝`);setTimeout(()=>{restoPlate(true);toast(`Your ${m[1].toLowerCase()} is here. Enjoy! 😋`)},2100);
-      if(two)setTimeout(()=>restoDate(guest,{m,dr,sw,t}),1500);else setTimeout(()=>doAct(`Eating ${m[1].toLowerCase()} at Akwaaba Grill`,sw?40:30,{hunger:m[3]+(sw?10:0),fun:sw?12:8,social:3}),1500)}};draw()}
+      if(two&&!romOK(guest))setTimeout(()=>{guest.friend=clamp(guest.friend+8);doAct(`Eating ${m[1].toLowerCase()} with ${guest.name.split(' ')[0]}`,45,{hunger:m[3],fun:14,social:18});toast(`${guest.name.split(' ')[0]} is gisting you about everything 😂`)},1500);
+      else if(two)setTimeout(()=>restoDate(guest,{m,dr,sw,t}),1500);else setTimeout(()=>doAct(`Eating ${m[1].toLowerCase()} at Akwaaba Grill`,sw?40:30,{hunger:m[3]+(sw?10:0),fun:sw?12:8,social:3}),1500)}};draw()}
 /* dinner date at the table: a few moments to choose, then the bill */
 function restoDate(n,o){const p=P(),fn=n.name.split(' ')[0];n.with=Math.max(n.with||0,S.min+120);if(IS)IS.buddy=n;
   const moments=[[`${fn} tastes your ${o.m[1].toLowerCase()} and closes ${n.gender==='f'?'her':'his'} eyes. "Okay, you chose well." 😋`,[['😏 "I always choose well."',4],['😂 Steal some of theirs too',5],['🥺 "Only the best for you"',6]]],
@@ -34,13 +35,13 @@ function restoDate(n,o){const p=P(),fn=n.name.split(' ')[0];n.with=Math.max(n.wi
     p.needs.hunger=clamp(p.needs.hunger+o.m[3]);p.needs.fun=clamp(p.needs.fun+28);p.needs.social=clamp(p.needs.social+28);addBuff('loved');advance(90);restoPlate(false);try{memAdd('date',[n],'Akwaaba Grill','us');ev('date',{n:n.id,where:'resto'})}catch(e){}
     story(`<div class="eyebrow">🕯️ Dinner date</div><h3>What a night</h3><p class="scene">${line}</p><p>Romance +${tot}</p>`,[['Lovely ❤️','g',()=>{}]]);hud()};
   doAct(`Eating dinner with ${fn}`,60,{});setTimeout(()=>{restoPlate(true);next()},900)}
-function restoInvite(){const list=S.npcs.filter(n=>n.contact&&(n.romance>=15||n.friend>=35)).sort((a,b)=>(b.romance||0)-(a.romance||0)).slice(0,8);
+function restoInvite(){const list=S.npcs.filter(n=>n.contact&&((romOK(n)&&n.romance>=15)||n.friend>=35)).sort((a,b)=>(b.romance||0)-(a.romance||0)).slice(0,8);
   if(!list.length)return toast('No one in your contacts close enough to invite to dinner yet.');
   placeSheet('📲 Who do you want to invite to dinner?',list.map(n=>`${n.name}${n.romance>=40?' ❤️':''}`),i=>{const n=list[i],ok=Math.random()<.35+(n.romance||0)/150+(n.friend||0)/250;
     toast(`📲 You text ${n.name.split(' ')[0]}: "I'm at Akwaaba Grill. Join me? 🍽️"`);setTimeout(()=>{if(ok){toast(`${n.name.split(' ')[0]}: "Omw! 🏃" … 15 minutes later they walk in 😍`);advance(15);restoOrder(n)}else toast(`${n.name.split(' ')[0]}: "Aww, I can't right now 😩 Next time!"`)},1600)})}
 {const _pa=placeActions;placeActions=function(b,inside){const a=_pa.apply(this,arguments);try{if(b&&b.id==='resto'&&inside){const add=[];
   if(!restoOpen())add.push(['🍽️ Closed · open 11:00 to 22:00',null]);else{const bd=buddy()||(IS&&IS.buddy);
-    if(bd)add.push([`🕯️ Dinner date with ${bd.name.split(' ')[0]}`,()=>restoOrder(bd),null,'b']);
+    if(bd)add.push(romOK(bd)?[`🕯️ Dinner date with ${bd.name.split(' ')[0]}`,()=>restoOrder(bd),null,'b']:[`🍽️ Eat together with ${bd.name.split(' ')[0]}`,()=>restoOrder(bd),null,'b']);
     add.push(['🍽️ Get a table and order',()=>restoOrder(null),null,bd?undefined:'b'],['🥡 Takeaway: jollof & chicken · GH₵70',()=>eat(70,65,'takeaway jollof',6)],['📲 Text someone to join you for dinner',()=>restoInvite()],['🥤 Just a drink at the bar · GH₵15',()=>eat(15,8,'a cold sobolo at the bar',6)])}
   a.unshift(...add)}}catch(e){}return a}}
 {const _lr=leaveRoom;leaveRoom=function(){try{if(IS&&IS._plate){IS._plate=null}}catch(e){}return _lr.apply(this,arguments)}}

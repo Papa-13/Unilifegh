@@ -58,3 +58,8 @@ owareGame=function(nOpt){if(!(IS&&IS.kind==='room'))return toast('Oware is playe
   return F};
 /* Oware lives in the rooms: no more Oware at the arcade, and "Let's play Oware" only in a room */
 ARC_GAMES.splice(ARC_GAMES.findIndex(g=>g[0]==='oware'),1);
+/* (romance rules) keep romance opposite-gender only: after every chat, every hour and on load */
+{const _sa=socialAct;socialAct=function(){const r=_sa.apply(this,arguments);romanceSanitize();return r}}
+{const _hr=hourly;hourly=function(){const r=_hr.apply(this,arguments);try{const hk=day()*24+Math.floor(hour());if(S&&S._rsH!==hk){S._rsH=hk;romanceSanitize()}}catch(e){}return r}}
+{const _sg=showGame;showGame=function(){romanceSanitize();return _sg.apply(this,arguments)}}
+{const _ds=dateScene;dateScene=function(n){if(!romOK(n))return toast(`${n.name.split(' ')[0]} is your friend. Dates are for someone you like 😉`);return _ds.apply(this,arguments)}}

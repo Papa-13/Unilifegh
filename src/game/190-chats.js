@@ -19,7 +19,8 @@ const VNT=[['hi','👋 Say hi','Hey {n}! Just checking on you. Hope your day is 
   ['fine','🙏 Tell them you\'re fine','I\'m fine o. Eating well and learning hard. Greet everybody for me.','how'],['money','🥺 Beg for money','Please, my money has finished… I need small something for food 🥺','money']];
 function npcReply(n,intent,vn){const p=P();let lines=RB[intent]||RB.def;
   if(n.friend<15&&!n.mate)return{text:pick(['Who is this please? 😅','Hmm, sorry, who is this?','Ah, hi… do I know you? 😅']),gain:1};
-  if(intent==='love'){if(p.partner===n||n.romance>40||(n.chem>.55&&n.friend>=40)){n.romance=clamp(n.romance+(vn?6:3))}else{n.romance=clamp(n.romance-2);lines=['Ei, slow down 😅','Hmm 😂 you\'re funny','Okay… 🙂']}}
+  if(intent==='love'&&n&&!romOK(n)){lines=['😂 Chale, you dey high? I\'m your guy/girl, not your crush!','Hahaha no wahala, I love you too as my friend 🤝','😂 Bro/sis, what did you eat today?'].map(x=>p.look.gender==='m'?x.replace('guy/girl','guy').replace('Bro/sis','Bro'):x.replace('guy/girl','girl').replace('Bro/sis','Sis'))}
+  else if(intent==='love'){if(p.partner===n||n.romance>40||(n.chem>.55&&n.friend>=40)){n.romance=clamp(n.romance+(vn?6:3))}else{n.romance=clamp(n.romance-2);lines=['Ei, slow down 😅','Hmm 😂 you\'re funny','Okay… 🙂']}}
   if(intent==='link'){const h=hour();if(n.friend>=30&&h>=7&&h<22&&!IS&&Math.random()<.75){n.with=S.min+60;n.x=clamp(p.x+R(-200,200),20,MW-20);n.y=clamp(p.y+R(-200,200),20,MH-20);n._fT=0;return{text:pick(['Coming! Give me small time 🏃🏾','I dey come. Where exactly?','Okay, I\'m on my way 😄']),gain:3}}
     return{text:pick(['Not now o, I\'m busy. Later?','I\'m in my room, tired paa 😩','Tomorrow, I promise!']),gain:1}}
   if(intent==='money'&&n.wealth==='rich')lines=['How much? Come and see me, I might help.','Ei, you too 😂 talk to me in person.'];
@@ -72,7 +73,7 @@ function drawChat(){const p=P(),chat=CHAT;if(!chat)return;const n=S.npcs.find(x=
       if(h<18)T.push(['today at 19:00',today+19*60]);if(h<20.5)T.push(['tonight at 21:00',today+21*60]);T.push(['tomorrow at 10:00',today+1440+600],['tomorrow at 16:00',today+1440+960]);
       $('comp').innerHTML=`<p style="font-size:13px;margin:6px 0">⏰ When? (${MEETP[bi][1]})</p><div class="qr" style="flex-wrap:wrap">${T.map(([t],i)=>`<button class="ghost sm" data-mt="${i}">${t}</button>`).join('')}<button class="ghost sm" id="mcancel">Cancel</button></div>`;
       $('mcancel').onclick=drawChat;$('comp').querySelectorAll('[data-mt]').forEach(x=>x.onclick=()=>{const [tl,at]=T[+x.dataset.mt];proposeMeet(chat,bi,at,tl)})})};
-  $('micb').onclick=()=>{const opts=VNT.filter(([id])=>fam?['hi','fine','money','sing'].includes(id):id!=='fine'&&id!=='money'&&(id!=='flirt'||p.partner===n||(n&&(n.romance>20||n.friend>=40))));
+  $('micb').onclick=()=>{const opts=VNT.filter(([id])=>fam?['hi','fine','money','sing'].includes(id):id!=='fine'&&id!=='money'&&(id!=='flirt'||(romOK(n)&&(p.partner===n||(n&&(n.romance>20||n.friend>=40))))));
     $('comp').innerHTML=`<p style="font-size:13px;margin:6px 0">🎤 What's your voice note about?</p><div class="qr" style="flex-wrap:wrap">${opts.map((o,i)=>`<button class="ghost sm" data-vt="${i}">${o[1]}</button>`).join('')}<button class="ghost sm" id="vcancel">Cancel</button></div>`;
     $('vcancel').onclick=drawChat;$('comp').querySelectorAll('[data-vt]').forEach(b=>b.onclick=()=>record(opts[+b.dataset.vt]))};
   function record(o){const t0=performance.now();$('comp').innerHTML=`<div class="rec"><span class="dot"></span><b id="rect">0:01</b><div class="wave" id="recw">${'<i style="height:6px"></i>'.repeat(22)}</div><button class="ghost sm" id="rdel" aria-label="Delete">🗑</button><button class="round" id="rsend" aria-label="Send voice note">➤</button></div>`;
