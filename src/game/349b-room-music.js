@@ -28,3 +28,7 @@ function roomSing(){const tr=CLUB_TRACKS[MUS.src.i]||{t:'the song'},who=roomJoin
     a.push([`🎵 Play music${bt&&tv?'':tv?' on the TV':' on your speaker'}`,go])}}catch(e){console.warn(e)}return a}}
 /* the speaker action on the desk only existed if you had a speaker; with only a TV, musSongs still plays */
 {const _ir=speakerPlay;speakerPlay=function(i){if(!P().items.includes('speaker')&&MUS.via!=='tv'&&!(IS&&IS.tv))return toast('Buy a Bluetooth speaker on HomeMart, or a TV, to play music in your room.');return _ir.apply(this,arguments)}}
+/* while the TV is playing your music, the music card is the remote; hide the channel remote */
+{const _tr=tvRemote;tvRemote=function(){const r=_tr.apply(this,arguments);try{const el=$('tvRemote');if(el&&MUS.via==='tv'&&roomMusicOn())el.hidden=true}catch(e){}return r}}
+{const _sp=speakerPlay;speakerPlay=function(){const r=_sp.apply(this,arguments);try{tvRemote()}catch(e){}return r}}
+{const _ss=speakerStop;speakerStop=function(){const r=_ss.apply(this,arguments);try{tvRemote()}catch(e){}return r}}
