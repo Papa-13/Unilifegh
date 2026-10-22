@@ -165,6 +165,8 @@ const HOSTEL_TPL={0:[{beds:4,price:3900},{beds:3,price:4700},{beds:3,price:5400,
   1:[{beds:2,price:5800},{beds:2,price:6300,large:true},{beds:2,price:6600,kitchen:true},{beds:1,price:6400},{beds:1,price:7400,kitchen:true}],
   2:[{beds:2,price:7900,ac:true},{beds:2,price:8800,ac:true,kitchen:true},{beds:1,price:10400,ac:true},{beds:1,price:11600,ac:true,kitchen:true},{beds:1,price:12600,ac:true,kitchen:true,large:true}],
   3:[{beds:2,price:12400,ac:true,tv:true,kitchen:true},{beds:1,price:17500,ac:true,tv:true,kitchen:true},{beds:1,price:20500,ac:true,tv:true,kitchen:true,large:true}]};
+/* some 4- and 3-in-a-room options are bigger rooms with single beds instead of bunks (halls and a few hostels) */
+const SINGLES_AT=['sankofa','volta','kotei','gaza','ayigya','morning'],SINGLES_TPL=[{beds:4,price:4500,singles:true},{beds:3,price:5200,singles:true}];
 /* hostels and halls, spread over the towns around campus like at KNUST. [id, name, town, tier, price factor, blurb]
    Closer to lectures costs more; halls on campus are cheapest but basic. */
 const HOSTELS=[
@@ -189,11 +191,11 @@ const HOSTELS=[
  ['nyamedua','Nyame Dua Hostel','Ayigya',1,.95,'Mid-range in Ayigya, across the highway from campus.'],
  ['kent','Kentinkrono Gardens','Kentinkrono',1,.9,'Mid-range in Kentinkrono, quiet and leafy, far from lectures.'],
  ['royal','Royal Crest Towers','Tech Junction',3,1,'Premium tower right at Tech Junction by the main gate: AC, smart TV, kitchenette, bathtub, free gym and pool.']
-].map(([id,name,town,tier,f,blurb])=>({id,name,town,tier,blurb,rooms:HOSTEL_TPL[tier].map(r=>Object.assign({},r,{price:Math.round(r.price*f/50)*50}))}));
+].map(([id,name,town,tier,f,blurb])=>({id,name,town,tier,blurb,rooms:HOSTEL_TPL[tier].concat(SINGLES_AT.includes(id)?SINGLES_TPL:[]).map(r=>Object.assign({},r,{price:Math.round(r.price*f/50)*50}))}));
 const HT=id=>{const h=HOSTELS.find(x=>x.id===id);return h?['lodge','sunrise','bayview','royal'][h.tier]:id};
 
-const ROOMS={};HOSTELS.forEach(h=>h.rooms.forEach(r=>{r.id=h.id+r.beds+(r.kitchen?'k':'')+(r.large?'L':'');r.hostel=h.id;r.tier=h.tier;r.name=`${r.large?(r.beds===1?'Large single room':r.beds+' in a large room'):r.beds===1?'Single room':r.beds+' in a room'}${r.kitchen?' + kitchenette':''}`;
-  r.W=+((r.beds>=4?6.9:r.beds===3?6.4:r.beds===2?5.8:5.1)+h.tier*.3+(r.kitchen?.5:0)+(r.large?1.2:0)).toFixed(2);r.D=+(4.9+h.tier*.2+(r.large?.7:0)+(r.beds>=3?.3:0)).toFixed(2);r.m2=Math.round(r.W*r.D*.92);ROOMS[r.id]=r}));
+const ROOMS={};HOSTELS.forEach(h=>h.rooms.forEach(r=>{r.id=h.id+r.beds+(r.kitchen?'k':'')+(r.large?'L':'')+(r.singles?'S':'');r.hostel=h.id;r.tier=h.tier;r.name=`${r.large?(r.beds===1?'Large single room':r.beds+' in a large room'):r.beds===1?'Single room':r.beds+' in a room'}${r.singles?' · single beds':''}${r.kitchen?' + kitchenette':''}`;
+  r.W=+((r.beds>=4?6.9:r.beds===3?6.4:r.beds===2?5.8:5.1)+h.tier*.3+(r.kitchen?.5:0)+(r.large?1.2:0)+(r.singles?1.45:0)).toFixed(2);r.D=+(4.9+h.tier*.2+(r.large?.7:0)+(r.beds>=3?.3:0)+(r.singles?.8:0)).toFixed(2);r.m2=Math.round(r.W*r.D*.92);ROOMS[r.id]=r}));
 const SHOP=[
  {id:'fan',name:'Standing fan',price:180,desc:'Better sleep in the heat'},
  {id:'cooker',name:'Rice cooker',price:220,desc:'Cook jollof in your room (uses provisions)'},

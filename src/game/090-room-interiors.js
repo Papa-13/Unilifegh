@@ -4,8 +4,10 @@ function floorMat(tier){return texMat('floor'+tier,g=>{
   else if(tier===1){g.fillStyle='#e6e1d6';g.fillRect(0,0,128,128);g.strokeStyle='#cfc8ba';g.lineWidth=2;for(let i=0;i<=128;i+=32){g.beginPath();g.moveTo(i,0);g.lineTo(i,128);g.moveTo(0,i);g.lineTo(128,i);g.stroke()}}
   else{g.fillStyle='#cfc6b6';g.fillRect(0,0,128,128);g.fillStyle='#b9af9e';g.fillRect(0,0,64,64);g.fillRect(64,64,64,64);g.fillStyle='rgba(0,0,0,.1)';for(let i=0;i<60;i++)g.fillRect(Math.random()*128,Math.random()*128,2,2)}},[4,4])}
 function sheetMat(k){const v=DECO.sheet[k][1];return v==='kente'?clothMat('kente'):lam(v)}
-function bedSlots(n,W,tier){const xr=W/2-.62,s=[];
+function bedSlots(n,W,tier,singles,D){const xr=W/2-.62,s=[];
   const bunk=z=>{s.push({x:xr,y:.5,z,bunk:true});s.push({x:xr,y:1.5,z,bunk:true})};
+  /* single beds: two rows of beds side by side along the right of a bigger room, a gap between them */
+  if(singles&&n>=3){const za=-(D||5.6)/2+1.82,zb=za+2.78,x2=xr-1.3;s.push({x:xr,y:.5,z:za},{x:x2,y:.5,z:za},{x:xr,y:.5,z:zb});if(n>=4)s.push({x:x2,y:.5,z:zb});return s}
   if(n===4){bunk(-1.15);bunk(1.05)}else if(n===3){bunk(-1.15);s.push({x:xr,y:.5,z:1.05})}else if(n===2){s.push({x:xr,y:.5,z:-1.15});s.push({x:xr,y:.5,z:1.05})}
   else s.push(tier>=1?{x:xr-.25,y:.5,z:-.6,dbl:true}:{x:xr,y:.5,z:-.6});
   return s}
@@ -58,7 +60,7 @@ function enterRoom0(owner){fadeIn();
     if(HT(mine?P().home:owner.home)==='lodge'){[0,.3].forEach((dz,i)=>mesh(cyl(.13,.13,.42,12),lam(i?0x9fd3f0:0xf2c230),BX0+.25,.21,-.95+dz,s));mesh(cyl(.17,.14,.3,12),lam(0x2f6bb5),BX0+.65,.15,-.35,s);OB(BX0,BX0+.85,-1.15,-.15)}
     IS.waterOff=mine&&['lodge','sunrise'].includes(HT(P().home))&&S.waterOffDay===day();
     IS.objs.push({id:'bath',label:'Bathroom',x:cx,z:bz/2-.1,r:1.35})}
-  const slots=bedSlots(beds,W,tier);IS.slots=slots;
+  const slots=bedSlots(beds,W,tier,rt.singles,D);IS.slots=slots;
   const others=[0x5aa9e6,0x4fb87a,0xe58fb0,0xf4f1ea];const drawn={};
   slots.forEach((sl,i)=>{
     const key=sl.x+'_'+sl.z,frameM=lam(tier>=1?0x6b4a2e:0x5d6670),len=2.05,wid=sl.dbl?1.5:.95;
