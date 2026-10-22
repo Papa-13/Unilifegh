@@ -15,7 +15,7 @@ function roomLifeTick(dt){if(!IS||IS.kind!=='room'||!S||S.paused)return;const no
     let g=null;
     if(k==='desk')g={k,x:q.deskSpot.x,z:q.deskSpot.z,ry:Math.PI,pose:pick(['sitWrite','type','sit','phone']),y:0};
     if(k==='tv')g=beanFree?{k,sit:1,x:bean.x,z:bean.z,ry:bean.ry,pose:'sit',y:bean.ly||0}:{k,x:IS.tvSpot.x+(Math.random()-.5)*.5,z:IS.tvSpot.z+(Math.random()-.5)*.5,ry:IS.tvSpot.ry,pose:'idle',y:0};
-    if(k==='bed')g={k,x:q.bedSpot.x,z:q.bedSpot.z,ry:0,pose:'lie',y:q.bedSpot.y,lie:1};
+    if(k==='bed')g={k,x:q.bedSpot.x,z:q.bedSpot.z,ry:0,pose:'lie',y:q.bedSpot.y,lie:1,yaw:q.bedSpot.yaw||0};
     if(k==='chat'){const a=Math.random()*6.28;g={k,x:p.ix+Math.cos(a)*.9,z:p.iz+Math.sin(a)*.9,pose:'talk',y:0,face:1}}
     if(k==='stand'){const a=Math.random()*6.28;g={k,x:Math.cos(a)*1.2,z:Math.sin(a)*1.2,pose:pick(['phone','idle','drink']),y:0,ry:Math.random()*6.28}}
     startWalk(q,A,g);A.next=now+(k==='bed'?50:k==='desk'?35:k==='tv'?40:20)+Math.random()*25})}

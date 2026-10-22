@@ -4,10 +4,12 @@ function floorMat(tier){return texMat('floor'+tier,g=>{
   else if(tier===1){g.fillStyle='#e6e1d6';g.fillRect(0,0,128,128);g.strokeStyle='#cfc8ba';g.lineWidth=2;for(let i=0;i<=128;i+=32){g.beginPath();g.moveTo(i,0);g.lineTo(i,128);g.moveTo(0,i);g.lineTo(128,i);g.stroke()}}
   else{g.fillStyle='#cfc6b6';g.fillRect(0,0,128,128);g.fillStyle='#b9af9e';g.fillRect(0,0,64,64);g.fillRect(64,64,64,64);g.fillStyle='rgba(0,0,0,.1)';for(let i=0;i<60;i++)g.fillRect(Math.random()*128,Math.random()*128,2,2)}},[4,4])}
 function sheetMat(k){const v=DECO.sheet[k][1];return v==='kente'?clothMat('kente'):lam(v)}
+/* where someone lies on a bed: feet at one end, head at the pillow (sideways beds: head against the right wall) */
+function bedPos(sl,dx=0){return sl.rot?{x:sl.x-.85,z:sl.z+dx,yaw:-Math.PI/2}:{x:sl.x+dx,z:sl.z+.85,yaw:0}}
 function bedSlots(n,W,tier,singles,D){const xr=W/2-.62,s=[];
   const bunk=z=>{s.push({x:xr,y:.5,z,bunk:true});s.push({x:xr,y:1.5,z,bunk:true})};
   /* single beds: two rows of beds side by side along the right of a bigger room, a gap between them */
-  if(singles&&n>=3){const za=-(D||5.6)/2+1.82,zb=za+2.78,x2=xr-1.3;s.push({x:xr,y:.5,z:za},{x:x2,y:.5,z:za},{x:xr,y:.5,z:zb});if(n>=4)s.push({x:x2,y:.5,z:zb});return s}
+  if(singles&&n>=3){const Dd=D||5.6,x=W/2-1.1,gap=(Dd-1.3)/n;for(let i=0;i<n;i++)s.push({x,y:.5,z:-Dd/2+.75+gap*(i+.5)-.05,rot:true});return s}
   if(n===4){bunk(-1.15);bunk(1.05)}else if(n===3){bunk(-1.15);s.push({x:xr,y:.5,z:1.05})}else if(n===2){s.push({x:xr,y:.5,z:-1.15});s.push({x:xr,y:.5,z:1.05})}
   else s.push(tier>=1?{x:xr-.25,y:.5,z:-.6,dbl:true}:{x:xr,y:.5,z:-.6});
   return s}
@@ -65,12 +67,15 @@ function enterRoom0(owner){fadeIn();
   slots.forEach((sl,i)=>{
     const key=sl.x+'_'+sl.z,frameM=lam(tier>=1?0x6b4a2e:0x5d6670),len=2.05,wid=sl.dbl?1.5:.95;
     if(!drawn[key]){drawn[key]=1;
-      if(sl.bunk){[-1,1].forEach(a=>[-1,1].forEach(b=>box(.06,2.1,.06,frameM,sl.x+a*wid/2,1.05,sl.z+b*len/2,s)));box(.06,.06,.6,frameM,sl.x-wid/2,1.2,sl.z+len/2-.2,s);box(.06,.06,.6,frameM,sl.x-wid/2,.85,sl.z+len/2-.2,s)}
+      if(sl.rot){[-1,1].forEach(a=>[-1,1].forEach(b=>box(.06,.5,.06,frameM,sl.x+b*len/2,.25,sl.z+a*wid/2,s)));if(tier>=1)box(.08,.7,wid+.06,frameM,sl.x+len/2,.6,sl.z,s);IS.obst.push({x1:sl.x-len/2-.05,x2:sl.x+len/2+.05,z1:sl.z-wid/2-.05,z2:sl.z+wid/2+.05})}
+      else if(sl.bunk){[-1,1].forEach(a=>[-1,1].forEach(b=>box(.06,2.1,.06,frameM,sl.x+a*wid/2,1.05,sl.z+b*len/2,s)));box(.06,.06,.6,frameM,sl.x-wid/2,1.2,sl.z+len/2-.2,s);box(.06,.06,.6,frameM,sl.x-wid/2,.85,sl.z+len/2-.2,s)}
       else{[-1,1].forEach(a=>[-1,1].forEach(b=>box(.06,.5,.06,frameM,sl.x+a*wid/2,.25,sl.z+b*len/2,s)));if(tier>=1)box(wid+.06,.7,.08,frameM,sl.x,.6,sl.z-len/2,s)}
-      IS.obst.push({x1:sl.x-wid/2-.05,x2:sl.x+wid/2+.05,z1:sl.z-len/2-.05,z2:sl.z+len/2+.05})}
-    box(wid+.05,.08,2.05,frameM,sl.x,sl.y-.04,sl.z,s);box(wid-.04,.16,1.95,lam(0xf4f1ea),sl.x,sl.y+.08,sl.z,s);
-    box(wid-.06,.04,1.3,mine&&i===0?sheetMat(deco.sheet):i===0?sheetMat(deco.sheet):lam(others[i%4]),sl.x,sl.y+.18,sl.z+.3,s);
-    box(wid*.6,.1,.32,lam(0xffffff),sl.x,sl.y+.21,sl.z-.78,s);
+      if(!sl.rot)IS.obst.push({x1:sl.x-wid/2-.05,x2:sl.x+wid/2+.05,z1:sl.z-len/2-.05,z2:sl.z+len/2+.05})}
+    const shM=mine&&i===0?sheetMat(deco.sheet):i===0?sheetMat(deco.sheet):lam(others[i%4]);
+    if(sl.rot){box(2.05,.08,wid+.05,frameM,sl.x,sl.y-.04,sl.z,s);box(1.95,.16,wid-.04,lam(0xf4f1ea),sl.x,sl.y+.08,sl.z,s);box(1.3,.04,wid-.06,shM,sl.x-.3,sl.y+.18,sl.z,s);box(.32,.1,wid*.6,lam(0xffffff),sl.x+.78,sl.y+.21,sl.z,s)}
+    else{box(wid+.05,.08,2.05,frameM,sl.x,sl.y-.04,sl.z,s);box(wid-.04,.16,1.95,lam(0xf4f1ea),sl.x,sl.y+.08,sl.z,s);
+    box(wid-.06,.04,1.3,shM,sl.x,sl.y+.18,sl.z+.3,s);
+    box(wid*.6,.1,.32,lam(0xffffff),sl.x,sl.y+.21,sl.z-.78,s)}
   });
   const n=beds,deskX=i=>-W/2+.95+i*Math.min(1.25,(W-2.6)/Math.max(1,n-1));
   for(let i=0;i<n;i++){const x=n===1?-.6:deskX(i),z=-D/2+.45;
@@ -98,11 +103,11 @@ function enterRoom0(owner){fadeIn();
     if(!rt.tv)IS.obst.push({x1:Math.min(T.x-wv.x,T.x+wv.x+dv.x),x2:Math.max(T.x-wv.x,T.x+wv.x+dv.x),z1:Math.min(T.z-wv.z,T.z+wv.z+dv.z),z2:Math.max(T.z-wv.z,T.z+wv.z+dv.z)});
     IS.tvAt={x:T.x,z:T.z};IS.keep=[{x1:Math.min(T.vx,T.x)-.3,x2:Math.max(T.vx,T.x)+.3,z1:Math.min(T.vz,T.z)-.3,z2:Math.max(T.vz,T.z)+.3}];IS.tvSpot={x:T.vx,z:T.vz,ry:Math.atan2(T.x-T.vx,T.z-T.vz)};IS.objs.push({id:'tv',label:'TV',x:(T.x+T.vx)/2,z:(T.z+T.vz)/2,r:1})}else IS.tvSpot=null;
   if(mine){
-    const cb=slots[0],cupb=tier>=1||P().items.includes('cupboard');
+    const cb=slots[0].rot?{x:.4,z:D/2-1.75}:slots[0],cupb=tier>=1||P().items.includes('cupboard');
     if(cupb){box(.7,.9,.42,lam(tier>=2?0x7a5536:0x9a7a55),cb.x-.2,.45,cb.z+1.35,s);box(.02,.7,.36,lam(0x5a3e28),cb.x-.2,.47,cb.z+1.35,s);[-.08,.08].forEach(dx=>mesh(sph(.02),lam(0xd9a537),cb.x-.2+dx,.6,cb.z+1.57,s));box(.5,.06,.34,lam(0xe8b24a),cb.x-.2,.93,cb.z+1.35,s)}
     else{const bag=mesh(sph(.24,12,10),lam(0x2f6b3a),cb.x-.2,.2,cb.z+1.3,s);bag.scale.set(1.3,.85,.9);mesh(cyl(.06,.09,.1,10),lam(0x2f6b3a),cb.x-.2,.4,cb.z+1.3,s);box(.3,.04,.02,lam(0xe8b24a),cb.x-.2,.22,cb.z+1.52,s)}
     IS.obst.push({x1:cb.x-.55,x2:cb.x+.15,z1:cb.z+1.12,z2:cb.z+1.58});IS.objs.push({id:'chop',label:cupb?'Food cupboard':'Provisions bag',x:cb.x-.95,z:cb.z+1.35,r:.75});IS.provLbl=cupb?'food cupboard':'provisions bag';
-    IS.objs.push({id:'bed',label:'Your bed',x:cb.x-.9,z:cb.z-.3,r:.8});
+    IS.objs.push(slots[0].rot?{id:'bed',label:'Your bed',x:slots[0].x-.4,z:slots[0].z+.95,r:.8}:{id:'bed',label:'Your bed',x:cb.x-.9,z:cb.z-.3,r:.8});
     if(rt.kitchen){const kx=-W/2+.34;box(.6,.9,1.15,lam(0xe6e2da),kx,.45,.72,s);box(.62,.04,1.17,lam(0x6b6560),kx,.92,.72,s);box(.4,.03,.45,lam(0x222222),kx,.95,.45,s);[-.1,.1].forEach(dz=>{const r=mesh(new THREE.TorusGeometry(.07,.01,6,14),lam(0x555555),kx,.97,.45+dz*1.5,s);r.rotation.x=Math.PI/2});mesh(cyl(.1,.09,.13,12),lam(0x9a9a9a),kx,1.03,.4,s);box(.5,.42,.4,lam(0xf4f4f4),kx,1.15,1.05,s);
       IS.obst.push({x1:-W/2,x2:-W/2+.66,z1:.12,z2:1.32});IS.objs.push({id:'kitchen',label:'Kitchenette',x:-W/2+1.05,z:.72,r:.85});IS.spots.stove={x:-W/2+.9,z:.48,ry:-Math.PI/2}}
     const it=P().items,dx=n===1?-.6:deskX(0),dzz=-D/2+.45;
@@ -152,12 +157,12 @@ function enterRoom0(owner){fadeIn();
     IS.objs.push({id:'room',label:'Room',x:0,z:0,r:9});
     if(mess>70)addBuff('messy');if(mess>70&&S.mates.length&&S['mc'+day()]!==1){S['mc'+day()]=1;const m=S.mates[0];m.friend=clamp(m.friend-2);setTimeout(()=>toast(`${m.name}: "Chale, this room is getting messy o. Let's clean small 🧹"`),400)}
   }else IS.objs.push({id:'hang',label:'Hang out',x:-.4,z:.6,r:9});
-  IS.spots=Object.assign(IS.spots,{bed:{x:slots[0].x,z:slots[0].z+.85,ly:slots[0].y+.3},desk:{x:n===1?-.6:deskX(0),z:-D/2+1.02,ry:Math.PI}});
+  IS.spots=Object.assign(IS.spots,{bed:Object.assign(bedPos(slots[0]),{ly:slots[0].y+.3}),desk:{x:n===1?-.6:deskX(0),z:-D/2+1.02,ry:Math.PI}});
   const placePerson=(who,slotIdx,sleeping)=>{const sl=slots[slotIdx]||slots[0],lbl=who.name+(who.mate?' · roommate':''),dk={x:n===1?-.6:deskX(Math.min(Math.max(who.bed,0),beds-1)),z:-D/2+1.02,ry:Math.PI};let q;
-    if(sleeping)q=addInPerson(who.look,lbl,sl.x,sl.z+.85,0,'lie',{n:who,lie:true,y:sl.y+.32});
+    const bp=bedPos(sl);if(sleeping)q=addInPerson(who.look,lbl,bp.x,bp.z,0,'lie',{n:who,lie:true,y:sl.y+.32,yaw:bp.yaw});
     else if(who===owner)q=addInPerson(who.look,lbl,-.5,.3,.4,'talk',{n:who});
     else q=addInPerson(who.look,lbl,dk.x,dk.z,Math.PI,pick(['sitWrite','type','sit']),{n:who});
-    q.deskSpot=who===owner&&!mine?null:dk;q.bedSpot={x:sl.x,z:sl.z+.85,y:sl.y+.32};q.life=1;q.nightSleep=!!sleeping};
+    q.deskSpot=who===owner&&!mine?null:dk;q.bedSpot={x:bp.x,z:bp.z,y:sl.y+.32,yaw:bp.yaw};q.life=1;q.nightSleep=!!sleeping};
   IS.lightsOn=!(hour()>=23.5||hour()<5.5);
   const night=hour()<7||hour()>=22;
   const gst=mine?(S.guestId!=null&&S.guestHere&&S.guestUntil>S.min?npcById(S.guestId):(()=>{const b=S.npcs.find(n=>n.with>S.min&&!n.mate&&!n.hidden&&dist(n,P())<300);return b})()):null;

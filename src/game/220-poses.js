@@ -1,4 +1,4 @@
-const _uq1=new THREE.Quaternion(),_uq2=new THREE.Quaternion(),_lqA=new THREE.Quaternion(),_lqB=new THREE.Quaternion(),_lX=new THREE.Vector3(1,0,0),_lY=new THREE.Vector3(0,1,0);
+const _uq1=new THREE.Quaternion(),_uq2=new THREE.Quaternion(),_lqA=new THREE.Quaternion(),_lqC=new THREE.Quaternion(),_lqB=new THREE.Quaternion(),_lX=new THREE.Vector3(1,0,0),_lY=new THREE.Vector3(0,1,0);
 /* ================= poses & animation ================= */
 /* a bite of food, step by step: scoop from the plate, lift to the mouth, bite, lower, chew */
 const ss=(a,b,x)=>{const k=clamp((x-a)/(b-a),0,1);return k*k*(3-2*k)};
@@ -109,7 +109,7 @@ function posePerson(c,moving,dt){poseX(c);
   c.arms[0].rotation.x=pv.A[0];c.arms[1].rotation.x=pv.A[1];c.arms[0].rotation.z=pv.Az[0];c.arms[1].rotation.z=pv.Az[1];
   if(c.elbows){c.elbows[0].rotation.x=pv.E[0];c.elbows[1].rotation.x=pv.E[1]}
   if(c.lying){const ss=c.sleepStyle||'back',ty=ss==='side'?Math.PI/2:ss==='sideL'?-Math.PI/2:ss==='front'?Math.PI:0;c._sry=c._sry==null?ty:c._sry+(ty-c._sry)*(dt?Math.min(1,dt*2.5):1);
-    _lqA.setFromAxisAngle(_lX,-Math.PI/2);_lqB.setFromAxisAngle(_lY,c._sry);g.quaternion.copy(_lqA).multiply(_lqB);g.position.y=(c.spotY||0)+(ss==='side'||ss==='sideL'?.1:ss==='front'?.06:0)+Math.sin(performance.now()/1000*1.6+(c.id||0))*.004}
+    _lqC.setFromAxisAngle(_lY,c.bedYaw||0);_lqA.setFromAxisAngle(_lX,-Math.PI/2);_lqB.setFromAxisAngle(_lY,c._sry);g.quaternion.copy(_lqC).multiply(_lqA).multiply(_lqB);g.position.y=(c.spotY||0)+(ss==='side'||ss==='sideL'?.1:ss==='front'?.06:0)+Math.sin(performance.now()/1000*1.6+(c.id||0))*.004}
   else if(pose==='dive'){g.rotation.x=c.diveRot||0;g.rotation.z=0;g.position.y=c.diveY||0}
   else if(pose==='swim'){g.rotation.x=1.55;g.rotation.z=0;g.position.y=.06+Math.sin(t*9)*.012}
   else{g.rotation.x=lean;g.rotation.z=pv.rz;g.position.y=pv.y+(c.spotY||0)}

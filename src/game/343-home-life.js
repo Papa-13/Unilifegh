@@ -10,14 +10,14 @@ function pjLook(L,seed){return Object.assign({},L,{outfit:'pj',pal:PJ_PAL[Math.a
 function towelLook(L){return Object.assign({},L,{outfit:'towel',pal:'white',shoes:'slides',bag:'none',extra:'none'})}
 const SLEEPY=/^Sleeping|nap\b|Napping|Taking a nap/i,BATHY=/shower|bucket bath|bathtub/i;
 /* you */
-{const _sb=startBusy;startBusy=function(label,a,dur,done){const r=_sb.apply(this,arguments);try{const p=P(),b=S.busy;if(b&&b.label===label&&!p._lookBak){
+{const _sb=startBusy;startBusy=function(label,a,dur,done){const r=_sb.apply(this,arguments);try{const p=P(),b=S.busy;if(b&&b.label===label)p.bedYaw=a&&a.spot&&a.spot.yaw!=null&&a.pose==='lie'?a.spot.yaw:0;if(b&&b.label===label&&!p._lookBak){
   const k=SLEEPY.test(label)?'pj':BATHY.test(label)?'towel':null;if(k){p._lookBak=p.look;p.look=k==='pj'?pjLook(p.look,(p.name||'').length+3):towelLook(p.look);rebuildPlayer();p.noTurn=false;if(k==='pj')p.sleepStyle=null}}}catch(e){console.warn(e)}return r}}
 {const _fb=finishBusy;finishBusy=function(){const p=P();const r=_fb.apply(this,arguments);try{if(p._lookBak&&!S.busy){p.look=p._lookBak;p._lookBak=null;rebuildPlayer()}}catch(e){console.warn(e)}return r}}
 /* roommates and friends in the room */
-{const _ai=addInPerson;addInPerson=function(look,label,x,z,ry,pose,o){o=o||{};try{if(o.lie&&o.n)look=pjLook(look,o.n.id||label.length);else if(pose==='shower')look=towelLook(look)}catch(e){}return _ai.call(this,look,label,x,z,ry,pose,o)}}
+{const _ai=addInPerson;addInPerson=function(look,label,x,z,ry,pose,o){o=o||{};try{if(o.lie&&o.n)look=pjLook(look,o.n.id||label.length);else if(pose==='shower')look=towelLook(look)}catch(e){}const q=_ai.call(this,look,label,x,z,ry,pose,o);if(q&&o.yaw!=null)q.bedYaw=o.yaw;return q}}
 function swapLook(q,look){if(!q||!q.mesh||!IS)return;const old=q.mesh,h=makeHuman(look,{label:q.n&&(q.n.met||q.n.mate)?q.n.name:'',labelColor:'#f6f0e8'});h.g.position.copy(old.position);h.g.rotation.copy(old.rotation);
   IS.scene.remove(old);try{disposeTree(old)}catch(e){}IS.scene.add(h.g);Object.assign(q,{mesh:h.g,legs:h.legs,knees:h.knees,arms:h.arms,elbows:h.elbows,head:h.head,lids:h.lids,torso:h.torso});q._pv=null}
-{const _ar=arrive;arrive=function(q,g){const r=_ar.apply(this,arguments);try{if(g&&g.lie&&q.n&&!q._pj){q._pj=1;swapLook(q,pjLook(q.n.look,q.n.id||1))}}catch(e){}return r}}
+{const _ar=arrive;arrive=function(q,g){const r=_ar.apply(this,arguments);try{q.bedYaw=g&&g.lie?(g.yaw||0):0;if(g&&g.lie&&q.n&&!q._pj){q._pj=1;swapLook(q,pjLook(q.n.look,q.n.id||1))}}catch(e){}return r}}
 {const _sw=startWalk;startWalk=function(q,A,g){try{if(q._pj&&q.n&&!(g&&g.lie)){q._pj=0;swapLook(q,q.n.look)}}catch(e){}return _sw.apply(this,arguments)}}
 
 /* ---------------- place your own furniture ---------------- */

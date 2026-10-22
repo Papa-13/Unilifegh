@@ -143,7 +143,7 @@ function sleepoverAsk(n,mine){const p=P(),yes=Math.random()<(n.romance>=60?.9:.5
   if(!yes){n.romance=clamp(n.romance-1);toast(`${n.name}: "Not tonight, babe. I have an early lecture 😘"`);return}
   story(`<div class="eyebrow">🌙 Sleepover</div><h3>${esc(n.name)} stays the night</h3><p class="scene">${mine?`You push the beds closer, put on a movie and talk until you both fall asleep halfway through it.`:`${esc(n.name)} finds you an extra pillow. You watch videos on one phone and laugh until midnight.`}</p><p style="font-size:13px;color:var(--muted)">Romance +8 · you'll wake up feeling loved ❤️</p>`,[['Goodnight 😴','g',()=>{
     n.romance=clamp(n.romance+8);n.friend=clamp(n.friend+4);S.sleepover={id:n.id,day:day()};if(mine){S.guestId=n.id;S.guestHere=true;S.guestUntil=(hour()>=12?day()+1:day())*1440+10*60}
-    const sl=IS.slots&&IS.slots[0];if(sl){IS.people.filter(q=>q.n===n).forEach(q=>{IS.scene.remove(q.mesh)});IS.people=IS.people.filter(q=>q.n!==n);addInPerson(n.look,n.name,sl.x+.32,sl.z+.85,0,'lie',{n,lie:true,y:sl.y+.32})}
+    const sl=IS.slots&&IS.slots[0];if(sl){IS.people.filter(q=>q.n===n).forEach(q=>{IS.scene.remove(q.mesh)});IS.people=IS.people.filter(q=>q.n!==n);(bp=>addInPerson(n.look,n.name,bp.x,bp.z,0,'lie',{n,lie:true,y:sl.y+.32,yaw:bp.yaw}))(bedPos(sl,.32))}
     if(mine&&S.mates.some(m=>homeNow(m)))setTimeout(()=>toast(`${S.mates[0].name} (whispering): "Eiii, we are also in this room o 😂"`),900);
     sleep();const b=S.busy;if(b){const d=b.done;b.done=()=>{d();addBuff('loved');setTimeout(()=>toast(`☀️ Good morning! ${n.name}: "${pick(['Morning, sleepyhead ❤️','I made you tea ☕','You snore small o 😂❤️'])}"`),600)}}}]])}
 
