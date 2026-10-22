@@ -53,11 +53,19 @@ function guestDecides(q,want){const n=q.n,fn=n.name.split(' ')[0],p=P(),pt=p.par
 function friendSleepover(n,q){const fn=n.name.split(' ')[0];
   const yes=Math.random()<.3+(n.friend||0)/180+(hour()>=22||hour()<4?.15:0);
   if(!yes){n.friend=clamp((n.friend||0)-1);toast(`${fn}: "${pick(['I wish, but I have an 8am lecture 😩','Not tonight, my roommate is waiting for me. Next time!','Ah, I didn\'t bring my things. Another day 🙏'])}"`);return}
-  const sofa=(IS.seatsX||[]).filter(s=>s.id==='sofa'),onSofa=sofa.length===2;
-  story(`<div class="eyebrow">🌙 Sleepover</div><h3>${esc(n.name)} is staying the night!</h3><p class="scene">${onSofa?`You grab a spare pillow and a cloth for ${esc(fn)} on the sofa.`:`You pull out a spare mattress and lay it on the floor for ${esc(fn)}.`} You gist and laugh until late, then the lights go off.</p><p style="font-size:13px;color:var(--muted)">Friendship +6 · Social +25</p>`,[['Goodnight 😴','g',()=>{
-    n.friend=clamp((n.friend||0)+6);P().needs.social=clamp(P().needs.social+25);S.sleepover={id:n.id,day:day(),friend:1};S.guestId=n.id;S.guestHere=true;S.guestUntil=(hour()>=12?day()+1:day())*1440+10*60;
-    let x,z,y,yaw;if(onSofa){const a=sofa[0],b=sofa[1];x=(a.x+b.x)/2;z=(a.z+b.z)/2;y=.46;yaw=a.ry+Math.PI/2}else{const m=matSpot();S.sleepover.mat=m;drawMat(m);x=m.x;z=m.z;y=.12;yaw=m.yaw}
-    x+=Math.sin(yaw)*.8;z+=Math.cos(yaw)*.8;
+  const sofa=(IS.seatsX||[]).filter(s=>s.id==='sofa'),opts=[['🛏️ "You can sleep beside me on my bed"','bed']];if(sofa.length===2)opts.push(['🛋️ "Take the sofa"','sofa']);opts.push(['🧺 "I\'ll lay a spare mattress for you"','mat']);
+  toast(`${fn}: "Okay, I'll stay! 🙌 Where do I sleep?"`);
+  setTimeout(()=>placeSheet(`🌙 Where will ${esc(fn)} sleep?`,opts.map(o=>o[0]),i=>{closeSheet();
+    /* they decide: sharing your bed is for people who are really close */
+    let w=opts[i][1];if(w==='bed'&&Math.random()>((n.friend||0)>=80?.75:.45)){w=sofa.length===2?'sofa':'mat';toast(`${fn}: "${pick(['Eh, your bed is small 😂 I\'ll take the '+(w==='sofa'?'sofa':'mattress')+'.','I kick in my sleep o 😅 '+(w==='sofa'?'Sofa':'Mattress')+' is fine for me.'])}"`)}
+    friendSleepNow(n,w,sofa)},1),900)}
+function friendSleepNow(n,w,sofa){const fn=n.name.split(' ')[0],txt=w==='bed'?`You move to one side of the bed and give ${esc(fn)} the other side and a pillow.`:w==='sofa'?`You grab a spare pillow and a cloth for ${esc(fn)} on the sofa.`:`You pull out a spare mattress and lay it on the floor for ${esc(fn)}.`;
+  story(`<div class="eyebrow">🌙 Sleepover</div><h3>${esc(n.name)} is staying the night!</h3><p class="scene">${txt} You gist and laugh until late, then the lights go off.</p><p style="font-size:13px;color:var(--muted)">Friendship +${w==='bed'?8:6} · Social +25</p>`,[['Goodnight 😴','g',()=>{
+    n.friend=clamp((n.friend||0)+(w==='bed'?8:6));P().needs.social=clamp(P().needs.social+25);S.sleepover={id:n.id,day:day(),friend:1};S.guestId=n.id;S.guestHere=true;S.guestUntil=(hour()>=12?day()+1:day())*1440+10*60;
+    let x,z,y,yaw;const sl=IS.slots&&IS.slots[0];
+    if(w==='bed'&&sl){const bp=bedPos(sl,.32);x=bp.x;z=bp.z;y=sl.y+.32;yaw=bp.yaw}
+    else{if(w==='sofa'&&sofa.length===2){const a=sofa[0],b=sofa[1];x=(a.x+b.x)/2;z=(a.z+b.z)/2;y=.46;yaw=a.ry+Math.PI/2}else{const m=matSpot();S.sleepover.mat=m;drawMat(m);x=m.x;z=m.z;y=.12;yaw=m.yaw}
+      x+=Math.sin(yaw)*.8;z+=Math.cos(yaw)*.8}
     IS.people.filter(o=>o.n===n).forEach(o=>IS.scene.remove(o.mesh));IS.people=IS.people.filter(o=>o.n!==n);addInPerson(n.look,n.name,x,z,0,'lie',{n,lie:true,y,yaw});
     if(S.mates.some(m=>homeNow(m)))setTimeout(()=>toast(`${S.mates[0].name}: "Welcome o, ${fn}! Don't snore 😂"`),900);
     sleep();const b=S.busy;if(b){const d=b.done;b.done=()=>{d();setTimeout(()=>toast(`☀️ Morning! ${fn}: "${pick(['Thanks for having me 🙏','Your room is so cosy','I slept like a baby 😴','Breakfast is on me today'])}"`),600)}}}]])}
@@ -84,3 +92,18 @@ function deskGather(){const o=IS.objs.find(o=>o.id==='desk');if(!o)return null;c
 {const _im=itemMenu;itemMenu=function(id){if(id!=='desk')return _im.apply(this,arguments);story(`<div class="eyebrow">🛋️ Your stuff</div><h3>Your desk</h3><p class="scene">Where you study, type and eat when nobody is looking.</p>`,
   [['🛠️ Move it','g',()=>startPlace('desk')],['Close','',()=>{}]])}}
 {const _ra=roomActions;roomActions=function(){const a=_ra.apply(this,arguments);try{if(inMyRoomNow()&&!S.busy)a.push(['🪑 Move your desk',()=>startPlace('desk')])}catch(e){}return a}}
+
+/* ↻ turn something where it stands (desk included), if there's room */
+function quickTurn(id){const p=P(),M=MOVABLE[id];if(!M||M.wall||!IS||!IS.mine)return;let q=p.place&&p.place[id];
+  if(!q&&id==='desk'){const d=IS.objs.find(o=>o.id==='desk');if(!d)return;q={x:d.x,z:-IS.D/2+.75,ry:0}}if(!q)return toast('Move it once first, then you can turn it.');
+  const f0=footprint(id,q.x,q.z,q.ry||0),oi=IS.obst.findIndex(o=>Math.abs(o.x1-f0.x1)<.03&&Math.abs(o.z1-f0.z1)<.03&&Math.abs(o.x2-f0.x2)<.03),saved=oi>=0?IS.obst.splice(oi,1)[0]:null;
+  const keep={id:PLACE.id,x:PLACE.x,z:PLACE.z,ry:PLACE.ry};let ok=false,ry=q.ry||0;
+  for(const d of [1,2,3]){ry=(((Math.round((q.ry||0)/(Math.PI/2))+d)%4+4)%4)*(Math.PI/2);PLACE.id=id;PLACE.x=q.x;PLACE.z=q.z;PLACE.ry=ry;try{ok=placeOK()}catch(e){ok=false}if(ok)break}
+  Object.assign(PLACE,keep);if(saved)IS.obst.push(saved);
+  if(!ok)return toast('There isn\'t room to turn it here. Use "Move it" to put it somewhere else.');
+  p.place=p.place||{};p.place[id]={x:q.x,z:q.z,ry:+ry.toFixed(3)};refreshRoom();toast(`↻ ${id==='desk'?'Desk':itemName(id)} turned`)}
+{const _im=itemMenu;itemMenu=function(id){const M=MOVABLE[id];if(id==='desk')return story(`<div class="eyebrow">🛋️ Your stuff</div><h3>Your desk</h3><p class="scene">Where you study, type and eat when nobody is looking.</p>`,
+    [['↻ Turn it','g',()=>quickTurn('desk')],['🛠️ Move it','',()=>startPlace('desk')],['Close','',()=>{}]]);
+  const r=_im.apply(this,arguments);try{if(M&&!M.wall&&P().place&&P().place[id]&&!(P().boxed||[]).includes(id)){const box=$('storyIn'),mv=[...box.querySelectorAll('button')].find(b=>/Move it/.test(b.textContent));
+    if(mv){const t=mv.cloneNode(true);t.textContent='↻ Turn it';t.onclick=()=>{$('story').hidden=true;S.paused=false;quickTurn(id)};mv.parentNode.insertBefore(t,mv)}}}catch(e){}return r}}
+{const _ra=roomActions;roomActions=function(){const a=_ra.apply(this,arguments);try{const k=a.findIndex(x=>/^🪑 Move your desk/.test(x[0]));if(k>=0)a.splice(k+1,0,['↻ Turn your desk',()=>quickTurn('desk')])}catch(e){}return a}}
