@@ -15,7 +15,7 @@ owareGame=function(nOpt){if(!(IS&&IS.kind==='room'))return toast('Oware is playe
   const legal=(b,pl)=>{let m=OWN(pl).filter(i=>b[i]>0);if(OWN(1-pl).every(i=>!b[i]))m=m.filter(i=>OWN(1-pl).some(j=>sim(b,i,pl).b[j]>0));return m};
   /* layout: their row on top (right to left), yours along the bottom, stores above and below */
   /* on a tall phone screen the board stands upright (your pits up the right side, theirs down the left) so pits and seeds are big */
-  let L={};F.onFit=()=>{const vert=F.h>F.w*1.25;if(vert){const pr=Math.min(F.w*.17,F.h*.6/12.6),cy=F.h*.5,cx=F.w/2;L={vert,pr,cx,cy,colR:cx+pr*1.3,colL:cx-pr*1.3,x0:cx-pr*3,W:pr*6,store:[cy+pr*6.3+pr*1.9,cy-pr*6.3-pr*1.9]}}
+  let L={};F.onFit=()=>{const vert=F.h>F.w*1.25;if(vert){const pr=Math.min(F.w*.17,F.h*.53/12.6),cy=F.h*.48,cx=F.w/2;L={vert,pr,cx,cy,colR:cx+pr*1.3,colL:cx-pr*1.3,x0:cx-pr*3,W:pr*6,store:[cy+pr*6.3+pr*1.9,cy-pr*6.3-pr*1.9]}}
     else{const W=Math.min(F.w-16,620),pr=W/12*.86,x0=(F.w-W)/2,cy=F.h*.47,gap=pr*2.5;L={vert,W,pr,x0,cy,top:cy-gap/2,bot:cy+gap/2,store:[cy+gap/2+pr*3.1,cy-gap/2-pr*3.1]}}};
   const pitXY=i=>{if(L.vert){const r=i<6?i:11-i;return{x:i<6?L.colR:L.colL,y:L.cy+L.pr*2.1*(2.5-r)}}const col=i<6?i:11-i;return{x:L.x0+L.W/12*(col*2+1),y:i<6?L.bot:L.top}};
   const labXY=(i,p)=>L.vert?{x:p.x+(i<6?1:-1)*L.pr*1.55,y:p.y}:{x:p.x,y:i<6?p.y+L.pr*1.35:p.y-L.pr*1.35};
