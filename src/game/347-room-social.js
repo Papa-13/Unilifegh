@@ -57,6 +57,7 @@ function friendSleepover(n,q){const fn=n.name.split(' ')[0];
   story(`<div class="eyebrow">🌙 Sleepover</div><h3>${esc(n.name)} is staying the night!</h3><p class="scene">${onSofa?`You grab a spare pillow and a cloth for ${esc(fn)} on the sofa.`:`You pull out a spare mattress and lay it on the floor for ${esc(fn)}.`} You gist and laugh until late, then the lights go off.</p><p style="font-size:13px;color:var(--muted)">Friendship +6 · Social +25</p>`,[['Goodnight 😴','g',()=>{
     n.friend=clamp((n.friend||0)+6);P().needs.social=clamp(P().needs.social+25);S.sleepover={id:n.id,day:day(),friend:1};S.guestId=n.id;S.guestHere=true;S.guestUntil=(hour()>=12?day()+1:day())*1440+10*60;
     let x,z,y,yaw;if(onSofa){const a=sofa[0],b=sofa[1];x=(a.x+b.x)/2;z=(a.z+b.z)/2;y=.46;yaw=a.ry+Math.PI/2}else{const m=matSpot();S.sleepover.mat=m;drawMat(m);x=m.x;z=m.z;y=.12;yaw=m.yaw}
+    x+=Math.sin(yaw)*.8;z+=Math.cos(yaw)*.8;
     IS.people.filter(o=>o.n===n).forEach(o=>IS.scene.remove(o.mesh));IS.people=IS.people.filter(o=>o.n!==n);addInPerson(n.look,n.name,x,z,0,'lie',{n,lie:true,y,yaw});
     if(S.mates.some(m=>homeNow(m)))setTimeout(()=>toast(`${S.mates[0].name}: "Welcome o, ${fn}! Don't snore 😂"`),900);
     sleep();const b=S.busy;if(b){const d=b.done;b.done=()=>{d();setTimeout(()=>toast(`☀️ Morning! ${fn}: "${pick(['Thanks for having me 🙏','Your room is so cosy','I slept like a baby 😴','Breakfast is on me today'])}"`),600)}}}]])}
