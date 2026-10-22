@@ -9,20 +9,39 @@ const leNear=(...ids)=>ids.includes(leAt());
 const leHostel=()=>leAt()==='room'||leAt()===P().home;
 const leDept=()=>{const a=leAt();return !!a&&a===P().col};
 const leWeekday=()=>{try{return wd()>=1&&wd()<=5}catch(e){return true}};
+const leAcad=()=>{const a=leAt();return !!a&&(a===P().col||!!COLLEGES[a]||a==='lib'||a==='senate')};
+const lePublic=()=>{const a=leAt();return a!=='room'&&!['cinema','club','resto','arcade'].includes(a)};
+const lePlaceTxt=()=>{const a=leAt();if(!a||!BID[a])return'on campus';return'at '+BID[a].name.split(' · ')[0]};
+/* fixed places for things that only happen there; everything else can happen wherever you happen to be */
 const LE_PLACE={
-  snatch:()=>leOut()&&leNear('night','market'),
-  lostid:()=>leNear('lib'),
   blackstars:()=>leHostel(),
   flood:()=>leHostel(),
   leak:()=>leHostel(),
-  lecturerhelp:()=>leDept()&&leWeekday(),
-  preacher:()=>leOut()&&leNear('square'),
-  talent:()=>leNear('greathall','square','parade'),
+  lecturerhelp:()=>leAcad()&&leWeekday(),
+  snatch:()=>leOut(),
+  lostid:()=>lePublic(),
+  preacher:()=>leOut(),
   wallet:()=>leOut(),
   nearmiss:()=>leOut()&&!leNear('lib','field','lake','garden')};
+/* the story names the place you're actually at */
+let LE_CUR=null;
+{const _ls=leStory;leStory=function(ic,title,scene,ch){try{const w=lePlaceTxt();if(LE_CUR==='snatch')scene=scene.replace('while you walk past the Night Market',`while you're walking ${w}`);
+  if(LE_CUR==='lostid')scene=scene.replace('at the library entrance',w);if(LE_CUR==='preacher'){title=`A preacher ${w}`;scene=scene.replace('A campus preacher','A campus preacher')}}catch(e){}return _ls.call(this,ic,title,scene,ch)}}
+LIFE_EVENTS.forEach(e=>{const r=e.run;e.run=function(){LE_CUR=e.id;try{return r.apply(this,arguments)}finally{LE_CUR=null}}});
+BUFFS.confident=BUFFS.confident||['😎','Feeling confident','happy',120];
+/* two more things that can happen anywhere */
+LIFE_EVENTS.push(
+ {id:'oldfriend',gap:12,when:()=>lePublic()&&leH()>=8&&leH()<21,run:()=>{const nm=pick(['Kwame','Abena','Yaw','Efua','Kojo','Adwoa','Nana','Akua']),w=lePlaceTxt();
+   leStory('🙌',`"Ei! ${esc(P().name.split(' ')[0])}!"`,`Someone shouts your name ${w}. It's ${nm}, your old classmate from SHS! You haven't seen each other since WASSCE.`,[
+    ['🤗 Catch up for a bit','g',()=>{LE_FX({social:18,fun:10});advance(25);leDone(`You and ${nm} gist about old teachers and who's dating who now 😂 You swap numbers.`)}],
+    ['👋 "Let\'s talk later, I\'m in a hurry"','',()=>{LE_FX({social:3});leDone(`${nm}: "Okay o, don't forget me!" 😅`)}]])}},
+ {id:'promo',gap:10,when:()=>leOut()&&leH()>=9&&leH()<18,run:()=>{const w=lePlaceTxt();
+   leStory('📣','Free data giveaway!',`A telecom promo team ${w} is giving free data bundles to anyone who dances to their jingle on camera.`,[
+    ['💃 Dance for it','g',()=>{LE_FX({fun:12,social:6});addBuff('confident');leDone('You killed it 😂 2GB free data, and the crowd cheered you on!')}],
+    ['🙈 No way, keep walking','',()=>{}]])}});
 LIFE_EVENTS.forEach(e=>{const w=LE_PLACE[e.id];if(!w)return;const _w=e.when;e.when=()=>{try{return w()&&_w()}catch(x){return false}}});
 /* the lecturer: your own lecturer, at your own department */
-{const e=LIFE_EVENTS.find(e=>e.id==='lecturerhelp');if(e)e.run=()=>{const nm=lecturerOf(0),dep=(BID[P().col]||{}).name||'your department';
+{const e=LIFE_EVENTS.find(e=>e.id==='lecturerhelp');if(e)e.run=()=>{const nm=lecturerOf(0),dep=(BID[leAt()]||BID[P().col]||{}).name||'your department';
   leStory('📚',`${esc(nm)} needs a hand`,`As you pass ${esc(dep)}, ${esc(nm)} is struggling up the stairs with a big box of exam scripts.`,[
     ['🙋 "Let me help you"','g',()=>{LE_FX({energy:-4,study:3});advance(15);S.lecHelped=(S.lecHelped||0)+1;leDone(`${nm}: "Thank you, my dear. What is your name again?" They'll remember you 😉`)}],
     ['🚶 Keep walking','',()=>{}]])}}
