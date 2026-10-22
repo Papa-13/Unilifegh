@@ -24,7 +24,7 @@ function guestKnock(n){S.guestEta=0;try{arcThud(.5);setTimeout(()=>arcThud(.5),1
 /* they come in through the door and walk over to you */
 function guestWalkIn(n){try{const q=IS&&IS.people.find(q=>q.n===n),d=IS&&IS.objs.find(o=>o.id==='door');if(!q||!d)return;const p=P();
   q.mesh.position.set(d.x+.35,0,d.z);q.x=d.x+.35;q.z=d.z;const A=q.ai||(q.ai={next:0,path:null,goal:null});const a=Math.atan2(d.x-p.ix,d.z-p.iz);
-  startWalk(q,A,{k:'chat',x:p.ix+Math.sin(a)*.9,z:p.iz+Math.cos(a)*.9,pose:'wave',y:0,face:1});A.next=performance.now()/1000+25;
+  startWalk(q,A,{k:'chat',x:p.ix-Math.sin(a)*.9,z:p.iz-Math.cos(a)*.9,pose:'wave',y:0,face:1});A.next=performance.now()/1000+25;
   setTimeout(()=>toast(`${n.name.split(' ')[0]}: "${pick(['Your room is nice o! 😍','Ei, it\'s cosy in here 😄','So this is where you hide 😂'])}"`),2500)}catch(e){console.warn(e)}}
 /* keep time: heads-up when close, knock when they arrive (works after reloading too) */
 setInterval(()=>{try{if(!S||!S.p||$('game').hidden)return guestBar();if(S.guestId!=null&&!S.guestHere&&S.guestEta){const n=npcById(S.guestId);if(!n){S.guestEta=0;return guestBar()}
