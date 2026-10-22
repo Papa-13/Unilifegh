@@ -19,7 +19,8 @@ const CTX=[[/can we talk|let'?s talk|saved my number/i,{yes:['Yay 🙈 So tell m
   [/i'?m so bored/i,{any:['Same 😩 come and let\'s do something','😂 okay, entertain me then']}],
   [/how are you\?|you\?$/i,{fine:['Nice 😊','Good to hear! 🙌','Okay, thank God 🙏'],any:['Hmm okay 😅']}],
   [/which hostel|how'?s campus/i,{any:['Oh nice! We should link up some time 😊','Okay, I know there 😄']}]];
-function ctxReply(n,intent){const lf=lastFrom(n);if(!lf||S.min-lf.at>360)return null;const c=CTX.find(([r])=>r.test(lf.text));if(!c)return null;const o=c[1];
+function ctxReply(n,intent){const recent=S.msgs.filter(m=>m.chat===n.name&&!m.mine&&!m.sys).slice(0,3).filter(m=>S.min-m.at<=360);let c=null;
+  for(const m of recent){c=CTX.find(([r])=>r.test(m.text));if(c)break}if(!c)return null;const o=c[1];
   const k=intent==='yes'||intent==='ate'&&!o.ate?'yes':intent==='no'?'no':intent==='fine'&&o.fine?'fine':intent==='ate'?'ate':null;
   const L=(k&&o[k])||(intent==='def'||intent==='q'||intent==='laugh'||intent==='fine'||intent==='yes'||intent==='no'?o.any:null);return L?{text:pick(L),gain:2}:null}
 const PROG_SHORT=n=>(n.prog||'my course').replace(/^BSc\.? |^BA\.? /,'');
