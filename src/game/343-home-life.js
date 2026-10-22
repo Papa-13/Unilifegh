@@ -71,7 +71,7 @@ function startPlace(id,fresh){if(!IS||!IS.mine||!MOVABLE[id])return toast('Go to
     PLACE.ghost=putItem(id,PLACE.x,PLACE.z,PLACE.ry,true);if(!M.wall)placeArrow(PLACE.ghost,M);placeUI();placeCheck()},700)}
 /* a bright arrow on the floor shows which way the item is facing while you place it */
 function placeArrow(g,M){const sh=new THREE.Shape();sh.moveTo(0,.26);sh.lineTo(.2,0);sh.lineTo(.08,0);sh.lineTo(.08,-.16);sh.lineTo(-.08,-.16);sh.lineTo(-.08,0);sh.lineTo(-.2,0);sh.lineTo(0,.26);
-  const a=new THREE.Mesh(new THREE.ShapeGeometry(sh),new THREE.MeshBasicMaterial({color:0x35e07a,transparent:true,opacity:.9,depthWrite:false,side:THREE.DoubleSide}));a.rotation.x=-Math.PI/2;a.position.set(0,.03,(M.d||.4)/2+.28);a.renderOrder=5;a.userData.arrow=1;g.add(a)}
+  const a=new THREE.Mesh(new THREE.ShapeGeometry(sh),new THREE.MeshBasicMaterial({color:0x35e07a,transparent:true,opacity:.9,depthWrite:false,side:THREE.DoubleSide}));a.rotation.x=Math.PI/2;a.position.set(0,.03,(M.d||.4)/2+.28);a.renderOrder=5;a.userData.arrow=1;g.add(a)}
 const FACING=ry=>{const k=((Math.round(ry/(Math.PI/2))%4)+4)%4;return['the front','the right','the back wall','the left'][k]};
 /* which walls things can hang on: the back wall, and the solid part of the left wall away from the door */
 function wallSnap(px,pz){const W=IS.W,D=IS.D,x0=IS.xmin??-W/2,opts=[{k:'b',d:Math.abs(pz+D/2),x:clamp(px,-W/2+.5,W/2-.5),z:-D/2+.07,ry:0}];
