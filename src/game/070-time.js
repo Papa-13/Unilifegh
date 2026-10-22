@@ -10,7 +10,7 @@ function hourly(){
   if(p.needs.hygiene<22&&h>=8&&h<=21&&!S['hy'+d]){S['hy'+d]=1;const m=S.mates[0]||bestFriend();if(m)msg(m.name,pick(['Chale… please go and bath 😅 I say it with love.','Ei, when did you last shower? Just asking o 🫣']))}
   if(IS&&IS.bid==='club'&&h>=3&&h<20){leaveRoom(true);toast('Lights on! Club Vibes is closed. Time to go home. 🥱');acts(true)}
   if(h>=9&&h<=22&&!S['op'+d+h]&&Math.random()<.14){S['op'+d+h]=1;const f=shuffle(S.npcs.filter(n=>(n.contact||n.mate)&&n.friend>=25))[0];
-    if(f)msg(f.name,pick(['Chale, you dey? 👀','Did you see what happened at the canteen today? 😂','Are you going for the lecture tomorrow?','I\'m so bored 😩 what are you doing?','Have you eaten? 🍛','This assignment eh 😭 have you started?','Where are you?']),Math.random()<.25?{secs:RI(5,15)}:null)}
+    if(f)msg(f.name,pick(['Chale, you dey? 👀','Did you see what happened at the canteen today? 😂','Are you going for the lecture tomorrow?','I\'m so bored 😩 what are you doing?','Have you eaten? 🍛','This assignment eh 😭 have you started?','Where are you?']))}
   if(h===7&&wd()===0&&p.savings>0&&!S['int'+d]){S['int'+d]=1;const it=Math.max(1,Math.round(p.savings*.015));p.savings+=it;msg(BID[p.acct].name,`Weekly interest of ${cedi(it)} added. Savings: ${cedi(p.savings)} 🏦`)}
   if(h===6){S.npcs.forEach(n=>n.talks=0);if(p.items.includes('rug'))p.needs.fun=clamp(p.needs.fun+3)}
   if(h>=6&&d>0&&d%14===0&&!S['allow'+d]){S['allow'+d]=1;const a=BG[p.bg].allow;p.money+=a;msg(p.bg==='rich'?'Dad':'Mum',`I sent your allowance for the next two weeks, ${cedi(a)}. ${p.bg==='poor'?'It is small, but it is what we have. Make it last.':'Make it last two weeks o. Have you eaten?'}`)}

@@ -37,11 +37,11 @@ function famReply(intent,vn){const p=P(),k='fam'+week();
 function sendChat(chat,text,vn){try{ev('chat',{vn:!!vn,fam:/mum|dad|auntie|uncle|sis|bro/i.test(chat)})}catch(e){}const p=P(),n=S.npcs.find(x=>x.name===chat),m={from:'You',chat,text,at:S.min,mine:true,read:true,vn};S.msgs.unshift(m);
   const k='cg'+chat+day();S[k]=(S[k]||0)+1;const intent=vn?vn.intent:intentOf(text);
   const reply=()=>{let t,gainSoc=vn?7:4;if(n){const r=npcReply(n,intent,!!vn);t=r.text;if(S[k]<=4)n.friend=clamp(n.friend+r.gain+(vn?1:0));else gainSoc=1}else{t=famReply(intent,!!vn);p.needs.fun=clamp(p.needs.fun+3)}
-    p.needs.social=clamp(p.needs.social+gainSoc);m.seen=true;S.typing=null;msg(chat,t,(vn?Math.random()<.55:Math.random()<.15)?{secs:RI(4,18)}:null);if(CHAT===chat&&!$('sheet').hidden)drawChat();hud()};
+    p.needs.social=clamp(p.needs.social+gainSoc);m.seen=true;S.typing=null;msg(chat,t,null);if(CHAT===chat&&!$('sheet').hidden)drawChat();hud()};
   const asleep=(hour()<6||hour()>=23.5)&&!(n&&p.partner===n)&&!FAMILY.includes(chat);
   if(asleep){(S.pending=S.pending||[]).push({due:(hour()>=23.5?day()+1:day())*1440+6*60+RI(10,90),fn:reply});drawChat();return}
   if(n&&p.partner!==n&&!(n.mate&&Math.random()<.5)&&Math.random()<.14){drawChat();setTimeout(()=>{m.seen=true;if(CHAT===chat&&!$('sheet').hidden)drawChat();toast(`✓✓ ${chat} has seen your message… no reply 🙄`)},R(1800,3500));return}
-  S.typing={chat,vn:vn?Math.random()<.55:false};drawChat();setTimeout(reply,R(1500,3400))}
+  S.typing={chat,vn:false};drawChat();setTimeout(reply,R(1500,3400))}
 function chatChips(n,p){const h=hour(),L=n&&(p.partner===n||n.side),q=['Hey! 👋','How are you?','Where are you?','What are you doing?','Are you free?'];
   if(h>=6&&h<11)q.push('Let\'s go and buy waakye 🍛');else if(h>=11&&h<18)q.push('Gob3 later? 😋');else if(h>=17&&h<22)q.push('Kelewele at the Night Market? 🔥');
   if(h>=15&&h<18)q.push('Ball at the field? ⚽');if(h>=8&&h<23)q.push(p.items.includes('console')?'Come and play FIFA in my room 🎮':'FIFA in your room? 🎮');
@@ -60,7 +60,7 @@ function drawChat(){const p=P(),chat=CHAT;if(!chat)return;const n=S.npcs.find(x=
   $('sheetIn').innerHTML=`<div class="row" style="gap:10px;align-items:center;justify-content:space-between"><button class="ghost sm" id="back" aria-label="Back to chats">‹ Chats</button><span class="av" style="background:${avCol(chat)}">${esc(chat[0])}</span><div class="grow" style="min-width:0"><b>${esc(chat)}</b><small style="display:block;color:var(--muted)">${status}</small></div><button class="ghost sm" id="bye">Close</button></div>
     <div class="thread" id="thread">${th.map(bub).join('')}${ty}</div>
     ${ok?`<div id="comp"><div class="qr">${qs.map((q,i)=>`<button class="ghost sm" data-q="${i}">${esc(q)}</button>`).join('')}</div>
-      <div class="composer"><input id="msgin" maxlength="160" placeholder="Message" autocomplete="off"><button class="round" id="sendb" aria-label="Send">➤</button><button class="round" id="micb" aria-label="Record a voice note" style="background:#2a6f9b">🎤</button>${n?'<button class="round" id="meetb" aria-label="Plan a meetup" style="background:#8e2a3a">📍</button>':''}</div></div>`:`<p style="font-size:13px;color:var(--muted);text-align:center">Only admins can send messages here.</p>`}`;
+      <div class="composer"><input id="msgin" maxlength="160" placeholder="Message" autocomplete="off"><button class="round" id="sendb" aria-label="Send">➤</button>${n?'<button class="round" id="meetb" aria-label="Plan a meetup" style="background:#8e2a3a">📍</button>':''}</div></div>`:`<p style="font-size:13px;color:var(--muted);text-align:center">Only admins can send messages here.</p>`}`;
   const thr=$('thread');thr.scrollTop=thr.scrollHeight;
   $('back').onclick=()=>{CHAT=null;stopRec();phone('msgs')};$('bye').onclick=()=>{CHAT=null;stopRec();closeSheet()};
   thr.querySelectorAll('[data-play]').forEach(b=>b.onclick=()=>playVN(S.msgs[+b.dataset.play],b));
@@ -73,7 +73,7 @@ function drawChat(){const p=P(),chat=CHAT;if(!chat)return;const n=S.npcs.find(x=
       if(h<18)T.push(['today at 19:00',today+19*60]);if(h<20.5)T.push(['tonight at 21:00',today+21*60]);T.push(['tomorrow at 10:00',today+1440+600],['tomorrow at 16:00',today+1440+960]);
       $('comp').innerHTML=`<p style="font-size:13px;margin:6px 0">⏰ When? (${MEETP[bi][1]})</p><div class="qr" style="flex-wrap:wrap">${T.map(([t],i)=>`<button class="ghost sm" data-mt="${i}">${t}</button>`).join('')}<button class="ghost sm" id="mcancel">Cancel</button></div>`;
       $('mcancel').onclick=drawChat;$('comp').querySelectorAll('[data-mt]').forEach(x=>x.onclick=()=>{const [tl,at]=T[+x.dataset.mt];proposeMeet(chat,bi,at,tl)})})};
-  $('micb').onclick=()=>{const opts=VNT.filter(([id])=>fam?['hi','fine','money','sing'].includes(id):id!=='fine'&&id!=='money'&&(id!=='flirt'||(romOK(n)&&(p.partner===n||(n&&(n.romance>20||n.friend>=40))))));
+  if($('micb'))$('micb').onclick=()=>{const opts=VNT.filter(([id])=>fam?['hi','fine','money','sing'].includes(id):id!=='fine'&&id!=='money'&&(id!=='flirt'||(romOK(n)&&(p.partner===n||(n&&(n.romance>20||n.friend>=40))))));
     $('comp').innerHTML=`<p style="font-size:13px;margin:6px 0">🎤 What's your voice note about?</p><div class="qr" style="flex-wrap:wrap">${opts.map((o,i)=>`<button class="ghost sm" data-vt="${i}">${o[1]}</button>`).join('')}<button class="ghost sm" id="vcancel">Cancel</button></div>`;
     $('vcancel').onclick=drawChat;$('comp').querySelectorAll('[data-vt]').forEach(b=>b.onclick=()=>record(opts[+b.dataset.vt]))};
   function record(o){const t0=performance.now();$('comp').innerHTML=`<div class="rec"><span class="dot"></span><b id="rect">0:01</b><div class="wave" id="recw">${'<i style="height:6px"></i>'.repeat(22)}</div><button class="ghost sm" id="rdel" aria-label="Delete">🗑</button><button class="round" id="rsend" aria-label="Send voice note">➤</button></div>`;
