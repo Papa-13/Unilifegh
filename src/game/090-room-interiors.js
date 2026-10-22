@@ -33,7 +33,7 @@ function enterRoom0(owner){fadeIn();
   box(W,.15,.12,trim,0,.075,-D/2+.07,s);box(.12,.15,D/2,trim,-W/2+.07,.075,D/4,s);
   box(W,.12,.06,lam(0x3a2f28),0,.06,D/2,s);box(.06,.12,D,lam(0x3a2f28),W/2,.06,0,s);
   if(tier===0){box(W,.9,.02,lam(0xa9c7b0),0,.45,-D/2+.07,s);for(let i=0;i<6;i++)box(R(.1,.3),R(.05,.15),.01,lam(0xbfb39a),R(-W/2+.5,W/2-.5),R(1,2.3),-D/2+.075,s)}
-  const winX=beds>=3?.4:.1;box(1.5,1.1,.05,lam(0x5a4a3a),winX,1.65,-D/2+.07,s);
+  const winX=beds>=3?.4:.1;IS.winX=winX;box(1.5,1.1,.05,lam(0x5a4a3a),winX,1.65,-D/2+.07,s);
   IS.win=mesh(new THREE.PlaneGeometry(1.3,.92),basic(0x9fd3f0),winX,1.65,-D/2+.1,s);
   if(tier===0)for(let i=-2;i<=2;i++)box(.025,.92,.02,lam(0x333333),winX+i*.26,1.65,-D/2+.12,s);
   const cur=DECO.curtain[deco.curtain][1];if(cur){const cmat=cur==='ankara'?clothMat('ankara'):lam(cur);[-1,1].forEach(sd=>box(.4,1.4,.04,cmat,winX+sd*.85,1.6,-D/2+.15,s));box(2.2,.05,.05,lam(0x333333),winX,2.32,-D/2+.15,s)}
@@ -251,8 +251,7 @@ function decorate(tab){
      ${t==='items'?items:row('wall','Wall colour')+row('sheet','Your bedsheet')+row('curtain','Curtains')}<button class="ghost sm" id="bye">Done</button>`;
     $('sheetIn').querySelectorAll('[data-dt]').forEach(b=>b.onclick=()=>draw(b.dataset.dt));
     $('sheetIn').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const [k,id]=b.dataset.d.split('|');if(p.deco[k]===id)return;if(!spend(DECOPRICE[k]))return draw(t,'Not enough money.');p.deco[k]=id;draw(t,`Updated your ${k==='sheet'?'bedsheet':k}.`)});
-    $('sheetIn').querySelectorAll('[data-hm]').forEach(b=>b.onclick=()=>{const it=SHOP.find(x=>x.id===b.dataset.hm);if(!it||p.items.includes(it.id))return;if(!spend(it.price+HM_FEE))return draw(t,'Not enough money on MoMo.');p.items.push(it.id);S.decoChanged=1;
-      draw(t,IS&&IS.kind==='room'&&IS.mine?`📦 ${it.name} delivered! It's in your room now.`:`📦 ${it.name} ordered. It's waiting in your room.`);try{ev('act',{l:'Decorating'})}catch(e){}});
+    $('sheetIn').querySelectorAll('[data-hm]').forEach(b=>b.onclick=()=>{const it=SHOP.find(x=>x.id===b.dataset.hm);if(!it||p.items.includes(it.id))return;if(!spend(it.price+HM_FEE))return draw(t,'Not enough money on MoMo.');p.items.push(it.id);S.decoChanged=1;try{ev('act',{l:'Decorating'})}catch(e){}afterRoomBuy(it.id)});
     $('bye').onclick=()=>{closeSheet();if(IS&&IS.kind==='room'&&IS.mine)refreshRoom()}};
   draw(tab||'items');
 }

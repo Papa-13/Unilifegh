@@ -34,7 +34,7 @@ function dripStore(tab){S.paused=true;openSheet();const p=P();tab=tab||'drop';co
 async function dripBuy(it,tab){const p=P(),pr=dripPrice(it);if((S.gems||0)<pr){closeSheet();toast(`You need ${pr} 💎 for ${it.name}. You have ${S.gems||0}.`);return gemShop()}
   if(!(await gemsSpend(pr)))return toast('Couldn\'t spend gems. Try again.');
   if(it.kind==='print'){(p.prem=p.prem||[]).push(it.k);p.look.pal=it.k;rebuildPlayer();toast(`👕 ${it.name} unlocked and you're wearing it. Switch prints in your wardrobe.`)}
-  if(it.kind==='room'){p.items.push(it.id);if(it.id==='ps5'&&!p.items.includes('console'))p.items.push('console');toast(`📦 ${it.name} delivered to your room!`);try{if(IS&&IS.mine)refreshRoom()}catch(e){}}
+  if(it.kind==='room'){p.items.push(it.id);if(it.id==='ps5'&&!p.items.includes('console'))p.items.push('console');try{window.track&&window.track('spend_gems',{item:it.id,gems:pr})}catch(e){}gemPop(-pr);hud();return afterRoomBuy(it.id)}
   try{window.track&&window.track('spend_gems',{item:it.id,gems:pr})}catch(e){}gemPop(-pr);hud();dripStore(tab)}
 function giftPick(g){const p=P(),ppl=S.npcs.filter(n=>n.met&&(n.contact||n===p.partner||n.side)&&!n.ex).sort((a,b)=>(isLove(b)-isLove(a))||b.romance-a.romance||b.friend-a.friend).slice(0,12);
   $('sheetIn').innerHTML=`<h3>${g.ic} ${g.name}: who is it for?</h3><div class="list">${ppl.map(n=>`<div class="item"><div class="grow"><b>${esc(n.name)}${n===p.partner?' ❤️':n.side?' 🤫':''}</b><small>${relStage(n)}</small></div><button class="btn sm" data-to="${n.id}">Send · ${g.g} 💎</button></div>`).join('')}</div><button class="ghost sm" id="bye">Back</button>`;
