@@ -12,7 +12,7 @@ const ACT_CATS=[
 const ACT_TOP=/^(📦 Unpack|🧺 Wash|🧺 .*laundry|🚪|Knock|💃 Dance|🎤|⏹ Stop|🪑 Offer|Leave the room|🌙 Ask)/;
 let ACT_CAT=null;
 function actCatOf(label){for(const [k,,r] of ACT_CATS)if(r.test(label))return k;return 'more'}
-{const _ra=roomActions;roomActions=function(){const a=_ra.apply(this,arguments);try{
+function groupActs(a){try{
   if(!IS||IS.kind!=='room'||a.length<=7){ACT_CAT=null;return a}
   const wrap=it=>{if(!it[1])return it;const f=it[1],c=it.slice();c[1]=function(){ACT_CAT=null;return f.apply(this,arguments)};return c};
   if(ACT_CAT){const sub=a.filter(it=>!ACT_TOP.test(it[0])&&actCatOf(it[0])===ACT_CAT).map(wrap);
@@ -22,6 +22,8 @@ function actCatOf(label){for(const [k,,r] of ACT_CATS)if(r.test(label))return k;
   const out=top.slice();[...ACT_CATS.map(c=>c[0]),'more'].forEach(k=>{const g=groups[k];if(!g||!g.length)return;
     if(g.length===1){out.push(g[0]);return}const nm=k==='more'?'➕ More':ACT_CATS.find(c=>c[0]===k)[1];
     out.push([`${nm} (${g.length})`,()=>{ACT_CAT=k;setTimeout(()=>{PIE=true;acts(true)},0)},null,'']);});
-  const lv=a.find(it=>/^Leave the room/.test(it[0]));if(lv)out.push(lv);return out}catch(e){console.warn(e);return a}}}
+  const lv=a.find(it=>/^Leave the room/.test(it[0]));if(lv)out.push(lv);return out}catch(e){console.warn(e);return a}}
+/* group after everything (including food from the market and the kitchen) has been added to the list */
+{const _rA=realityActs;realityActs=function(list){const r=_rA.apply(this,arguments);try{if(IS&&IS.kind==='room'){const g=groupActs(list);list.length=0;g.forEach(x=>list.push(x))}}catch(e){console.warn(e)}return r}}
 /* closing the actions panel forgets the open category */
 {const _pl=pieLayout;pieLayout=function(){if(!PIE&&ACT_CAT&&!S.busy){const was=ACT_CAT;setTimeout(()=>{if(!PIE&&ACT_CAT===was){ACT_CAT=null;try{acts0(true)}catch(e){}}},400)}return _pl.apply(this,arguments)}}
