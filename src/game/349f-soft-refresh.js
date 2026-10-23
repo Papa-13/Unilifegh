@@ -15,11 +15,14 @@ let HARD_REFRESH=0;
 {const _sn=sleepNow;sleepNow=function(){HARD_REFRESH++;try{return _sn.apply(this,arguments)}finally{HARD_REFRESH--}}}
 {const _rr=refreshRoom;refreshRoom=function(){if(HARD_REFRESH||!(IS&&IS.mine))return _rr.apply(this,arguments);
   const p=P(),me={ix:p.ix,iz:p.iz,face:p.face,pose:p.pose,spotY:p.spotY,lying:p.lying},tvOn=typeof TV!=='undefined'&&TV.on,
-    snap=IS.people.map(q=>({k:q.n?'n'+q.n.id:(q.mp?'m'+(q.mp.ck||q.mp.uid||''):'l'+q.label),x:q.mesh.position.x,y:q.mesh.position.y,z:q.mesh.position.z,ry:q.mesh.rotation.y,pose:q.pose,spotY:q.spotY,lying:q.lying,sleeping:q.sleeping,ai:q.ai,freed:q.freed,nightSleep:q.nightSleep}));
+    snap=IS.people.map(q=>({k:q.n?'n'+q.n.id:(q.mp?'m'+(q.mp.ck||q.mp.uid||''):'l'+q.label),x:q.mesh.position.x,y:q.mesh.position.y,z:q.mesh.position.z,ry:q.mesh.rotation.y,pose:q.pose,spotY:q.spotY,lying:q.lying,sleeping:q.sleeping,ai:q.ai,freed:q.freed,nightSleep:q.nightSleep,n:q.n,lbl:q.lbl||q.label,life:q.life,visitor:q.visitor,deskSpot:q.deskSpot,bedSpot:q.bedSpot,mp:q.mp,used:0}));
   SOFT++;SOFT_T=performance.now();let r;try{r=_rr.apply(this,arguments)}finally{SOFT--}
   try{if(IS&&IS.mine){Object.assign(p,me);
-    IS.people.forEach(q=>{const k=q.n?'n'+q.n.id:(q.mp?'m'+(q.mp.ck||q.mp.uid||''):'l'+q.label),o=snap.find(s=>s.k===k);if(!o)return;
+    IS.people.forEach(q=>{const k=q.n?'n'+q.n.id:(q.mp?'m'+(q.mp.ck||q.mp.uid||''):'l'+q.label),o=snap.find(s=>s.k===k);if(!o)return;o.used=1;
       const dx=q.mesh.position.x,dz=q.mesh.position.z,moved=Math.hypot(dx-o.x,dz-o.z)>.05;
       if(moved||o.freed){const i=IS.obst.findIndex(b=>b.x2-b.x1<.4&&Math.abs((b.x1+b.x2)/2-dx)<.02&&Math.abs((b.z1+b.z2)/2-dz)<.02);if(i>=0)IS.obst.splice(i,1)}
       q.mesh.position.set(o.x,o.y,o.z);q.mesh.rotation.y=o.ry;q.x=o.x;q.z=o.z;q.pose=o.pose;q.spotY=o.spotY;q.lying=o.lying;q.sleeping=o.sleeping;q.nightSleep=o.nightSleep;q.ai=o.ai;q.freed=o.freed||moved});IS.grid=null;
+    /* people who had walked in after you arrived are put back too */
+    snap.filter(o=>!o.used&&o.n&&!o.mp).forEach(o=>{try{const q=addInPerson(o.n.look,o.lbl||o.n.name,o.x,o.z,o.ry,o.pose||'idle',{n:o.n,noObst:1});if(!q)return;q.mesh.position.y=o.y;q.spotY=o.spotY;q.lying=o.lying;q.sleeping=o.sleeping;q.nightSleep=o.nightSleep;
+      q.life=o.life;q.visitor=o.visitor;q.deskSpot=o.deskSpot;q.bedSpot=o.bedSpot;q.ai=o.ai;q.freed=1}catch(e){}});
     if(tvOn)setTimeout(()=>{try{tvPower(true,TV.auto)}catch(e){}},50)}}catch(e){console.warn(e)}return r}}
