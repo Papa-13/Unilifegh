@@ -1,5 +1,5 @@
 /* ================= character maker ================= */
-let pvOn=false,pvR=null,pvScene,pvCam,pvModel=null,pvAngle=.5,faceZoom=false;
+let PVLOOK=null,pvOn=false,pvR=null,pvScene,pvCam,pvModel=null,pvAngle=.5,faceZoom=false;
 function setupPreview(c){
   if(pvR){pvR.dispose();pvR.forceContextLoss()}
   pvR=new THREE.WebGLRenderer({canvas:c,antialias:true});pvR.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
@@ -11,8 +11,8 @@ function setupPreview(c){
   const floor=mesh(new THREE.CylinderGeometry(.85,.9,.08,48),new THREE.MeshStandardMaterial({color:0x2c1530,roughness:.4,metalness:.2}),0,-.04,0,pvScene);const ring=mesh(new THREE.TorusGeometry(.86,.012,8,64),new THREE.MeshBasicMaterial({color:0xf5b41f}),0,0,0,pvScene);ring.rotation.x=Math.PI/2;
   pvModel=null;rebuildPreview();pvOn=true}
 function rebuildPreview(){if(!pvScene)return;if(pvModel){pvScene.remove(pvModel);disposeTree(pvModel)}const h=makeHuman(myLook);pvModel=h.g;pvModel.rotation.y=pvAngle;pvScene.add(pvModel);window.pvC={mesh:h.g,legs:h.legs,knees:h.knees,arms:h.arms,elbows:h.elbows,head:h.head,lids:h.lids,torso:h.torso,phase:0,id:1,pose:'idle'}}
-function renderPreview(dt){const c=$('pv');if(!c||!pvR)return;fitR(pvR,pvCam,c);pvAngle+=dt*.5;if(pvModel)pvModel.rotation.y=faceZoom?Math.sin(performance.now()/1200)*.6:pvAngle;if(window.pvC&&pvC.mesh===pvModel){const r=pvModel.rotation.y;try{posePerson(pvC,false,dt)}catch(e){}pvModel.rotation.y=r;pvModel.position.set(0,0,0)}
-  const wide=pvCam.aspect>1.1;pvCam.position.y+=((faceZoom?1.56:1.3)-pvCam.position.y)*.1;pvCam.position.z+=((faceZoom?1.15:wide?3.9:4.6)-pvCam.position.z)*.1;pvCam.position.x+=((wide&&!faceZoom?.35:0)-pvCam.position.x)*.1;pvCam.lookAt(0,faceZoom?1.52:1.1,0);pvR.render(pvScene,pvCam)}
+function renderPreview(dt){const c=$('pv');if(!c||!pvR)return;fitR(pvR,pvCam,c);pvAngle+=dt*.5;const footZoom=CASTAB==='shoes'&&!faceZoom;if(pvModel)pvModel.rotation.y=faceZoom?Math.sin(performance.now()/1200)*.6:footZoom?.35+Math.sin(performance.now()/1400)*.75:pvAngle;if(window.pvC&&pvC.mesh===pvModel){const r=pvModel.rotation.y;try{posePerson(pvC,false,dt)}catch(e){}pvModel.rotation.y=r;pvModel.position.set(0,0,0)}
+  const wide=pvCam.aspect>1.1;pvCam.position.y+=((faceZoom?1.56:footZoom?.55:1.3)-pvCam.position.y)*.1;pvCam.position.z+=((faceZoom?1.15:footZoom?1.55:wide?3.9:4.6)-pvCam.position.z)*.1;pvCam.position.x+=((wide&&!faceZoom&&!footZoom?.35:0)-pvCam.position.x)*.1;PVLOOK=(PVLOOK??1.1)+((faceZoom?1.52:footZoom?.12:1.1)-(PVLOOK??1.1))*.12;pvCam.lookAt(0,PVLOOK,0);pvR.render(pvScene,pvCam)}
 let CASTAB='gender';
 function maker(){
   if(IS)leaveRoom(true);
