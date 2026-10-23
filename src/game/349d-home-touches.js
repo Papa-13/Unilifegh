@@ -21,3 +21,17 @@ MOVABLE.bedside={w:.45,d:.4,build:g=>{const wd=lam(0x7a5536);box(.44,.5,.38,wd,0
     const L=new THREE.PointLight(0xffd59a,.55,2.6,1.6);L.position.set(.05,.8,-.02);g.add(L)}else{box(.14,.04,.1,lam(0x2f6b9b),-.08,.55,0,g);mesh(cyl(.04,.04,.1,10),lam(0xffffff),.12,.58,.05,g)}}};
 {const _er=enterRoom0;enterRoom0=function(owner){const p=P(),mine=owner==='me',moveLamp=mine&&p.items.includes('lamp')&&p.items.includes('bedside')&&p.place&&p.place.bedside&&!(p.boxed||[]).includes('bedside');
   const bak=p.items.slice();if(moveLamp)p.items=p.items.filter(i=>i!=='lamp');window._bsLamp=moveLamp;let r;try{r=_er.apply(this,arguments)}finally{if(moveLamp)p.items=bak;window._bsLamp=false}return r}}
+/* the food cupboard (or provisions bag) is no longer stuck at the foot of your bed: it's furniture you place */
+MOVABLE.cupboard={w:.7,d:.42,obj:{id:'chop',label:'Food cupboard',r:.8},build:g=>{if(IS&&IS.cupb===false){const bag=mesh(sph(.24,12,10),lam(0x2f6b3a),0,.2,0,g);bag.scale.set(1.3,.85,.9);mesh(cyl(.06,.09,.1,10),lam(0x2f6b3a),0,.4,0,g);box(.3,.04,.02,lam(0xe8b24a),0,.22,.22,g);return}
+  const wd=lam(0x7a5536);box(.7,.9,.42,wd,0,.45,0,g);box(.02,.7,.02,lam(0x5a3e28),0,.47,.215,g);[-.08,.08].forEach(dx=>mesh(sph(.02),lam(0xd9a537),dx,.6,.22,g));box(.5,.06,.34,lam(0xe8b24a),0,.93,0,g)}};
+function cupAutoSpot(){const keep={id:PLACE.id,x:PLACE.x,z:PLACE.z,ry:PLACE.ry},W=IS.W,D=IS.D,C=[];let best=null;
+  for(let z=D/2-.35;z>-D/2+.3;z-=.25)C.push([W/2-.32,z,-Math.PI/2]);for(let x=W/2-.5;x>-W/2+.5;x-=.25)C.push([x,D/2-.32,Math.PI]);for(let x=W/2-.5;x>-W/2+.5;x-=.25)C.push([x,-D/2+.32,0]);
+  for(const [x,z,ry] of C){PLACE.id='cupboard';PLACE.x=x;PLACE.z=z;PLACE.ry=ry;let ok=false;try{ok=placeOK()}catch(e){}if(ok&&!(IS.keep||[]).some(o=>x>o.x1-.4&&x<o.x2+.4&&z>o.z1-.4&&z<o.z2+.4)){best={x:+x.toFixed(2),z:+z.toFixed(2),ry};break}}
+  Object.assign(PLACE,keep);return best}
+{const _er=enterRoom0;enterRoom0=function(owner){const r=_er.apply(this,arguments);try{if(owner==='me'&&IS&&IS.mine){const p=P();p.place=p.place||{};
+  if(PLACE.hideId==='cupboard'){/* being moved: the ghost shows it */}
+  else{if(!p.place.cupboard){const sp=cupAutoSpot();if(sp)p.place.cupboard=sp}const q=p.place.cupboard;
+    if(q&&!(IS.itemG&&IS.itemG.cupboard)){IS.objs=IS.objs.filter(o=>o.id!=='chop');putItem('cupboard',q.x,q.z,q.ry||0)}
+    else if(!q){const d=IS.objs.find(o=>o.id==='desk');if(d&&!IS.objs.some(o=>o.id==='chop'))IS.objs.push({id:'chop',label:'Provisions',x:d.x,z:d.z,r:.8})}}
+  const c=IS.objs.find(o=>o.id==='chop');if(c)c.label=IS.cupb?'Food cupboard':'Provisions bag'}}catch(e){console.warn(e)}return r}}
+{const _ra=roomActions;roomActions=function(){const a=_ra.apply(this,arguments);try{if(inMyRoomNow()&&!S.busy)a.push([`🛠️ Move your ${IS.cupb?'food cupboard':'provisions bag'}`,()=>startPlace('cupboard')])}catch(e){}return a}}
