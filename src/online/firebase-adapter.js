@@ -50,13 +50,16 @@ async function start(){
 }
 
 /* ---------- sign-in screen ---------- */
+/* inside Instagram / TikTok / Snapchat / Facebook / WhatsApp's own browser, Google blocks sign-in */
+const INAPP=(()=>{const u=navigator.userAgent||'';return /Instagram/i.test(u)?'Instagram':/TikTok|musical_ly|Bytedance|BytedanceWebview/i.test(u)?'TikTok':/Snapchat/i.test(u)?'Snapchat':/FBAN|FBAV|FB_IAB/i.test(u)?'Facebook':/WhatsApp/i.test(u)?'WhatsApp':/Line\//i.test(u)?'LINE':/Twitter/i.test(u)?'X (Twitter)':''})();
 function signInScreen(auth){return new Promise(res=>{
   const o=document.createElement('div');o.id='fbSign';
   o.innerHTML=`${typeof introScene==='function'?introScene():''}<div class="fbs-in">
    <h2 class="yolo" aria-label="Unilife GH"><span>U</span><span>N</span><span>I</span><span>L</span><span>I</span><span>F</span><span>E</span><span class="gh">GH</span></h2>
    <p class="fbs-lead">${ONLINE?'Sign in to join an online campus with real students. Your student and your chats are saved to your account.':'Choose how to play. Sign in with Google and your student follows you to any phone.'}</p>
-   <button id="fbG" class="sbtn"><span class="ic">G</span><span>Continue with Google<small>Your student is saved to your account</small></span></button>
-   <button id="fbA" class="sbtn alt"><span class="ic">🎒</span><span>Play as a guest<small>Saved on this device only</small></span></button>
+   ${INAPP?`<div class="fbs-note">📲 You opened this inside ${INAPP}. Google sign-in doesn't work here. Tap <b>⋯</b> and choose <b>Open in browser</b> (Chrome or Safari) to save with Google, or play as a guest below.</div>`:''}
+   <button id="fbG" class="sbtn"${INAPP?' style="opacity:.55"':''}><span class="ic">G</span><span>${ONLINE?'Continue with Google':'Play solo · save with Google'}<small>${ONLINE?'Your student is saved to your account':'Same game. Your student is backed up and follows you to any phone'}</small></span></button>
+   <button id="fbA" class="sbtn alt"><span class="ic">🎒</span><span>${ONLINE?'Play as a guest':'Play solo as a guest'}<small>Saved on this device only</small></span></button>
    <button id="fbO" class="sbtn dim"><span class="ic">📴</span><span>Play offline<small>No account, nothing synced</small></span></button>
    <div id="fbErr"></div><p style="font-size:12px;opacity:.8;margin:6px 0 0">By playing you agree to our <a href="/terms.html" target="_blank" style="color:#ffd34d">Terms</a> and <a href="/privacy.html" target="_blank" style="color:#ffd34d">Privacy Policy</a>.</p></div>`;
   const st=document.createElement('style');st.textContent=`#fbSign{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;overflow:auto;padding:24px 16px calc(24px + min(30vh,260px));
@@ -66,10 +69,11 @@ function signInScreen(auth){return new Promise(res=>{
    #fbSign .yolo{font-size:clamp(50px,14vw,92px);margin:0 0 4px}
    .fbs-lead{margin:0 0 8px;color:#f3e3d6;max-width:40ch}
    #fbSign .sbtn .ic{font:800 20px Figtree,system-ui}
-   #fbErr{color:#ffd0c8;font-size:14px;font-weight:700}`;
+   #fbErr{color:#ffd0c8;font-size:14px;font-weight:700}
+   .fbs-note{background:rgba(255,211,77,.16);border:1px solid rgba(255,211,77,.45);border-radius:14px;padding:10px 12px;font-size:14px;line-height:1.4}`;
   document.head.appendChild(st);document.body.appendChild(o);
   const done=u=>{o.remove();res(u)},err=e=>{o.querySelector('#fbErr').textContent=e&&e.message?e.message.replace('Firebase: ',''):'Sign-in failed. Try again.'};
-  o.querySelector('#fbG').onclick=async()=>{const p=new GoogleAuthProvider();try{done((await signInWithPopup(auth,p)).user)}catch(e){if(/popup/i.test(e.code||''))signInWithRedirect(auth,p);else err(e)}};
+  o.querySelector('#fbG').onclick=async()=>{const p=new GoogleAuthProvider();try{done((await signInWithPopup(auth,p)).user)}catch(e){if(/popup/i.test(e.code||'')&&!INAPP)signInWithRedirect(auth,p);else if(INAPP||/disallowed|user-agent|web-storage|operation-not-supported/i.test((e.code||'')+(e.message||'')))err({message:'Google sign-in doesn\'t work in this app\'s browser. Open the link in Chrome or Safari, or play as a guest.'});else err(e)}};
   o.querySelector('#fbA').onclick=async()=>{try{done((await signInAnonymously(auth)).user)}catch(e){err(e)}};
   o.querySelector('#fbO').onclick=()=>done(null)})}
 
