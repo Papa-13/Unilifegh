@@ -11,7 +11,7 @@ const ACT_CATS=[
   ['home','🛋️ Home & furniture',/Decorate|shop|Arrange|Move your|Turn your|LED|Unpack|cupboard|desk|Clean|tidy|📦/i]];
 const ACT_TOP=/^(📦 Unpack|🧺 Wash|🧺 .*laundry|🚪|Knock|💃 Dance|🎤|⏹ Stop|🪑 Offer|Leave the room|🌙 Ask)/;
 let ACT_CAT=null;
-function actCatOf(label){for(const [k,,r] of ACT_CATS)if(r.test(label))return k;return 'more'}
+function actCatOf(label){if(/^(🛠️|↻|🪑 Move|🎨|🌈)/.test(label))return 'home';for(const [k,,r] of ACT_CATS)if(r.test(label))return k;return 'more'}
 function groupActs(a){try{
   if(!IS||IS.kind!=='room'||a.length<=7){ACT_CAT=null;return a}
   const wrap=it=>{if(!it[1])return it;const f=it[1],c=it.slice();c[1]=function(){ACT_CAT=null;return f.apply(this,arguments)};return c};
