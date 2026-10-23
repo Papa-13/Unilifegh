@@ -110,3 +110,5 @@ function quickTurn(id){const p=P(),M=MOVABLE[id];if(!M||M.wall||!IS||!IS.mine)re
 
 /* a new game starts in your room, not outside your hostel */
 {const _st=start;start=function(){const r=_st.apply(this,arguments);setTimeout(()=>{try{if(S&&S.p&&!IS)enterRoom('me')}catch(e){console.warn(e)}},250);return r}}
+/* continuing a saved game also puts you back in your room */
+{const _lg=loadGame;loadGame=async function(){const r=await _lg.apply(this,arguments);setTimeout(()=>{try{if(S&&S.p&&!IS){const d=homeB().door,p=P();p.x=d[0];p.y=d[1]+24*outDir(homeB());enterRoom('me')}}catch(e){console.warn(e)}},300);return r}}
