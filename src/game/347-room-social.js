@@ -107,3 +107,6 @@ function quickTurn(id){const p=P(),M=MOVABLE[id];if(!M||M.wall||!IS||!IS.mine)re
   const r=_im.apply(this,arguments);try{if(M&&!M.wall&&P().place&&P().place[id]&&!(P().boxed||[]).includes(id)){const box=$('storyIn'),mv=[...box.querySelectorAll('button')].find(b=>/Move it/.test(b.textContent));
     if(mv){const t=mv.cloneNode(true);t.textContent='↻ Turn it';t.onclick=()=>{$('story').hidden=true;S.paused=false;quickTurn(id)};mv.parentNode.insertBefore(t,mv)}}}catch(e){}return r}}
 {const _ra=roomActions;roomActions=function(){const a=_ra.apply(this,arguments);try{const k=a.findIndex(x=>/^🪑 Move your desk/.test(x[0]));if(k>=0)a.splice(k+1,0,['↻ Turn your desk',()=>quickTurn('desk')])}catch(e){}return a}}
+
+/* a new game starts in your room, not outside your hostel */
+{const _st=start;start=function(){const r=_st.apply(this,arguments);setTimeout(()=>{try{if(S&&S.p&&!IS)enterRoom('me')}catch(e){console.warn(e)}},250);return r}}

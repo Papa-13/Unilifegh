@@ -3,6 +3,19 @@
    (the artist's plays count on SoundCloud), in sync like the others. If SoundCloud can't load, the
    original browser beat plays instead. To add one: push {sc:'<soundcloud track url>', t, a}. */
 CLUB_TRACKS.push({sc:'https://soundcloud.com/valerie-and-emberlyn-vibes/lets-get-the-party-started',t:'Let\'s Get the Party Started',a:'Nana · 🎙️ Campus artist',campus:1});
+/* more Ghanaian hits (official videos) and long CULTUR FM Afrobeats mixes */
+CLUB_TRACKS.push(
+  {id:'6unnNvyupos',t:'Forever',a:'Gyakie'},
+  {id:'tEVWPBxEx3Y',t:'Sugarcane (Remix) ft. Mayorkun, King Promise & Darkoo',a:'Camidoh'},
+  {id:'zdKpIM9VwGM',t:'Soja',a:'Black Sherif'},
+  {id:'4S9ma6z_Y70',t:'Monica',a:'Kuami Eugene'},
+  {id:'TK7k8vKLGi4',t:'Enjoyment',a:'KiDi'},
+  {id:'QqmxpTbOHX4',t:'Non Living Thing ft. Oxlade',a:'Sarkodie'},
+  {id:'VzgkY78sh0I',t:'Paris',a:'King Promise'},
+  {id:'hvf_K273XIY',t:'Live Afrobeats Mix by DJames',a:'CULTUR FM · 🎧 mix',mix:1},
+  {id:'ym5qWlk-5dw',t:'Live Afrobeats Mix by P Smoov (DC)',a:'CULTUR FM · 🎧 mix',mix:1},
+  {id:'3ezu_1lPyFI',t:'Live Afrobeats Mix by ICERAGE',a:'CULTUR FM · 🎧 mix',mix:1},
+  {id:'GzYYPZCoEb8',t:'Live Afrobeats Mix by DJ Ehnny (Houston)',a:'CULTUR FM · 🎧 mix',mix:1});
 let SCP=null;function scReady(){if(SCP)return SCP;SCP=new Promise(res=>{if(window.SC&&SC.Widget)return res(true);const s=document.createElement('script');s.src='https://w.soundcloud.com/player/api.js';s.async=true;
   s.onload=()=>res(!!(window.SC&&SC.Widget));s.onerror=()=>res(false);document.head.appendChild(s);setTimeout(()=>res(!!(window.SC&&SC.Widget)),7000)});SCP.then(ok=>{if(!ok)SCP=null});return SCP}
 /* a fresh, empty spot for the player inside the music card */
