@@ -25,3 +25,9 @@
 .phSub .tabs{flex-wrap:wrap}
 /* phone held sideways: a shorter in-game phone so it fits on screen */
 @media (max-height:520px){.phHome{min-height:0;padding-bottom:8px}.phClock{margin:2px 0 8px}.phClock b{font-size:30px}.phBody{min-height:0;max-height:52vh}.phGrid{gap:8px 4px}.phApp i{width:42px;height:42px;font-size:21px;border-radius:12px}.phDock{margin-top:8px;padding:6px}}
+/* an open app always fits on screen and its own content scrolls (fixes lists you couldn't scroll on phones) */
+#sheetIn>.ph{display:flex;flex-direction:column;max-height:calc(86dvh - 92px)}
+#sheetIn>.ph>div{flex:none}
+#sheetIn>.ph>.phBody{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
+@supports not (height:1dvh){#sheetIn>.ph{max-height:calc(86vh - 92px)}}
+#sheetIn>.ph>.phHome{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
