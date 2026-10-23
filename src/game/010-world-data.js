@@ -161,6 +161,7 @@ const BOTTOM_SPEC={jeans:{legs:'pants',pc:'#3f5f86',denim:1,belt:1},bjeans:{legs
   shorts:{legs:'shorts',pc:'#2b2b2b'},jorts:{legs:'jorts',pc:'#5d7fa8'},leggings:{legs:'tights',pc:'#1c1c1c'},
   mini:{legs:'skin',over:'mini',oc:'#3d5f8f'},bmini:{legs:'skin',over:'mini',oc:'#1c1c1c'},dskirt:{legs:'skin',over:'dskirt'},pencil:{legs:'skin',over:'pencil'},wrap:{legs:'skin',over:'wrap'}};
 /* one-piece outfits (dresses, jumpsuits, swimwear…) can't take a separate bottom */
+const BOT_COLS={'#3f5f86':'Mid blue','#5d7fa8':'Light wash','#1f3a68':'Navy','#1c1c1c':'Black','#8d8f93':'Grey','#f4f1ea':'White','#e8dcc4':'Cream','#c2ae86':'Khaki','#5e5b3c':'Olive','#6b4426':'Brown','#8e2a3a':'Maroon','#c8102e':'Red','#e86a9a':'Pink','#7a4bd1':'Purple','#2fa36b':'Green'};
 const FULL_OUTFITS=['jumpsuit','kente','bodycon','kaba','dress','towel','swim','pj'];
 const EXTRA={none:'Nothing',specs:'Glasses',headphones:'Headphones',cap:'Cap',chain:'Chain',earrings:'Hoop earrings',studs:'Stud earrings',durag:'Durag',bucket:'Bucket hat',watch:'Watch',beads:'Bead bracelets'};
 const BEARDS={none:'Clean shaven',goatee:'Goatee',full:'Full beard'};
