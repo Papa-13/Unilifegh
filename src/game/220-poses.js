@@ -46,6 +46,7 @@ function posePerson(c,moving,dt){poseX(c);
     case 'pull':A=[-1.3,-1.35];E=[-.25,-.25];L=[-.55,.35];K=[.55,.25];lean=-.32;y=-.04;break;
     case 'hop':{const q=Math.abs(Math.sin(t*5));A=[-.4,-.4];E=[-1.3,-1.3];K=[.2+q*.3,.2+q*.3];y=q*.22;break}
     case 'sweep':{const q=Math.sin(t*5);lean=.2;A=[-.95+q*.35,-.7+q*.35];Az=[-.15,.15];E=[-.35,-.5];hx=.25;K=[.25,.25];break}
+    case 'scrub':{const q=Math.sin(t*6);lean=.45;L=[-1.95,-1.95];K=[2.25,2.25];y=-.5;A=[-1.05+q*.32,-1.05-q*.32];Az=[-.1,.1];E=[-.45,-.45];hx=.3;break}
     case 'dive':A=[-3.05,-3.05];Az=[.12,-.12];E=[0,0];L=[.05,.05];K=[0,0];break;
     case 'climb':{const q=Math.sin(t*6);A=[-2.3+q*.35,-2.3-q*.35];E=[-.6,-.6];L=[-.9-q*.5,-.9+q*.5];K=[1.1,1.1];break}
     case 'dj':A=[-.75,-.6+Math.sin(t*6)*.15];E=[-1.05,-1.2];hx=Math.sin(t*8)*.15+.15;y=Math.abs(Math.sin(t*4))*.02;break;
