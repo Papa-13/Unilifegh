@@ -49,3 +49,4 @@ body.setup #panel.bleed{padding:0}
 .scr.hscr .hcard{min-height:auto}
 @media (max-width:420px){.hcard .rooms{grid-template-columns:1fr!important}.htabs .pick{flex:1 1 30%}}
 .htabs .pick[aria-pressed="true"] small{color:#5a3a06!important}
+.cas-hint{position:absolute;left:calc(14px + var(--sal,0px));bottom:16px;background:rgba(0,0,0,.45);color:#fff;font:600 12px Figtree,system-ui;padding:6px 10px;border-radius:999px;pointer-events:none;transition:opacity .4s}

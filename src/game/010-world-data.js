@@ -151,7 +151,17 @@ const OUTFIT={m:{tee:'Oversized boxy tee & cargos',hoodie:'Oversized hoodie & jo
     bodycon:'Bodycon dress',dress:'Slip dress',jumpsuit:'Utility jumpsuit',blazer:'Oversized blazer & wide trousers',unitee:'AKWAABA U campus tee',
     formal:'Shirt & trousers (presentations)',faculty:'Department shirt & black skirt',halltee:'Hall Week tee & jorts'}};
 const OCCASION=['suit','faculty','jersey','halltee','formal'],OLD_OUTFITS={m:['kaftan','smock','friday'],f:['twopiece','kente','kaba','friday','kabaslit']};
-const SHOES={sneakers:'Sneakers',chunky:'Chunky white sneakers',socks:'Slides & socks',sandals:'Sandals',slides:'Slides',shoes:'Leather shoes'};
+const SHOES={sneakers:'Sneakers',chunky:'Chunky white sneakers',hightops:'High-top sneakers',runners:'Running shoes',canvas:'Canvas low-tops',boots:'Tan boots',crocs:'Clogs',socks:'Slides & socks',sandals:'Sandals',ahenema:'Ahenema sandals',slides:'Slides',loafers:'Loafers',shoes:'Leather shoes',heels:'Block heels',flats:'Ballet flats',mules:'Platform mules'};
+const SHOES_F_ONLY=['heels','flats','mules'];
+/* bottoms you can pick separately from your top (like the Sims). 'match' keeps the outfit's own bottom */
+const BOTTOMS={m:{match:'✨ Goes with the top',jeans:'Blue jeans',bjeans:'Black jeans',baggy:'Baggy jeans',cargo:'Cargo pants',chinos:'Chinos',slacks:'Black trousers',joggers:'Grey joggers',bjog:'Black joggers',shorts:'Shorts',jorts:'Denim shorts'},
+  f:{match:'✨ Goes with the top',jeans:'Blue jeans',wjeans:'Wide-leg jeans',bjeans:'Black jeans',cargo:'Cargo pants',joggers:'Grey joggers',leggings:'Leggings',slacks:'Tailored trousers',jorts:'Denim shorts',mini:'Mini skirt',bmini:'Black mini skirt',dskirt:'Denim skirt',pencil:'Pencil skirt',wrap:'Wrap skirt'}};
+const BOTTOM_SPEC={jeans:{legs:'pants',pc:'#3f5f86',denim:1,belt:1},bjeans:{legs:'pants',pc:'#1c1c1c',denim:1},baggy:{legs:'pants',pc:'#4a6d99',denim:1,wide:1},wjeans:{legs:'pants',pc:'#5d7fa8',denim:1,wide:1},
+  cargo:{legs:'pants',pc:'#5e5b3c',cargo:1},chinos:{legs:'pants',pc:'#c2ae86',belt:1},slacks:{legs:'pants',pc:'#151515',belt:1},joggers:{legs:'jog',pc:'#8d8f93'},bjog:{legs:'jog',pc:'#1c1c1c'},
+  shorts:{legs:'shorts',pc:'#2b2b2b'},jorts:{legs:'jorts',pc:'#5d7fa8'},leggings:{legs:'tights',pc:'#1c1c1c'},
+  mini:{legs:'skin',over:'mini',oc:'#3d5f8f'},bmini:{legs:'skin',over:'mini',oc:'#1c1c1c'},dskirt:{legs:'skin',over:'dskirt'},pencil:{legs:'skin',over:'pencil'},wrap:{legs:'skin',over:'wrap'}};
+/* one-piece outfits (dresses, jumpsuits, swimwear…) can't take a separate bottom */
+const FULL_OUTFITS=['jumpsuit','kente','bodycon','kaba','dress','towel','swim','pj'];
 const EXTRA={none:'Nothing',specs:'Glasses',headphones:'Headphones',cap:'Cap',chain:'Chain',earrings:'Hoop earrings',studs:'Stud earrings',durag:'Durag',bucket:'Bucket hat',watch:'Watch',beads:'Bead bracelets'};
 const BEARDS={none:'Clean shaven',goatee:'Goatee',full:'Full beard'};
 const BAGS={backpack:'Backpack',sling:'Crossbody sling bag',tote:'Tote bag',none:'No bag'};

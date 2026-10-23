@@ -131,9 +131,13 @@ const OSPEC={
  f_ftrack:{sl:2,legs:'jog',match:1,solid:1,stripes:1,zip:1,wide:1},
  m_pj:{sl:2,legs:'jog',match:1,solid:1,loose:1,collar:1,buttons:1},f_pj:{sl:1,legs:'jog',match:1,solid:1,loose:1,neck:1},
  m_towel:{sl:0,legs:'shorts',pc:'#f4f2ec',bare:1},f_towel:{sl:0,legs:'skin',solid:1,neck:2,over:'bodycon'}};
-const ospec=(f,O)=>OSPEC[(f?'f_':'m_')+O]||OSPEC[(f?'m_':'f_')+O]||OSPEC.m_tee;
+const ospec0=(f,O)=>OSPEC[(f?'f_':'m_')+O]||OSPEC[(f?'m_':'f_')+O]||OSPEC.m_tee;
+const SKIRT_OVERS=['mini','dskirt','pencil','wrap'];
+const botKey=L=>L&&L.bottom&&L.bottom!=='match'&&typeof BOTTOM_SPEC!=='undefined'&&BOTTOM_SPEC[L.bottom]&&!FULL_OUTFITS.includes(L.outfit)?L.bottom:'';
+const ospec=(f,O,L)=>{const base=ospec0(f,O),b=botKey(L);if(!b)return base;const sp=Object.assign({},base);
+  ['legs','pc','cargo','wide','denim','match','socks','oc'].forEach(k=>delete sp[k]);if(SKIRT_OVERS.includes(sp.over))delete sp.over;delete sp.belt;return Object.assign(sp,BOTTOM_SPEC[b])};
 const hexN=c=>new THREE.Color(c).getHex();
-function torsoMat(L,f){const O=L.outfit,sp=ospec(f,O),k='to'+(f?'f':'m')+O+L.pal+L.skin;if(SM[k])return SM[k];
+function torsoMat(L,f){const O=L.outfit,sp=ospec(f,O,L),k='to'+(f?'f':'m')+O+L.pal+L.skin+botKey(L);if(SM[k])return SM[k];
   const c=document.createElement('canvas');c.width=128;c.height=256;const g=c.getContext('2d'),row=i=>Math.round((1-i/12)*256);
   if(sp.bare){g.fillStyle=L.skin;g.fillRect(0,0,128,256)}
   else if(sp.solid){g.fillStyle=PAL[L.pal].a;g.fillRect(0,0,128,256);g.fillStyle='rgba(0,0,0,.08)';for(let x=0;x<128;x+=16)g.fillRect(x,0,1,256)}
@@ -157,7 +161,7 @@ function fabricT(kind){const k='fab'+kind;if(SM[k])return SM[k];const c=document
   else{for(let y=0;y<64;y+=2){g.fillStyle=`rgba(0,0,0,${.04+Math.random()*.04})`;g.fillRect(0,y,64,1)}for(let x=0;x<64;x+=2){g.fillStyle='rgba(0,0,0,.03)';g.fillRect(x,0,1,64)}}
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(4,4);return SM[k]=t}
 function denimStd(col){const k='dn'+col;return SM[k]||(SM[k]=new THREE.MeshStandardMaterial({color:col,map:fabricT('denim'),roughness:.9,side:THREE.DoubleSide}))}
-function bodyMats(L,f,sp){const key='bm'+(f?'f':'m')+L.outfit+L.pal+L.skin;if(SM[key])return SM[key];
+function bodyMats(L,f,sp){const key='bm'+(f?'f':'m')+L.outfit+L.pal+L.skin+botKey(L);if(SM[key])return SM[key];
   const sc=new THREE.Color(L.skin),skin=new THREE.MeshStandardMaterial({color:sc,roughness:.52,emissive:sc.clone().multiplyScalar(.07),skinning:true});
   const pat=!sp.solid&&!sp.tee,P=PAL[L.pal];
   const top=sp.over==='smock'?new THREE.MeshStandardMaterial({map:fuguStd(L.pal).map,roughness:.95,skinning:true}):pat?new THREE.MeshStandardMaterial({map:clothMat(L.pal).map,roughness:.9,skinning:true}):new THREE.MeshStandardMaterial({color:hexN(sp.tee||P.a),map:fabricT('w'),roughness:.8,skinning:true});
@@ -178,7 +182,7 @@ function VGEO2(k){if(GC[k])return GC[k];const sph2=(sx,sy,sz,x,y,z,r=.05)=>{cons
   if(k==='lthU')g=sph2(1.08,.78,2.4,0,0,.005);
   if(k==='lthS')g=sph2(1.12,.3,2.45,0,-.027,.005);
   return GC[k]=g}
-function bodyGeo(f,O){const key='body'+(f?'f':'m')+O;if(GC[key])return GC[key];const sp=ospec(f,O),N=20;
+function bodyGeo(f,O,L){const key='body'+(f?'f':'m')+O+botKey(L);if(GC[key])return GC[key];const sp=ospec(f,O,L),N=20;
   const P=[],UV=[],SI=[],SW=[],IDX=[[],[],[],[]];
   const pushW=w=>{const a=w.filter(q=>q[1]>1e-3).sort((x,y)=>y[1]-x[1]).slice(0,4),t=a.reduce((s,q)=>s+q[1],0)||1;while(a.length<4)a.push([0,0]);SI.push(...a.map(q=>q[0]));SW.push(...a.map(q=>q[1]/t))};
   function tube(rows,region,def,capT,capB){const base=P.length/3;
@@ -246,7 +250,7 @@ function makeHumanProc(L,{label=null,labelColor='#f6f0e8',ring=false}={}){
   const f=L.gender==='f',g=new THREE.Group(),O=L.outfit;g.rotation.order='YXZ';
   if(typeof HAIR!=='undefined'&&HAIR[f?'f':'m']&&!HAIR[f?'f':'m'][L.hair])L.hair=f?'knotless':'fade';   // retired styles (e.g. half up half down)
   const skin=skinM(L.skin),cloth=clothStd(L.pal),hair=hairStd(!!L.grey),gold=stdM(0xd9a537,.3,{metalness:.8});
-  const sp=ospec(f,O),topM=sp.solid?stdM(hexN(PAL[L.pal].a),.7):cloth;
+  const sp=ospec(f,O,L),topM=sp.solid?stdM(hexN(PAL[L.pal].a),.7):cloth;
   const pantsM=sp.legs==='skin'?null:stdM(hexN(sp.pc),sp.legs==='tights'?.55:.9);
   const sk=new THREE.Color(L.skin),lipC=sk.clone().lerp(new THREE.Color(f?0x5a2230:0x3e1d1c),f?.5:.42).getHex(),darkSkin=sk.clone().multiplyScalar(.75).getHex();
   // contact shadow
@@ -259,7 +263,7 @@ function makeHumanProc(L,{label=null,labelColor='#f6f0e8',ring=false}={}){
   [-1,1].forEach(s=>{const a=Bn();a.position.set(s*(sw+.02),.09,0);chest.add(a);arms.push(a);const e=Bn();e.position.set(0,-.27,0);a.add(e);elbows.push(e)});
   [-1,1].forEach(s=>{const l=Bn();l.position.set(s*(f?.088:.095),0,0);hips.add(l);legs.push(l);const k=Bn();k.position.set(0,-.41,0);l.add(k);knees.push(k)});
   const bones=[hips,spine,chest,neckB,headB,arms[0],elbows[0],arms[1],elbows[1],legs[0],knees[0],legs[1],knees[1]];
-  const body=new THREE.SkinnedMesh(bodyGeo(f,O),bodyMats(L,f,sp));body.castShadow=SHADOWS;body.receiveShadow=SHADOWS;g.add(body);g.updateMatrixWorld(true);body.bind(new THREE.Skeleton(bones));
+  const body=new THREE.SkinnedMesh(bodyGeo(f,O,L),bodyMats(L,f,sp));body.castShadow=SHADOWS;body.receiveShadow=SHADOWS;g.add(body);g.updateMatrixWorld(true);body.bind(new THREE.Skeleton(bones));
   const torso=chest;
   if(sp.print){const k='prt'+sp.print+L.pal;const tm=SM[k]||(SM[k]=new THREE.MeshBasicMaterial({map:textTex(sp.print,{w:256,h:72,font:'900 34px system-ui',color:new THREE.Color(PAL[L.pal].a).getHSL({}).l>.6?'#1c1c1c':'#ffffff',stroke:false}),transparent:true,depthWrite:false}));const d=new THREE.Mesh(new THREE.PlaneGeometry(.3,.084),tm);d.position.set(0,-.015,f?.168:.192);chest.add(d)}
   const at=(bone,absY)=>absY-new THREE.Vector3().setFromMatrixPosition(bone.matrixWorld).y;
@@ -295,6 +299,22 @@ function makeHumanProc(L,{label=null,labelColor='#f6f0e8',ring=false}={}){
     else if(S==='socks'){const sock=mesh(cyl(.036,.034,.13,12),stdM(0xf4f2ec,.9),0,.05,-.035,F);void sock;const ft=mesh(sph(.045,14,10),stdM(0xf4f2ec,.9),0,0,.005,F);ft.scale.set(1.1,.55,2.3);box(.1,.02,.25,stdM(0x151515,.8),0,-.027,.005,F);box(.108,.03,.07,stdM(0x151515,.6),0,.004,.025,F)}
     else if(S==='sneakers'){const up=new THREE.Mesh(VGEO2('snkU'),stdM(hexN(pick2(L,['#f4f2ec','#f4f2ec','#1c1c1c',PAL[L.pal].a])),.55));F.add(up);const so=new THREE.Mesh(VGEO2('snkS'),stdM(0xf7f5ef,.7));F.add(so);const st=new THREE.Mesh(VGEO2('snkT'),stdM(hexN(PAL[L.pal].b==='#ffffff'?PAL[L.pal].a:PAL[L.pal].b),.5));st.position.x=(i?1:-1)*.001;F.add(st)}
     else if(S==='shoes'){F.add(new THREE.Mesh(VGEO2('lthU'),stdM(0x3a2214,.3)));F.add(new THREE.Mesh(VGEO2('lthS'),stdM(0x1a110a,.6)))}
+    else if(S==='hightops'){const c=hexN(pick2(L,['#c8102e','#1c1c1c','#f4f2ec',PAL[L.pal].a]));F.add(new THREE.Mesh(VGEO2('snkU'),stdM(c,.55)));F.add(new THREE.Mesh(VGEO2('snkS'),stdM(0xf7f5ef,.7)));
+      const col=mesh(cyl(.047,.05,.09,14),stdM(c,.55),0,.06,-.03,F);void col;mesh(cyl(.049,.049,.012,14),stdM(0xf7f5ef,.6),0,.105,-.03,F);const st=new THREE.Mesh(VGEO2('snkT'),stdM(0xf7f5ef,.5));F.add(st)}
+    else if(S==='runners'){const c=hexN(pick2(L,['#2f7bd9','#ff5a3c','#1c1c1c','#7a4bd1',PAL[L.pal].a]));F.add(new THREE.Mesh(VGEO2('snkU'),stdM(c,.45)));const so=new THREE.Mesh(VGEO2('snkS'),stdM(0xffffff,.6));so.scale.set(1.03,1.5,1.02);so.position.y=-.004;F.add(so);
+      const sw=mesh(sph(.02,8,6),stdM(0xffffff,.4),(i?1:-1)*.05,.005,0,F);sw.scale.set(.2,.6,2.2)}
+    else if(S==='canvas'){const c=hexN(pick2(L,['#1c1c1c','#f4f2ec','#8e2a3a','#2f4e6b']));const up=new THREE.Mesh(VGEO2('snkU'),stdM(c,.85));up.scale.set(1,.85,1);F.add(up);const so=new THREE.Mesh(VGEO2('snkS'),stdM(0xf4f1ea,.8));so.scale.set(1,.8,1);F.add(so);box(.1,.012,.03,stdM(0xf4f1ea,.6),0,-.012,.105,F)}
+    else if(S==='boots'){const bm=stdM(0xb5823c,.75);const up=new THREE.Mesh(VGEO2('lthU'),bm);up.scale.set(1.12,1.25,1.02);F.add(up);mesh(cyl(.052,.05,.13,14),bm,0,.075,-.025,F);mesh(cyl(.055,.055,.02,14),stdM(0x6b4426,.7),0,.14,-.025,F);
+      const so=new THREE.Mesh(VGEO2('lthS'),stdM(0x3a2a1c,.9));so.scale.set(1.08,1.6,1.02);so.position.y=-.004;F.add(so);for(let k=0;k<3;k++)box(.05,.005,.006,stdM(0xe8d7a8,.6),0,.02+k*.03,.05-k*.012,F)}
+    else if(S==='crocs'){const c=hexN(pick2(L,['#f2c230','#2fa36b','#f4f2ec','#1c1c1c','#e86a9a',PAL[L.pal].a]));const cl=mesh(sph(.05,14,10),stdM(c,.6),0,.004,.01,F);cl.scale.set(1.15,.7,2.3);
+      const st=mesh(new THREE.TorusGeometry(.045,.008,6,16,Math.PI),stdM(c,.6),0,.01,-.05,F);st.rotation.y=Math.PI/2;st.rotation.z=Math.PI/2;for(let k=0;k<4;k++)mesh(sph(.006,6,5),stdM(0x222222,.8),(k%2?.02:-.02),.03,.04+Math.floor(k/2)*.03,F);box(.105,.016,.25,stdM(c,.8),0,-.027,.008,F)}
+    else if(S==='loafers'){F.add(new THREE.Mesh(VGEO2('lthU'),stdM(0x5a3220,.35)));F.add(new THREE.Mesh(VGEO2('lthS'),stdM(0x1a110a,.6)));box(.06,.006,.02,stdM(0xd9a537,.3,{metalness:.7}),0,.028,.055,F)}
+    else if(S==='heels'||S==='flats'||S==='mules'){const c=hexN(pick2(L,S==='flats'?['#1c1c1c','#e7c9b0','#8e2a3a']:['#1c1c1c','#c8a27a','#f4f2ec',PAL[L.pal].a]));
+      if(S==='flats'){const up=new THREE.Mesh(VGEO2('lthU'),stdM(c,.4));up.scale.set(.98,.6,.98);F.add(up);box(.1,.012,.25,stdM(0x1a1a1a,.7),0,-.028,.005,F)}
+      else{const ft=mesh(sph(.045,14,10),skin,0,.012,.005,F);ft.scale.set(1.05,.5,2.2);ft.rotation.x=-.12;const so=box(.098,.016,.25,stdM(c,.6),0,-.012,.008,F);so.rotation.x=-.12;
+        mesh(cyl(.016,.014,S==='mules'?.04:.06,10),stdM(c,.6),0,-.03,-.09,F);box(.104,S==='mules'?.04:.022,S==='mules'?.11:.035,stdM(c,.6),0,.012,S==='mules'?.04:.05,F);if(S==='mules')box(.1,.028,.25,stdM(c,.6),0,-.035,.008,F)}}
+    else if(S==='ahenema'){const ft=mesh(sph(.045,14,10),skin,0,0,.005,F);ft.scale.set(1.1,.55,2.3);box(.096,.018,.235,stdM(0x5a3220,.85),0,-.028,.005,F);
+      const st=mesh(new THREE.TorusGeometry(.046,.01,6,16,Math.PI),stdM(0x2b1d12,.75),0,-.012,.035,F);st.rotation.y=Math.PI/2;st.rotation.z=Math.PI/2;st.scale.set(1,1.15,.9);[-.022,0,.022].forEach(x=>mesh(sph(.006,6,5),stdM(0xd9a537,.3,{metalness:.8}),x,.03,.035,F))}
     else{const ft=mesh(sph(.045,14,10),skin,0,0,.005,F);ft.scale.set(1.1,.55,2.3);box(.1,.02,.25,stdM(S==='sandals'?0x6b4426:0x151515,.8),0,-.027,.005,F);box(.105,.025,.05,S==='slides'?cloth:stdM(0x6b4426,.8),0,0,.03,F)}});
   if(L.extra==='watch'){const band=mesh(new THREE.TorusGeometry(.037,.008,6,16),stdM(0x1a1a1a,.4),0,-.235,0,elbows[0]);band.rotation.x=Math.PI/2;const fc=mesh(cyl(.02,.02,.012,14),stdM(0xd8dde2,.2,{metalness:.9}),-.0,-.235,.04,elbows[0]);fc.rotation.x=Math.PI/2}
   if(L.extra==='beads')[0,1].forEach(i=>[-.225,-.24].forEach((y,j)=>{const bd=mesh(new THREE.TorusGeometry(.036,.007,5,14),stdM([0xc8322b,0xe8b24a,0x1d7a45,0x1a1a1a][(i*2+j)%4],.5),0,y,0,elbows[i]);bd.rotation.x=Math.PI/2}));
