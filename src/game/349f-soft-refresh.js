@@ -23,6 +23,6 @@ let HARD_REFRESH=0;
       if(moved||o.freed){const i=IS.obst.findIndex(b=>b.x2-b.x1<.4&&Math.abs((b.x1+b.x2)/2-dx)<.02&&Math.abs((b.z1+b.z2)/2-dz)<.02);if(i>=0)IS.obst.splice(i,1)}
       q.mesh.position.set(o.x,o.y,o.z);q.mesh.rotation.y=o.ry;q.x=o.x;q.z=o.z;q.pose=o.pose;q.spotY=o.spotY;q.lying=o.lying;q.sleeping=o.sleeping;q.nightSleep=o.nightSleep;q.ai=o.ai;q.freed=o.freed||moved});IS.grid=null;
     /* people who had walked in after you arrived are put back too */
-    snap.filter(o=>!o.used&&o.n&&!o.mp).forEach(o=>{try{const q=addInPerson(o.n.look,o.lbl||o.n.name,o.x,o.z,o.ry,o.pose||'idle',{n:o.n,noObst:1});if(!q)return;q.mesh.position.y=o.y;q.spotY=o.spotY;q.lying=o.lying;q.sleeping=o.sleeping;q.nightSleep=o.nightSleep;
+    snap.filter(o=>!o.used&&o.n&&!o.mp).forEach(o=>{try{const q=addInPerson(o.n.look,o.lbl||(o.n.name+(o.n.mate?' · roommate':o.visitor?' · visiting':'')),o.x,o.z,o.ry,o.pose||'idle',{n:o.n,noObst:1});if(!q)return;q.mesh.position.y=o.y;q.spotY=o.spotY;q.lying=o.lying;q.sleeping=o.sleeping;q.nightSleep=o.nightSleep;
       q.life=o.life;q.visitor=o.visitor;q.deskSpot=o.deskSpot;q.bedSpot=o.bedSpot;q.ai=o.ai;q.freed=1}catch(e){}});
     if(tvOn)setTimeout(()=>{try{tvPower(true,TV.auto)}catch(e){}},50)}}catch(e){console.warn(e)}return r}}
